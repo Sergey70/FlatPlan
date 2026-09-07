@@ -1540,9 +1540,6 @@ button svg {
   background: #fff;
   box-shadow: 0 1px 3px #0002;
 }
-.ed-toggle [data-slot='switch-thumb'][data-checked] {
-  transform: translateX(16px);
-}
 
 /* Keep zoomed plans inside the viewport and touch controls clear of the model. */
 .ed-plan > svg {

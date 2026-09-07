@@ -4,9 +4,9 @@ Updated: 2026-09-07.
 
 ## Objective and current phase
 
-Last completed iteration: **PLAN-002**, separate kitchen and a second room using the passport window locations, including local/CI acceptance and verified GitHub Pages publication. No implementation iteration is active. EDITOR-001 supplied the full editable apartment; PLAN-001 supplied the preliminary passport reconstruction. Commits and pushes are explicitly authorized.
+Last completed iteration: **PLAN-002**, separate kitchen and a second room using the passport window locations, including local/CI acceptance and verified GitHub Pages publication. Active iteration: **UI-003**, correct the checked-state switch thumb in the Variants panel. EDITOR-001 supplied the full editable apartment; PLAN-001 supplied the preliminary passport reconstruction. Commits and pushes are explicitly authorized.
 
-The user wants an editable 3D apartment with materials, browser saving, independent arrangements, exact dimensions/colors for objects and nested parts, full JSON transfer and mobile controls. The latest request makes the default layout a separate kitchen and one additional room, each with its own window, with removable proposed walls and the ability to add walls elsewhere.
+The user wants an editable 3D apartment with materials, browser saving, independent arrangements, exact dimensions/colors for objects and nested parts, full JSON transfer and mobile controls. PLAN-002 makes the default layout a separate kitchen and one additional room, each with its own window, with removable proposed walls and the ability to add walls elsewhere.
 
 ## Implemented
 
@@ -48,3 +48,7 @@ Published PLAN-002 application commit: `a96505d262567cedee1c798abf52bbb98f30d996
 ## Next
 
 Wait for the detailed measured plan and interior preferences. Update the seed or a saved project explicitly while preserving existing browser documents. Current window coordinates, room divisions and furniture remain preliminary. No required work remains for PLAN-002.
+
+## Active UI-003
+
+Reproduced on the current local editor: Base UI renders a span track 32 px wide with a 16 px thumb. Checked state combines the native 14 px `translate` with a custom 16 px `transform`, leaving the thumb 15 px outside the track. Removed only the redundant custom transform, retaining the installed primitive's state geometry and interaction. `npm run verify` passed: 27 tests, lint, TypeScript and production build. Focused browser verification passed for all five switches in both states at 1365/768/390/360 px, including pointer, touch and keyboard operation. Thumbs now have a 1 px inset at the active edge and remain vertically centered inside the track. Desktop/mobile screenshots were inspected. Independent read-only source audit confirmed the double translation; actual DOM measurements determined the minimal removal. No new dependencies or persistent tests were needed for the three-line style fix. Final diff and `git diff --check` passed. Existing projects and model geometry are unaffected. Pages publication is the remaining gate.
