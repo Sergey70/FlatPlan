@@ -59,7 +59,7 @@ test('editor seed has complete editable geometry, two arrangements and a real ba
   assert.ok(tub.children.length >= 5);
   assert.ok(!nodes.some((n) => /душ/i.test(n.node.name)));
   assert.equal(p.arrangements.length, 2);
-  assert.equal(p.activeArrangement, 'separate-kitchen-v1');
+  assert.equal(p.activeArrangement, 'kitchen-by-bathroom-v2');
   assert.equal(
     p.scene.objects.filter((n) => n.id.startsWith('wall-proposed-')).length,
     3,

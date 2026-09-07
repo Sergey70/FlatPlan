@@ -679,9 +679,9 @@ export default function Editor() {
     try {
       const saved = readStoredProject(window.localStorage);
       restored = saved;
-      const requested =
-        new URLSearchParams(window.location.search).get('layout') ===
-        'separate-kitchen';
+      const requested = ['separate-kitchen', 'kitchen-by-bathroom'].includes(
+        new URLSearchParams(window.location.search).get('layout') ?? '',
+      );
       return {
         project: saved
           ? requested &&
@@ -700,7 +700,11 @@ export default function Editor() {
   });
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (url.searchParams.get('layout') === 'separate-kitchen') {
+    if (
+      ['separate-kitchen', 'kitchen-by-bathroom'].includes(
+        url.searchParams.get('layout') ?? '',
+      )
+    ) {
       url.searchParams.delete('layout');
       window.history.replaceState(null, '', url);
     }
@@ -1131,14 +1135,14 @@ export default function Editor() {
                   className="ed-layout-card"
                   aria-label="Предложенные перегородки"
                 >
-                  <strong>Кухня и вторая комната</strong>
+                  <strong>Кухня у стены санузла</strong>
                   <p>
-                    Кухня — у верхнего левого окна, комната 2 — у нижнего.
-                    Проход к входу и санузлу остаётся справа.
+                    Предложенная схема: кухня на прежнем месте ТВ, у нижнего
+                    окна. Комната 2 — у верхнего левого окна.
                   </p>
                   {project.scene.objects.some(
                     (n) => n.id === 'floor-kitchen',
-                  ) ? (
+                  ) && (
                     <>
                       <button
                         className="ed-full"
@@ -1172,20 +1176,41 @@ export default function Editor() {
                         удалить. Окна на плане выделены голубым.
                       </p>
                     </>
-                  ) : (
+                  )}
+                  {(!project.arrangements.some(
+                    (a) => a.id === PARTITION_PRESET_ID,
+                  ) ||
+                    !project.scene.objects.some(
+                      (n) => n.id === 'floor-kitchen',
+                    )) && (
                     <button
                       className="ed-primary ed-full"
                       onClick={() =>
                         attempt(() => {
                           commit(applyPartitionedPreset(project));
                           setNotice(
-                            'Открыт новый план. Предыдущая сцена сохранена в варианте «До разделения кухни и комнаты».',
+                            'Открыт новый план. Предыдущая сцена сохранена в варианте «До переноса кухни к санузлу».',
                           );
                         })
                       }
                     >
-                      Открыть новый план с перегородками
+                      Открыть кухню у санузла
                     </button>
+                  )}
+                  {[
+                    [PARTITION_WALL_IDS[0], 'Размер стены у кухни'],
+                    [PARTITION_WALL_IDS[1], 'Стена между кухней и комнатой'],
+                  ].map(
+                    ([id, label]) =>
+                      project.scene.objects.some((n) => n.id === id) && (
+                        <button
+                          className="ed-full"
+                          key={id}
+                          onClick={() => select(id)}
+                        >
+                          {label}
+                        </button>
+                      ),
                   )}
                   <button
                     className="ed-full"
@@ -1326,7 +1351,10 @@ export default function Editor() {
                   <fieldset disabled={node.locked}>
                     <legend>Размеры, м</legend>
                     <div className="ed-fields">
-                      {['Ширина', 'Высота', 'Глубина'].map((label, i) => (
+                      {(node.geometry.kind === 'wall'
+                        ? ['Длина', 'Высота', 'Толщина']
+                        : ['Ширина', 'Высота', 'Глубина']
+                      ).map((label, i) => (
                         <Field
                           key={label}
                           label={label}

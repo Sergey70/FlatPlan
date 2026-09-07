@@ -37,6 +37,8 @@ import {
   nodeWorldMatrix,
   wallBlocks,
   planDrawing,
+  resizeObject,
+  objectDimensions,
 } from '../lib/editor-geometry.ts';
 const fresh = createInitialProject;
 const intersect = (a: Box3, b: Box3) => {
@@ -58,7 +60,7 @@ test('passport glazing gives the separate kitchen and second room their own full
       [6.6, 8.4],
     ],
   );
-  for (const [i, floorId] of ['floor-kitchen', 'floor-room2'].entries()) {
+  for (const [i, floorId] of ['floor-room2', 'floor-kitchen'].entries()) {
     const opening = west.openings[i],
       floor = findNode(p.scene.objects, floorId)!;
     for (
@@ -236,7 +238,7 @@ test('switching an existing edited project to the new preset retains every old v
     old.arrangements,
   );
   assert.deepEqual(
-    next.arrangements.find((a) => a.name === 'До разделения кухни и комнаты')!
+    next.arrangements.find((a) => a.name === 'До переноса кухни к санузлу')!
       .scene,
     old.scene,
   );
@@ -244,13 +246,64 @@ test('switching an existing edited project to the new preset retains every old v
   assert.deepEqual(importProject(exportProject(next)), next);
 });
 
-test('the compact dining table leaves at least 90 cm in front of the kitchen run', () => {
+test('the kitchen occupies the former TV wall and the dining group leaves a clear working aisle', () => {
   const p = fresh(),
     kitchen = p.scene.objects.find((n) => n.name === 'Кухня')!,
-    dining = p.scene.objects.find((n) => n.name === 'Обеденная группа')!;
-  const k = localBounds(kitchen).applyMatrix4(nodeMatrix(kitchen)),
-    d = localBounds(dining).applyMatrix4(nodeMatrix(dining));
-  assert.ok(d.min.z - k.max.z >= 0.9, `kitchen passage: ${d.min.z - k.max.z}`);
+    dining = p.scene.objects.find((n) => n.name === 'Обеденная группа')!,
+    top = kitchen.children.find((n) => n.name === 'Столешница кухни')!,
+    fridge = kitchen.children.find((n) => n.name === 'Холодильник')!;
+  const k = localBounds(top).applyMatrix4(
+      nodeWorldMatrix(p.scene.objects, top.id)!,
+    ),
+    d = localBounds(dining).applyMatrix4(nodeMatrix(dining)),
+    f = localBounds(fridge).applyMatrix4(
+      nodeWorldMatrix(p.scene.objects, fridge.id)!,
+    );
+  assert.ok(k.min.z > 7.1 && k.max.z < 9, 'worktop along the bathroom wall');
+  assert.ok(k.max.x < 4.15 && k.max.x > 4, 'worktop at the former TV position');
+  assert.ok(k.min.x - d.max.x >= 0.9, `working aisle: ${k.min.x - d.max.x}`);
+  assert.ok(f.max.z < 9 && f.max.x < k.min.x, 'separate fridge beside the run');
+  const tv = p.scene.objects.find((n) => n.name === 'Тумба и телевизор')!;
+  assert.ok(tv.position[2] < 5.875, 'TV belongs to the upper room');
+});
+
+test('bathroom wall extension joins the column and can be resized independently with its door', () => {
+  let p = fresh();
+  const id = PARTITION_WALL_IDS[0],
+    wall = findNode(p.scene.objects, id)!,
+    bathroom = clone(findNode(p.scene.objects, 'wall-bathroom-left')!);
+  assert.ok(Math.abs(wall.geometry.size[0] - 1) < 1e-8);
+  assert.equal(wall.geometry.size[2], 0.11);
+  assert.deepEqual(wall.position, [4.205, 0, 6.6]);
+  p = editNode(p, id, (n) =>
+    resizeObject(p.scene.objects, n, [1.6, 2.9, 0.15]),
+  );
+  const changed = findNode(p.scene.objects, id)!;
+  assert.deepEqual(
+    objectDimensions(p.scene.objects, changed),
+    [1.6, 2.9, 0.15],
+  );
+  assert.equal(changed.children[0].geometry.openingType, 'door');
+  assert.deepEqual(findNode(p.scene.objects, bathroom.id), bathroom);
+  assert.deepEqual(importProject(exportProject(p)), p);
+});
+
+test('restoring a deleted wall in an older arrangement uses that arrangement geometry', () => {
+  const p = fresh(),
+    id = PARTITION_WALL_IDS[0];
+  p.activeArrangement = 'separate-kitchen-v1';
+  p.arrangements[0].id = p.activeArrangement;
+  const oldWall = findNode(p.arrangements[0].scene.objects, id)!;
+  oldWall.position = [4.205, 0, 4.125];
+  oldWall.geometry.size[0] = 3.05;
+  const restored = togglePartitionWalls(removeNode(p, id), true);
+  assert.deepEqual(findNode(restored.scene.objects, id), oldWall);
+  oldWall.visible = false;
+  const shown = togglePartitionWalls(removeNode(p, id), true);
+  assert.equal(findNode(shown.scene.objects, id)!.visible, true);
+  const next = applyPartitionedPreset(restored);
+  assert.equal(next.activeArrangement, PARTITION_PRESET_ID);
+  assert.deepEqual(next.arrangements[0], restored.arrangements[0]);
 });
 
 test('2D window symbols are drawn above their projected opaque frames', () => {

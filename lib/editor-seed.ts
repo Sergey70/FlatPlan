@@ -187,20 +187,56 @@ function furnitureNodes(partitioned = false): SceneNode[] {
     }
   }
   // Kitchen: cabinetry, countertop, sink, hob, oven and upper storage.
-  const kitchen = group(furniture, 0.25, 2.88);
+  const kitchen = group(
+    furniture,
+    partitioned ? 4.03 : 0.25,
+    partitioned ? 7.14 : 2.88,
+    partitioned ? -Math.PI / 2 : 0,
+  );
   kitchen.name = 'Кухня';
-  const units = partitioned ? 4 : 7;
-  const counterWidth = partitioned ? 2.72 : 4.7;
-  const counterX = partitioned ? 1.38 : 2.37;
-  const hobX = partitioned ? 1.03 : 1.9;
-  const sinkX = partitioned ? 2.37 : 3.23;
+  const units = partitioned ? 3 : 7;
+  const counterWidth = partitioned ? 1.84 : 4.7;
+  const counterX = partitioned ? 0.91 : 2.37;
+  const hobX = partitioned ? 0.32 : 1.9;
+  const sinkX = partitioned ? 1.52 : 3.23;
   for (let i = 0; i < units; i++) {
-    const x = 0.36 + i * 0.67;
-    box(kitchen, 0.65, 0.82, 0.61, x, 0.47, 0.31, i < 2 ? wood : accent, 0.018);
+    const x = partitioned ? 0.32 + i * 0.6 : 0.36 + i * 0.67;
+    box(
+      kitchen,
+      partitioned ? 0.58 : 0.65,
+      0.82,
+      0.61,
+      x,
+      0.47,
+      0.31,
+      i < 2 ? wood : accent,
+      0.018,
+    );
     box(kitchen, 0.42, 0.022, 0.033, x, 0.79, 0.64, brass);
-    box(kitchen, 0.64, 0.69, 0.32, x, 1.94, 0.17, i < 2 ? wood : white, 0.012);
+    box(
+      kitchen,
+      partitioned ? 0.58 : 0.64,
+      0.69,
+      0.32,
+      x,
+      1.94,
+      0.17,
+      i < 2 ? wood : white,
+      0.012,
+    );
   }
-  box(kitchen, counterWidth, 0.055, 0.69, counterX, 0.91, 0.35, stone, 0.018);
+  const worktop = box(
+    kitchen,
+    counterWidth,
+    0.055,
+    0.69,
+    counterX,
+    0.91,
+    0.35,
+    stone,
+    0.018,
+  );
+  worktop.name = 'Столешница кухни';
   box(kitchen, counterWidth + 0.02, 0.46, 0.04, counterX, 1.17, -0.1, stone);
   box(
     kitchen,
@@ -212,8 +248,21 @@ function furnitureNodes(partitioned = false): SceneNode[] {
     0.28,
     glowMat,
   );
-  box(kitchen, 0.68, 0.03, 0.47, hobX, 0.955, 0.36, black, 0.012);
-  for (const x of [hobX - 0.18, hobX + 0.18])
+  box(
+    kitchen,
+    partitioned ? 0.53 : 0.68,
+    0.03,
+    0.47,
+    hobX,
+    0.955,
+    0.36,
+    black,
+    0.012,
+  );
+  for (const x of [
+    hobX - (partitioned ? 0.13 : 0.18),
+    hobX + (partitioned ? 0.13 : 0.18),
+  ])
     for (const z of [0.24, 0.49])
       cylinder(
         kitchen,
@@ -251,39 +300,27 @@ function furnitureNodes(partitioned = false): SceneNode[] {
   );
   cylinder(kitchen, 0.018, 0.018, 0.31, sinkX, 1.09, 0.1, brass);
   box(kitchen, 0.033, 0.033, 0.19, sinkX, 1.24, 0.18, brass, 0.012);
-  box(
-    kitchen,
-    0.63,
-    1.57,
-    0.64,
-    partitioned ? 3.47 : 0.37,
-    0.91,
-    partitioned ? 0.31 : 1.18,
-    white,
-    0.025,
-  );
-  box(
-    kitchen,
-    0.035,
-    0.5,
-    0.04,
-    partitioned ? 3.7 : 0.6,
-    1.04,
-    partitioned ? 0.65 : 1.52,
-    black,
-  );
-  vase(kitchen, partitioned ? 2 : 4.2, 0.95, 0.33);
+  if (partitioned) {
+    const fridge = group(kitchen, 1.48, 1.11, -Math.PI / 2);
+    fridge.name = 'Холодильник';
+    box(fridge, 0.63, 1.57, 0.64, 0, 0.91, 0, white, 0.025);
+    box(fridge, 0.035, 0.5, 0.04, 0.23, 1.04, 0.34, black);
+  } else {
+    box(kitchen, 0.63, 1.57, 0.64, 0.37, 0.91, 1.18, white, 0.025);
+    box(kitchen, 0.035, 0.5, 0.04, 0.6, 1.04, 1.52, black);
+  }
+  vase(kitchen, partitioned ? 0.92 : 4.2, 0.95, 0.33);
   // Round dining table, four curved chairs and a pendant.
   const dining = group(
     furniture,
-    partitioned ? 2.05 : 2.5,
-    partitioned ? 5 : 4.9,
+    partitioned ? 1.5 : 2.5,
+    partitioned ? 7.6 : 4.9,
   );
   dining.name = 'Обеденная группа';
   cylinder(
     dining,
-    partitioned ? 0.5 : 0.72,
-    partitioned ? 0.5 : 0.72,
+    partitioned ? 0.45 : 0.72,
+    partitioned ? 0.45 : 0.72,
     0.065,
     0,
     0.77,
@@ -292,7 +329,7 @@ function furnitureNodes(partitioned = false): SceneNode[] {
   );
   cylinder(dining, 0.15, 0.29, 0.72, 0, 0.37, 0, wood);
   for (let i = 0; i < 4; i++) {
-    if (partitioned && i % 2 === 0) continue;
+    if (partitioned && i % 2 !== 0) continue;
     const a = (i * Math.PI) / 2;
     const chair = group(
       dining,
@@ -310,8 +347,8 @@ function furnitureNodes(partitioned = false): SceneNode[] {
   vase(dining, 0.13, 0.81, -0.12);
   const pendant = group(
     furniture,
-    partitioned ? 2.05 : 2.5,
-    partitioned ? 5 : 4.9,
+    partitioned ? 1.5 : 2.5,
+    partitioned ? 7.6 : 4.9,
   );
   pendant.name = 'Подвесной светильник';
   cylinder(pendant, 0.009, 0.009, 0.45, 0, 2.42, 0, black);
@@ -323,14 +360,19 @@ function furnitureNodes(partitioned = false): SceneNode[] {
     3.4,
     0.025,
     2.9,
-    2.3,
+    partitioned ? 2.1 : 2.3,
     0.035,
-    7.52,
+    partitioned ? 4.25 : 7.52,
     mat('#ddd9cf', 1),
     0.09,
   );
   rug.name = 'Ковёр';
-  const sofa = group(furniture, 0.8, 7.5, -Math.PI / 2);
+  const sofa = group(
+    furniture,
+    partitioned ? 1.9 : 0.8,
+    partitioned ? 5.3 : 7.5,
+    partitioned ? 0 : -Math.PI / 2,
+  );
   sofa.name = 'Диван';
   box(sofa, 2.6, 0.31, 0.93, 0, 0.25, 0, fabric, 0.09);
   box(sofa, 2.6, 0.49, 0.2, 0, 0.62, 0.4, fabric, 0.065);
@@ -355,14 +397,32 @@ function furnitureNodes(partitioned = false): SceneNode[] {
     0.075,
   ).rotation.z = -0.25;
   box(sofa, 0.82, 0.44, 1.15, 0.78, 0.29, -0.69, fabric, 0.08);
-  const coffee = group(furniture, 2.65, 7.45);
+  const coffee = group(
+    furniture,
+    partitioned ? 1.35 : 2.65,
+    partitioned ? 4.25 : 7.45,
+  );
   coffee.name = 'Журнальный столик';
-  cylinder(coffee, 0.5, 0.5, 0.055, 0, 0.41, 0, wood);
+  cylinder(
+    coffee,
+    partitioned ? 0.4 : 0.5,
+    partitioned ? 0.4 : 0.5,
+    0.055,
+    0,
+    0.41,
+    0,
+    wood,
+  );
   cylinder(coffee, 0.36, 0.41, 0.35, 0, 0.2, 0, wood);
   box(coffee, 0.27, 0.055, 0.36, -0.06, 0.468, 0, white, 0.01).rotation.y =
     0.25;
   cylinder(coffee, 0.07, 0.058, 0.1, 0.22, 0.49, 0.04, porcelain);
-  const media = group(furniture, 3.85, partitioned ? 8.1 : 7.85, -Math.PI / 2);
+  const media = group(
+    furniture,
+    partitioned ? 2 : 3.85,
+    partitioned ? 2.9 : 7.85,
+    partitioned ? 0 : -Math.PI / 2,
+  );
   media.name = 'Тумба и телевизор';
   box(media, partitioned ? 1.65 : 2.17, 0.43, 0.4, 0, 0.31, 0, wood, 0.026);
   for (const x of partitioned ? [-0.65, 0.65] : [-0.9, 0.9])
@@ -371,9 +431,13 @@ function furnitureNodes(partitioned = false): SceneNode[] {
   box(media, 1.46, 0.78, 0.008, 0, 1.12, 0.031, screenMat, 0.01);
   box(media, 0.035, 0.22, 0.03, 0, 0.61, 0, black);
   box(media, 0.37, 0.025, 0.21, 0, 0.51, 0, black);
-  plant(furniture, 0.35, 4.7, 0.75);
+  plant(furniture, 0.35, partitioned ? 3.3 : 4.7, 0.75);
   plant(furniture, 0.35, 0.2, 0.7);
-  const lamp = group(furniture, 0.4, 8.72);
+  const lamp = group(
+    furniture,
+    partitioned ? 0.3 : 0.4,
+    partitioned ? 5.4 : 8.72,
+  );
   lamp.name = 'Торшер';
   cylinder(lamp, 0.19, 0.19, 0.025, 0, 0.025, 0, black);
   cylinder(lamp, 0.013, 0.013, 1.49, 0, 0.78, 0, brass);
@@ -632,7 +696,7 @@ export function createOpenProject(): EditorProject {
   });
 }
 // PLAN-002: proposed walls follow the solid pier between the two west windows.
-export const PARTITION_PRESET_ID = 'separate-kitchen-v1';
+export const PARTITION_PRESET_ID = 'kitchen-by-bathroom-v2';
 export const PARTITION_WALL_IDS = [
   'wall-proposed-kitchen-hall',
   'wall-proposed-kitchen-room',
@@ -640,9 +704,9 @@ export const PARTITION_WALL_IDS = [
 ] as const;
 export const partitionFloors = [
   {
-    id: 'floor-kitchen',
-    name: 'Пол — Кухня',
-    material: 'stone' as const,
+    id: 'floor-room2',
+    name: 'Пол — Комната 2',
+    material: 'wood' as const,
     polygon: [
       [0, 2.65],
       [4.205, 2.65],
@@ -655,9 +719,9 @@ export const partitionFloors = [
     ],
   },
   {
-    id: 'floor-room2',
-    name: 'Пол — Комната 2',
-    material: 'wood' as const,
+    id: 'floor-kitchen',
+    name: 'Пол — Кухня',
+    material: 'stone' as const,
     polygon: [
       [0.3, 5.875],
       [4.04, 5.875],
@@ -690,8 +754,8 @@ export const partitionFloors = [
 export function createPartitionWalls(): SceneNode[] {
   const specs = [
     {
-      id: PARTITION_WALL_IDS[0],
-      name: 'Новая перегородка — кухня / холл',
+      id: PARTITION_WALL_IDS[2],
+      name: 'Новая перегородка — комната 2 / холл',
       from: [4.205, 2.6],
       to: [4.205, 5.65],
       door: [1.35, 2.25],
@@ -704,10 +768,11 @@ export function createPartitionWalls(): SceneNode[] {
       door: null,
     },
     {
-      id: PARTITION_WALL_IDS[2],
-      name: 'Новая перегородка — комната 2 / холл',
+      id: PARTITION_WALL_IDS[0],
+      name: 'Продление стены санузла — кухня / холл',
       from: [4.205, 6.1],
-      to: [4.205, 7.155],
+      to: [4.205, 7.1],
+      thickness: 0.11,
       door: [0.1, 0.9],
     },
   ];
@@ -716,7 +781,7 @@ export function createPartitionWalls(): SceneNode[] {
     const node = baseNode(
       s.id,
       s.name,
-      { kind: 'wall', size: [length, 2.8, 0.12] },
+      { kind: 'wall', size: [length, 2.8, s.thickness ?? 0.12] },
       'structure',
     );
     node.position = [(s.from[0] + s.to[0]) / 2, 0, (s.from[1] + s.to[1]) / 2];
@@ -779,13 +844,13 @@ export function createInitialProject(): EditorProject {
     arrangements: [
       {
         id: PARTITION_PRESET_ID,
-        name: 'Отдельная кухня + две комнаты',
+        name: 'Кухня у санузла + две комнаты',
         scene: clone(scene),
       },
       {
         id: 'initial',
         name: 'Без дополнительных перегородок',
-        scene: { objects: createInitialObjects(), view: defaultView() },
+        scene: { objects: createInitialObjects(true), view: defaultView() },
       },
     ],
     activeArrangement: PARTITION_PRESET_ID,
@@ -800,7 +865,7 @@ export function applyPartitionedPreset(project: EditorProject): EditorProject {
     );
   next.arrangements.push({
     id: newId('arrangement'),
-    name: 'До разделения кухни и комнаты',
+    name: 'До переноса кухни к санузлу',
     scene: clone(next.scene),
   });
   const seed = createInitialProject(),
@@ -810,7 +875,7 @@ export function applyPartitionedPreset(project: EditorProject): EditorProject {
   next.scene = clone(seed.scene);
   next.arrangements.push({
     id,
-    name: 'Отдельная кухня + две комнаты',
+    name: 'Кухня у санузла + две комнаты',
     scene: clone(seed.scene),
   });
   next.activeArrangement = id;
@@ -821,13 +886,17 @@ export function togglePartitionWalls(
   visible: boolean,
 ): EditorProject {
   const next = clone(project);
-  for (const template of createPartitionWalls()) {
+  const active = next.arrangements.find((a) => a.id === next.activeArrangement);
+  for (const fallback of createPartitionWalls()) {
+    const template =
+      findNode(active?.scene.objects ?? [], fallback.id) ?? fallback;
     const existing = next.scene.objects.find((n) => n.id === template.id);
     if (existing) {
       existing.visible = visible;
       if (!visible && findNode([existing], next.scene.view.selected))
         next.scene.view.selected = null;
-    } else if (visible) next.scene.objects.push(template);
+    } else if (visible)
+      next.scene.objects.push({ ...clone(template), visible: true });
   }
   return validateProject(next);
 }

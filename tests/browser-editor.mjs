@@ -145,7 +145,10 @@ try {
     'wall-proposed-kitchen-room',
     'wall-proposed-room-hall',
   ];
-  assert.equal((await status(page)).activeArrangement, 'separate-kitchen-v1');
+  assert.equal(
+    (await status(page)).activeArrangement,
+    'kitchen-by-bathroom-v2',
+  );
   await page
     .getByRole('button', { name: 'Убрать новые перегородки', exact: true })
     .click();
@@ -161,6 +164,18 @@ try {
     (await project(page)).scene.objects
       .filter((n) => partitionIds.includes(n.id))
       .every((n) => n.visible),
+  );
+  // Restoring all three after deletion must retain the current furniture edits.
+  for (const id of partitionIds)
+    await call(page, 'edit_editor_object', { action: 'remove', id });
+  await page
+    .getByRole('button', { name: 'Вернуть новые перегородки', exact: true })
+    .click();
+  assert.equal(
+    (await project(page)).scene.objects.filter(
+      (n) => partitionIds.includes(n.id) && n.visible,
+    ).length,
+    3,
   );
   await select(page, partitionIds[1]);
   await page.getByRole('button', { name: 'Удалить', exact: true }).click();
@@ -179,7 +194,7 @@ try {
     .click();
   const addedWall = (await status(page)).view.selected;
   assert.equal((await status(page)).view.mode, '2d');
-  await editField(page, 'Ширина', 1.234);
+  await editField(page, 'Длина', 1.234);
   await editField(page, 'X — вправо', 5.55);
   await editField(page, 'Z — вниз плана', 4.1);
   const extraWall = await call(page, 'get_editor_project', {
@@ -200,6 +215,21 @@ try {
     'PASS proposed layout: default rooms/windows, hide/restore, individual delete/undo, add wall at precise coordinates',
   );
 
+  await page
+    .getByRole('button', { name: 'Размер стены у кухни', exact: true })
+    .click();
+  await editField(page, 'Длина', 1.6);
+  await editField(page, 'Высота', 2.9);
+  await editField(page, 'Толщина', 0.15);
+  const extension = await call(page, 'get_editor_project', {
+    objectId: partitionIds[0],
+  });
+  assert.deepEqual(extension.dimensions, [1.6, 2.9, 0.15]);
+  assert.equal(extension.node.children[0].geometry.openingType, 'door');
+  await editField(page, 'Длина', 1);
+  await editField(page, 'Высота', 2.8);
+  await editField(page, 'Толщина', 0.11);
+  await call(page, 'configure_editor_view', { selected: null });
   const initial = await project(page);
   assert.equal((await status(page)).status.unavailable, false);
   const sofa = initial.scene.objects.find((n) => n.name === 'Диван');
@@ -238,7 +268,7 @@ try {
   // Wall dimensions/position use the same inspector and must retain the door.
   const wallId = 'wall-bedroom-divider';
   await select(page, wallId);
-  await editField(page, 'Ширина', 6.15);
+  await editField(page, 'Длина', 6.15);
   await editField(page, 'X — вправо', 4.333);
   inspected = await call(page, 'get_editor_project', { objectId: wallId });
   assert.equal(inspected.node.position[0], 4.333);
@@ -501,43 +531,52 @@ try {
   legacy.scene.view.camera = structuredClone(initial.scene.view.camera);
   legacy.scene.objects.find((n) => n.name === 'Диван').color = '#abcdef';
   legacy.name = 'Сохранённый пользовательский проект';
-  for (const viaLink of [false, true]) {
-    const upgrade = await browser.newContext();
-    await installTools(upgrade);
-    await upgrade.addInitScript((value) => {
-      if (!localStorage.getItem('flatplan.editor.v1'))
-        localStorage.setItem('flatplan.editor.v1', value);
-    }, JSON.stringify(legacy));
-    const up = await upgrade.newPage();
-    up.on('pageerror', (e) => errors.push(e.message));
-    await up.goto(viaLink ? `${url}?layout=separate-kitchen` : url);
-    await loaded(up);
-    if (!viaLink) {
-      assert.deepEqual(await project(up), legacy);
-      await up
-        .getByRole('button', {
-          name: 'Открыть новый план с перегородками',
-          exact: true,
-        })
-        .click();
+  const previous = structuredClone(initial);
+  previous.arrangements[0].id = 'separate-kitchen-v1';
+  previous.activeArrangement = 'separate-kitchen-v1';
+  previous.scene.objects.find((n) => n.name === 'Кухня').position = [
+    0.25, 0, 2.88,
+  ];
+  previous.name = 'Прежняя кухня сверху';
+  for (const previousProject of [legacy, previous]) {
+    for (const viaLink of [false, true]) {
+      const upgrade = await browser.newContext();
+      await installTools(upgrade);
+      await upgrade.addInitScript((value) => {
+        if (!localStorage.getItem('flatplan.editor.v1'))
+          localStorage.setItem('flatplan.editor.v1', value);
+      }, JSON.stringify(previousProject));
+      const up = await upgrade.newPage();
+      up.on('pageerror', (e) => errors.push(e.message));
+      await up.goto(viaLink ? `${url}?layout=kitchen-by-bathroom` : url);
+      await loaded(up);
+      if (!viaLink) {
+        assert.deepEqual(await project(up), previousProject);
+        await up
+          .getByRole('button', {
+            name: 'Открыть кухню у санузла',
+            exact: true,
+          })
+          .click();
+      }
+      await saved(up);
+      const upgraded = await project(up);
+      assert.equal(upgraded.activeArrangement, 'kitchen-by-bathroom-v2');
+      assert.equal(upgraded.name, previousProject.name);
+      assert.deepEqual(
+        upgraded.arrangements.find(
+          (a) => a.name === 'До переноса кухни к санузлу',
+        ).scene,
+        previousProject.scene,
+      );
+      assert.ok(upgraded.scene.objects.some((n) => n.id === 'floor-room2'));
+      assert.ok(!new URL(up.url()).searchParams.has('layout'));
+      await up.reload();
+      await loaded(up);
+      await saved(up);
+      assert.deepEqual(await project(up), upgraded);
+      await upgrade.close();
     }
-    await saved(up);
-    const upgraded = await project(up);
-    assert.equal(upgraded.activeArrangement, 'separate-kitchen-v1');
-    assert.equal(upgraded.name, legacy.name);
-    assert.deepEqual(
-      upgraded.arrangements.find(
-        (a) => a.name === 'До разделения кухни и комнаты',
-      ).scene,
-      legacy.scene,
-    );
-    assert.ok(upgraded.scene.objects.some((n) => n.id === 'floor-room2'));
-    assert.ok(!new URL(up.url()).searchParams.has('layout'));
-    await up.reload();
-    await loaded(up);
-    await saved(up);
-    assert.deepEqual(await project(up), upgraded);
-    await upgrade.close();
   }
   console.log(
     'PASS saved-project upgrade: explicit button/deep link, full backup and stable reload',
