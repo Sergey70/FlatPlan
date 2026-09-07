@@ -8,7 +8,7 @@ PLAN-001 implemented: preliminary reconstruction of the user's technical-passpor
 
 Reported areas: living/kitchen 39.4, living room 14.7, bathroom 4.0, loggia 3.4 physical / 2.4 accounted. Inside total 58.1, accounted total 60.5 m². Approximate modeled areas are distinct. Ceiling 2.8 m, heights/positions of openings, service zone, columns and finishes are assumptions. Furniture is an optional suggestion, off by default. See PLAN_ASSUMPTIONS.md.
 
-Last completed: DEMO-001, initial viewer and Pages setup. Active: PLAN-001 publication verification. No application code work remains after verification below.
+Last completed: PLAN-001, including publication verification. No active implementation iteration. DEMO-001 established the viewer and Pages setup.
 
 ## Verification
 
@@ -24,8 +24,8 @@ Last completed: DEMO-001, initial viewer and Pages setup. Active: PLAN-001 publi
 Repository: https://github.com/Sergey70/FlatPlan (public).
 Live URL: https://sergey70.github.io/FlatPlan/.
 GitHub Pages source: GitHub Actions; workflow `.github/workflows/pages.yml`.
-Previously verified deployment: application e9f5959, https://github.com/Sergey70/FlatPlan/actions/runs/34157466763. New PLAN-001 deployment verification pending.
+PLAN-001 application commit: 8b3146ed591e3ebba542dce9f38b07ca448b6311. Build and deploy succeeded: https://github.com/Sergey70/FlatPlan/actions/runs/34158564717. Public URL returned HTTP 200; all 6 production files (HTML, two JS chunks, CSS, icon and oak texture) matched the verified local build byte-for-byte.
 
 ## Next
 
-Finish PLAN-001 by verifying GitHub build/deploy and matching published assets. Then wait for a detailed measured plan, ceiling/opening heights and interior preferences. Do not treat preliminary dimensions as construction measurements. No editor/import/save support is claimed.
+Wait for a detailed measured plan, ceiling/opening heights and interior preferences. Do not treat preliminary dimensions as construction measurements. No editor/import/save support is claimed.
