@@ -4,9 +4,9 @@ Updated: 2026-09-07.
 
 ## Objective and current phase
 
-Active iteration: **EDITOR-001**, final acceptance and publication. Previous completed iteration: **PLAN-001** (technical-passport reconstruction, deployed).
+Last completed iteration: **EDITOR-001**, including full acceptance and verified GitHub Pages publication. No active implementation iteration. PLAN-001 supplied the preliminary passport reconstruction.
 
-The full user objective is an editable 3D apartment with materials, local browser saving, independent arrangements of furniture/walls, exact dimensions and colors for every object and nested part, complete JSON export/import across devices, and usable mobile controls. A bathtub replaces the shower suggestion. Commits and pushes are explicitly authorized. Do not reduce completion to a static viewer or mark the objective complete before browser acceptance and Pages publication.
+The full user objective is an editable 3D apartment with materials, local browser saving, independent arrangements of furniture/walls, exact dimensions and colors for every object and nested part, complete JSON export/import across devices, and usable mobile controls. A bathtub replaces the shower suggestion. Commits and pushes are explicitly authorized. The complete editor scope is implemented and verified; browser acceptance and Pages publication both succeeded.
 
 ## Implemented
 
@@ -40,10 +40,8 @@ Repository: https://github.com/Sergey70/FlatPlan (public).
 Live URL: https://sergey70.github.io/FlatPlan/.
 Source: GitHub Actions, `.github/workflows/pages.yml`.
 
-Current public application is still PLAN-001 commit `8b3146ed591e3ebba542dce9f38b07ca448b6311`, successful run https://github.com/Sergey70/FlatPlan/actions/runs/34158564717. This editor iteration is not yet committed or published.
+Published application commit: `eaffadd743d862a1e5a34a53ad5bc5bdc6166c23`. Successful build, all browser checks and deploy: https://github.com/Sergey70/FlatPlan/actions/runs/34161376312. The public URL and all six production files returned HTTP 200 and matched the verified local build byte-for-byte. Fresh desktop and mobile browser contexts loaded the live WebGL editor, all 238 elements and two variants, switched to 2D successfully, and reported no page/asset errors. Published screenshots and SHA-256 evidence are in `.local/qa/`. The local development server was stopped after verification.
 
-## Remaining acceptance
+## Next
 
-1. Commit EDITOR-001, push main, wait for successful build/browser/deploy jobs.
-2. Verify the public URL and deployed production assets, record the run/commit here and stop the local server.
-3. Mark the full user goal complete only after all of the above succeeds.
+Wait for a detailed measured plan and interior preferences. Update the seed or a saved project explicitly; do not overwrite existing browser documents on application updates. Current physical constraints and preliminary assumptions remain documented in PLAN_ASSUMPTIONS.md. No required work remains for EDITOR-001.
