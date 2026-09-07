@@ -201,7 +201,7 @@ export default function Gallery() {
             <Grid2X2 size={20} />
           </span>
           FlatPlan<span className="gallery-brand-divider">/</span>
-          <small>Идеи для квартиры</small>
+          <small>Галерея интерьеров</small>
         </a>
         <a className="gallery-back" href="./">
           <ArrowLeft size={17} /> <span>В редактор</span>
@@ -210,16 +210,11 @@ export default function Gallery() {
       <main className="gallery-main">
         <section className="gallery-hero" aria-labelledby="gallery-title">
           <div className="gallery-hero-copy">
-            <p className="gallery-eyebrow">Коллекция 01 / По вашему плану</p>
-            <h1 id="gallery-title">
-              Одна квартира.
-              <br />
-              <em>Разные истории.</em>
-            </h1>
+            <p className="gallery-eyebrow">Планировка и отделка</p>
+            <h1 id="gallery-title">Варианты интерьера</h1>
             <p className="gallery-intro">
-              Посмотрите, как меняется пространство с другой планировкой,
-              материалами и настроением. Найдите сочетание, которое хочется
-              развивать.
+              Концепции планировки и отделки на основе предварительного плана
+              квартиры. Выберите планировку и стиль для просмотра и сравнения.
             </p>
             <div className="gallery-numbers">
               <span>
@@ -233,7 +228,7 @@ export default function Gallery() {
               </span>
             </div>
             <a className="gallery-hero-link" href="#concepts">
-              Смотреть коллекцию <ArrowUpRight size={20} />
+              Просмотреть варианты <ArrowUpRight size={20} />
             </a>
           </div>
           <figure className="gallery-hero-image">

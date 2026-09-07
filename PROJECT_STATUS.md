@@ -4,7 +4,7 @@ Updated: 2026-09-08.
 
 ## Objective and current phase
 
-Last completed and published iteration: **GALLERY-005**, separate interior concept gallery. Local acceptance, GitHub Actions and public-site checks are complete; no implementation iteration is active. PLAN-004 placed the kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
+Last completed and published iteration: **GALLERY-005**, separate interior concept gallery. Local acceptance, GitHub Actions and public-site checks are complete; GALLERY-006 is active: simplify the gallery introduction into formal wording at the user’s request. Acceptance: build/lint and desktop/mobile visual check, then existing CI and public-page verification. PLAN-004 placed the kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
 
 ## Completed iteration: GALLERY-005
 
@@ -62,3 +62,7 @@ Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, succ
 ## Next
 
 Wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied. No required work remains for GALLERY-005.
+
+## GALLERY-006 follow-up
+
+Replace the promotional two-line slogan and italic styling with «Варианты интерьера». Use a concise factual introduction, neutral section label and a direct collection link. No layout data or editor behavior changes. `npm run lint` and `npm run build` pass; isolated Chromium checks and visual review pass at 1440/390/360 widths with the new heading, no italic slogan and no horizontal overflow. Final diff reviewed. Publication pending.
