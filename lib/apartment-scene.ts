@@ -1,10 +1,14 @@
 import * as THREE from 'three';
 import { fitCamera, apartmentBounds } from './camera-fit';
+import { planShape, createFloorGeometry } from './apartment-geometry';
 import { createTapTracker } from './tap-tracker';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {
   apartment,
+  walls,
+  wallLength,
+  solidOutlines,
   rooms,
   palettes,
   defaultOptions,
@@ -45,7 +49,7 @@ export function createApartmentScene(
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.domElement.setAttribute(
     'aria-label',
-    'Трёхмерная модель демонстрационной квартиры. Управление видом доступно кнопками рядом с моделью.',
+    'Приблизительная модель квартиры по техпаспорту. Управление видом доступно кнопками рядом с моделью.',
   );
   renderer.domElement.setAttribute('role', 'img');
   host.appendChild(renderer.domElement);
@@ -132,7 +136,7 @@ export function createApartmentScene(
       wood.map = texture;
       wood.needsUpdate = true;
       const floorTexture = texture.clone();
-      floorTexture.repeat.set(3, 2);
+      floorTexture.repeat.set(0.5, 0.5);
       floorTexture.needsUpdate = true;
       floorWood.map = floorTexture;
       floorWood.needsUpdate = true;
@@ -244,138 +248,122 @@ export function createApartmentScene(
   (Array.isArray(grid.material) ? grid.material : [grid.material]).forEach(
     (m) => materials.add(m),
   );
-  box(scene, 9.32, 0.26, 7.32, 4.5, -0.19, 3.5, mat('#d8d4ca'), 0.06);
-  box(scene, 9.35, 0.065, 7.35, 4.5, -0.34, 3.5, mat('#c7cbd0'), 0.025);
+  box(scene, 7.85, 0.26, 9.65, 3.55, -0.19, 4.48, mat('#d8d4ca'), 0.06);
+  box(scene, 7.9, 0.065, 9.7, 3.55, -0.34, 4.48, mat('#c7cbd0'), 0.025);
   const roomFloors: THREE.Mesh[] = [];
+  const selectionMaterial = new THREE.MeshBasicMaterial({
+    color: '#bc7045',
+    transparent: true,
+    opacity: 0.2,
+    depthWrite: false,
+  });
+  materials.add(selectionMaterial);
+  const selections = new Map<RoomId, THREE.Mesh>();
   for (const room of rooms) {
-    const tile = room.id === 'bathroom' || room.id === 'hall';
-    const floor = box(
+    const geometry = createFloorGeometry(room);
+    const floor = mesh(
+      geometry,
+      room.id === 'bathroom' || room.id === 'balcony' ? stone : floorWood,
       scene,
-      room.width,
-      0.06,
-      room.depth,
-      room.x + room.width / 2,
-      -0.025,
-      room.z + room.depth / 2,
-      tile ? stone : floorWood,
+      0,
+      0.012,
+      0,
     );
+    floor.castShadow = false;
     floor.userData.room = room.id;
     roomFloors.push(floor);
-    // Thin joints read as floorboards/tiles at close range without external meshes.
-    const vertices: number[] = [];
-    const pitch = tile ? 0.6 : 0.22;
-    for (let x = room.x + pitch; x < room.x + room.width - 0.01; x += pitch) {
-      vertices.push(x, 0.009, room.z, x, 0.009, room.z + room.depth);
-    }
-    if (tile) {
-      for (let z = room.z + 0.6; z < room.z + room.depth; z += 0.6)
-        vertices.push(room.x, 0.009, z, room.x + room.width, 0.009, z);
-    } else {
-      for (let col = 0; col < room.width / pitch; col++) {
-        for (
-          let z = room.z + 0.8 + (col % 3) * 0.48;
-          z < room.z + room.depth;
-          z += 1.65
-        ) {
-          vertices.push(
-            room.x + col * pitch,
-            0.009,
-            z,
-            Math.min(room.x + (col + 1) * pitch, room.x + room.width),
-            0.009,
-            z,
-          );
-        }
-      }
-    }
-    const joints = new THREE.BufferGeometry().setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(vertices, 3),
-    );
-    const jointMat = new THREE.LineBasicMaterial({
-      color: tile ? '#b9b4aa' : '#ae906b',
-      transparent: true,
-      opacity: 0.29,
-    });
-    materials.add(jointMat);
-    geometries.add(joints);
-    scene.add(new THREE.LineSegments(joints, jointMat));
+    const selected = mesh(geometry, selectionMaterial, scene, 0, 0.02, 0);
+    selected.visible = false;
+    selected.castShadow = false;
+    selections.set(room.id, selected);
   }
-  const permanentWalls = new THREE.Group();
-  scene.add(permanentWalls);
-  const cutawayWalls = new THREE.Group();
-  scene.add(cutawayWalls);
   const wallItems: { object: THREE.Mesh; fullHeight: number; base: number }[] =
     [];
-  function wall(
-    w: number,
-    d: number,
-    x: number,
-    z: number,
-    cut: boolean,
-    height = apartment.ceiling,
-    base = 0,
-  ) {
-    const object = box(
-      cut ? cutawayWalls : permanentWalls,
-      w,
-      height,
-      d,
-      x,
-      base + height / 2,
-      z,
-      wallMaterial,
+  const cutawayDetails: THREE.Group[] = [];
+  for (const segment of walls) {
+    const length = wallLength(segment);
+    const wallGroup = group(
+      scene,
+      segment.from[0],
+      segment.from[1],
+      -Math.atan2(
+        segment.to[1] - segment.from[1],
+        segment.to[0] - segment.from[0],
+      ),
     );
-    if (cut) wallItems.push({ object, fullHeight: height, base });
-    return object;
+    const block = (from: number, to: number, base: number, height: number) => {
+      if (to - from < 0.001 || height < 0.001) return;
+      const object = box(
+        wallGroup,
+        to - from,
+        height,
+        segment.thickness,
+        (from + to) / 2,
+        base + height / 2,
+        0,
+        wallMaterial,
+      );
+      if (segment.cutaway) wallItems.push({ object, base, fullHeight: height });
+    };
+    let cursor = 0;
+    for (const opening of segment.openings) {
+      block(cursor, opening.from, 0, apartment.ceiling);
+      block(opening.from, opening.to, 0, opening.bottom);
+      block(
+        opening.from,
+        opening.to,
+        opening.top,
+        apartment.ceiling - opening.top,
+      );
+      const width = opening.to - opening.from,
+        mid = (opening.from + opening.to) / 2;
+      const details = new THREE.Group();
+      wallGroup.add(details);
+      if (segment.cutaway) cutawayDetails.push(details);
+      if (opening.kind === 'window') {
+        const height = opening.top - opening.bottom;
+        box(
+          details,
+          width,
+          height,
+          0.018,
+          mid,
+          opening.bottom + height / 2,
+          0,
+          glass,
+        ).castShadow = false;
+        for (const x of [opening.from, mid, opening.to])
+          box(
+            details,
+            0.045,
+            height,
+            0.08,
+            x,
+            opening.bottom + height / 2,
+            0,
+            white,
+          );
+        for (const y of [opening.bottom, opening.top])
+          box(details, width, 0.05, segment.thickness + 0.03, mid, y, 0, white);
+      } else {
+        // Only the opening and a threshold: the document does not establish door swings.
+        box(wallGroup, width, 0.015, segment.thickness, mid, 0.008, 0, stone);
+      }
+      cursor = opening.to;
+    }
+    block(cursor, length, 0, apartment.ceiling);
   }
-  // Back wall with actual window openings, rather than glass pasted over a wall.
-  wall(9.16, 0.16, 4.5, 0, false, 0.88);
-  wall(9.16, 0.16, 4.5, 0, false, 0.35, 2.45);
-  for (const [x, width] of [
-    [0.7, 1.4],
-    [4.65, 2.1],
-    [8.75, 0.5],
-  ])
-    wall(width, 0.16, x, 0, false, 1.57, 0.88);
-  function windowAt(x: number, width: number) {
-    box(permanentWalls, width, 0.06, 0.25, x, 0.9, 0.01, white);
-    box(permanentWalls, width, 0.05, 0.12, x, 2.44, 0, white);
-    for (const offset of [-width / 2, 0, width / 2])
-      box(permanentWalls, 0.045, 1.55, 0.12, x + offset, 1.68, 0, white);
-    box(permanentWalls, width, 1.48, 0.015, x, 1.67, -0.005, glass).castShadow =
-      false;
-  }
-  windowAt(2.5, 2.2);
-  windowAt(7.1, 2.8);
-  // Exterior entry on the right connects to the central hall.
-  wall(0.16, 3.8, 9, 1.9, false);
-  wall(0.16, 2.25, 9, 5.875, false);
-  wall(0.16, 0.95, 9, 4.275, false, 0.6, 2.2);
-  wall(0.16, 7.16, 0, 3.5, true);
-  wall(9.16, 0.16, 4.5, 7, true);
-  // Central circulation connects all rooms independently.
-  wall(0.14, 3.75, 5.4, 1.875, true);
-  wall(0.14, 2.3, 5.4, 5.85, true);
-  wall(0.14, 0.95, 5.4, 4.225, true, 0.65, 2.15);
-  for (const z of [3.6, 5.1]) {
-    wall(2.05, 0.14, 6.425, z, true);
-    wall(0.65, 0.14, 8.675, z, true);
-    wall(0.9, 0.14, 7.9, z, true, 0.65, 2.15);
-  }
-  // Door leaves are independent from furniture visibility.
-  const doors = new THREE.Group();
-  scene.add(doors);
-  const doorMat = mat('#e2d8c7');
-  const entryDoor = group(doors, 9, 3.8, -Math.PI + 0.5);
-  box(entryDoor, 0.9, 2.12, 0.05, 0.45, 1.06, 0, doorMat);
-  for (const [x, z, angle] of [
-    [7.45, 3.6, 0.8],
-    [8.35, 5.1, -Math.PI + 0.8],
-  ]) {
-    const door = group(doors, x, z, angle);
-    box(door, 0.88, 2.1, 0.045, 0.44, 1.05, 0, doorMat);
-    box(door, 0.12, 0.025, 0.08, 0.73, 1.02, 0.045, brass);
+  for (const solid of solidOutlines) {
+    const geometry = new THREE.ExtrudeGeometry(planShape(solid.polygon), {
+      depth: solid.height,
+      bevelEnabled: false,
+    });
+    geometry.rotateX(-Math.PI / 2);
+    mesh(
+      geometry,
+      solid.id === 'service' ? mat('#a9aaa2') : wallMaterial,
+      scene,
+    );
   }
   const furniture = new THREE.Group();
   scene.add(furniture);
@@ -425,7 +413,7 @@ export function createApartmentScene(
     }
   }
   // Kitchen: cabinetry, countertop, sink, hob, oven and upper storage.
-  const kitchen = group(furniture, 0.2, 0.2);
+  const kitchen = group(furniture, 0.25, 2.88);
   for (let i = 0; i < 7; i++) {
     const x = 0.36 + i * 0.67;
     box(kitchen, 0.65, 0.82, 0.61, x, 0.47, 0.31, i < 2 ? wood : accent, 0.018);
@@ -478,7 +466,7 @@ export function createApartmentScene(
   box(kitchen, 0.035, 0.5, 0.04, 0.6, 1.04, 1.52, black);
   vase(kitchen, 4.2, 0.95, 0.33);
   // Round dining table, four curved chairs and a pendant.
-  const dining = group(furniture, 3.15, 2.3);
+  const dining = group(furniture, 2.5, 4.9);
   cylinder(dining, 0.72, 0.72, 0.065, 0, 0.77, 0, wood);
   cylinder(dining, 0.15, 0.29, 0.72, 0, 0.37, 0, wood);
   for (let i = 0; i < 4; i++) {
@@ -492,13 +480,13 @@ export function createApartmentScene(
   }
   cylinder(dining, 0.21, 0.21, 0.013, -0.2, 0.816, 0.07, porcelain);
   vase(dining, 0.13, 0.81, -0.12);
-  const pendant = group(furniture, 3.15, 2.3);
+  const pendant = group(furniture, 2.5, 4.9);
   cylinder(pendant, 0.009, 0.009, 0.45, 0, 2.42, 0, black);
   cylinder(pendant, 0.18, 0.43, 0.23, 0, 2.09, 0, mat('#c5a47c', 0.93));
   cylinder(pendant, 0.37, 0.37, 0.025, 0, 1.97, 0, glowMat);
   // Living area: sectional sofa, woven rug, tables, sideboard and TV.
-  box(furniture, 3.4, 0.025, 2.9, 2.68, 0.035, 5.24, mat('#ddd9cf', 1), 0.09);
-  const sofa = group(furniture, 1.0, 5.15, -Math.PI / 2);
+  box(furniture, 3.4, 0.025, 2.9, 2.3, 0.035, 7.52, mat('#ddd9cf', 1), 0.09);
+  const sofa = group(furniture, 0.8, 7.5, -Math.PI / 2);
   box(sofa, 2.6, 0.31, 0.93, 0, 0.25, 0, fabric, 0.09);
   box(sofa, 2.6, 0.49, 0.2, 0, 0.62, 0.4, fabric, 0.065);
   for (const x of [-1.23, 1.23])
@@ -522,83 +510,52 @@ export function createApartmentScene(
     0.075,
   ).rotation.z = -0.25;
   box(sofa, 0.82, 0.44, 1.15, 0.78, 0.29, -0.69, fabric, 0.08);
-  cylinder(furniture, 0.59, 0.59, 0.055, 2.9, 0.41, 5.08, wood);
-  cylinder(furniture, 0.36, 0.41, 0.35, 2.9, 0.2, 5.08, wood);
-  box(furniture, 0.27, 0.055, 0.36, 2.84, 0.468, 5.08, white, 0.01).rotation.y =
+  cylinder(furniture, 0.5, 0.5, 0.055, 2.65, 0.41, 7.45, wood);
+  cylinder(furniture, 0.36, 0.41, 0.35, 2.65, 0.2, 7.45, wood);
+  box(furniture, 0.27, 0.055, 0.36, 2.59, 0.468, 7.45, white, 0.01).rotation.y =
     0.25;
-  cylinder(furniture, 0.07, 0.058, 0.1, 3.12, 0.49, 5.12, porcelain);
-  const media = group(furniture, 4.98, 5.33, Math.PI / 2);
+  cylinder(furniture, 0.07, 0.058, 0.1, 2.87, 0.49, 7.49, porcelain);
+  const media = group(furniture, 3.85, 7.85, -Math.PI / 2);
   box(media, 2.17, 0.43, 0.4, 0, 0.31, 0, wood, 0.026);
   for (const x of [-0.9, 0.9]) box(media, 0.04, 0.1, 0.31, x, 0.05, 0, black);
   box(media, 1.56, 0.88, 0.055, 0, 1.11, 0, black, 0.015);
   box(media, 1.46, 0.78, 0.008, 0, 1.12, 0.031, screenMat, 0.01);
   box(media, 0.035, 0.22, 0.03, 0, 0.61, 0, black);
   box(media, 0.37, 0.025, 0.21, 0, 0.51, 0, black);
-  plant(furniture, 0.48, 3.0, 1.08);
-  plant(furniture, 4.55, 6.57, 0.9);
-  const lamp = group(furniture, 0.47, 6.55);
+  plant(furniture, 0.35, 4.7, 0.75);
+  plant(furniture, 0.35, 0.2, 0.7);
+  const lamp = group(furniture, 0.4, 8.72);
   cylinder(lamp, 0.19, 0.19, 0.025, 0, 0.025, 0, black);
   cylinder(lamp, 0.013, 0.013, 1.49, 0, 0.78, 0, brass);
   cylinder(lamp, 0.16, 0.25, 0.35, 0, 1.53, 0, white);
-  // Bedroom.
-  box(furniture, 2.8, 0.023, 2.85, 7.18, 0.03, 1.95, mat('#dcded4', 1), 0.025);
-  box(furniture, 1.83, 0.3, 2.17, 7.15, 0.22, 1.83, wood, 0.04);
-  box(furniture, 1.74, 0.25, 2.05, 7.15, 0.47, 1.83, mattressMat, 0.09);
-  box(furniture, 1.96, 1.04, 0.13, 7.15, 0.59, 0.74, accent, 0.035);
-  box(furniture, 1.76, 0.12, 1.39, 7.15, 0.625, 2.14, white, 0.08);
-  box(furniture, 1.79, 0.05, 0.48, 7.15, 0.712, 2.53, accent, 0.022);
-  for (const x of [6.73, 7.57])
-    box(furniture, 0.69, 0.16, 0.47, x, 0.65, 1.19, white, 0.08);
-  for (const x of [5.94, 8.36]) {
-    box(furniture, 0.49, 0.46, 0.43, x, 0.26, 1.05, wood, 0.024);
-    cylinder(furniture, 0.075, 0.12, 0.16, x, 0.59, 1.05, porcelain);
-    cylinder(furniture, 0.12, 0.17, 0.18, x, 0.77, 1.05, white);
+  // Optional furnishing suggestion; no furniture placement is established by the passport.
+  const bed = group(furniture, 3.75, 1.3, Math.PI / 2);
+  box(bed, 1.66, 0.3, 2.12, 0, 0.22, 0, wood, 0.04);
+  box(bed, 1.6, 0.25, 2.02, 0, 0.47, 0, mattressMat, 0.09);
+  box(bed, 1.76, 1.04, 0.12, 0, 0.59, -1.03, accent, 0.035);
+  box(bed, 1.62, 0.12, 1.3, 0, 0.625, 0.33, white, 0.08);
+  box(bed, 1.65, 0.05, 0.42, 0, 0.712, 0.73, accent, 0.02);
+  for (const x of [-0.39, 0.39])
+    box(bed, 0.65, 0.16, 0.45, x, 0.65, -0.65, white, 0.07);
+  for (const x of [-0.99, 0.99]) {
+    box(bed, 0.34, 0.46, 0.35, x, 0.26, -0.83, wood, 0.02);
+    cylinder(bed, 0.07, 0.1, 0.16, x, 0.59, -0.83, porcelain);
+    cylinder(bed, 0.1, 0.14, 0.17, x, 0.75, -0.83, white);
   }
-  // Hall: built-in storage and bench.
-  box(furniture, 1.63, 2.25, 0.39, 6.37, 1.13, 4.84, white, 0.013);
-  for (const x of [5.97, 6.78])
-    box(furniture, 0.02, 0.36, 0.025, x, 1.05, 4.63, brass);
-  box(furniture, 0.86, 0.34, 0.38, 8.19, 0.24, 4.79, wood, 0.015);
-  box(furniture, 0.84, 0.09, 0.39, 8.19, 0.455, 4.79, fabric, 0.025);
-  // Bathroom: walk-in shower, vanity, round mirror, toilet, towels.
-  const bathroom = group(furniture, 5.4, 5.1);
-  box(bathroom, 1.03, 0.05, 1.65, 0.62, 0.04, 0.99, porcelain, 0.025);
-  box(bathroom, 0.028, 1.95, 1.64, 1.16, 1.025, 0.99, glass).castShadow = false;
-  cylinder(bathroom, 0.012, 0.012, 1.83, 0.16, 1.04, 0.55, brass);
-  cylinder(bathroom, 0.14, 0.14, 0.025, 0.34, 1.97, 0.55, brass);
-  box(bathroom, 0.19, 0.02, 0.025, 0.25, 1.95, 0.55, brass);
-  box(bathroom, 1.08, 0.44, 0.45, 2.87, 0.56, 1.57, wood, 0.018);
-  box(bathroom, 1.12, 0.04, 0.48, 2.87, 0.8, 1.57, stone, 0.012);
-  cylinder(bathroom, 0.21, 0.17, 0.12, 2.84, 0.88, 1.57, porcelain);
-  cylinder(bathroom, 0.012, 0.012, 0.21, 2.84, 0.99, 1.76, brass);
-  const mirror = cylinder(
-    bathroom,
-    0.32,
-    0.32,
-    0.028,
-    2.85,
-    1.52,
-    1.81,
-    mat('#a7b9bd', 0.08, 0.7),
-  );
-  mirror.rotation.x = Math.PI / 2;
-  box(bathroom, 0.41, 0.36, 0.21, 1.77, 0.42, 1.64, porcelain, 0.09);
-  const toilet = sphere(bathroom, 1.77, 0.31, 1.35, 0.25, porcelain);
-  toilet.scale.set(0.86, 1, 1.35);
-  box(bathroom, 0.39, 0.05, 0.5, 1.77, 0.51, 1.36, white, 0.09);
-  box(bathroom, 0.6, 0.025, 0.4, 2.77, 0.043, 0.66, mat('#c1c9c6', 1), 0.02);
-  for (let i = 0; i < 3; i++)
-    box(
-      bathroom,
-      0.27,
-      0.045,
-      0.19,
-      3.21,
-      0.85 + i * 0.045,
-      1.55,
-      i === 2 ? accent : white,
-      0.02,
-    );
+  box(furniture, 0.46, 2.25, 1.6, 6.88, 1.13, 1.08, white, 0.012);
+  const bathroom = group(furniture, 0, 0);
+  box(bathroom, 0.8, 0.05, 1.07, 6.7, 0.04, 7.8, porcelain, 0.025);
+  box(bathroom, 0.025, 1.95, 1.06, 6.285, 1, 7.8, glass).castShadow = false;
+  cylinder(bathroom, 0.012, 0.012, 1.82, 7.02, 1.05, 7.7, brass);
+  cylinder(bathroom, 0.13, 0.13, 0.025, 6.88, 1.97, 7.7, brass);
+  box(bathroom, 0.88, 0.44, 0.43, 5.62, 0.56, 8.7, wood, 0.018);
+  box(bathroom, 0.91, 0.04, 0.46, 5.62, 0.8, 8.7, stone, 0.015);
+  cylinder(bathroom, 0.18, 0.15, 0.12, 5.62, 0.88, 8.7, porcelain);
+  cylinder(bathroom, 0.012, 0.012, 0.22, 5.62, 0.99, 8.88, brass);
+  box(bathroom, 0.4, 0.36, 0.2, 4.98, 0.42, 8.65, porcelain, 0.07);
+  const toilet = sphere(bathroom, 4.98, 0.31, 8.36, 0.24, porcelain);
+  toilet.scale.set(0.86, 1, 1.2);
+  box(bathroom, 0.38, 0.05, 0.48, 4.98, 0.51, 8.36, white, 0.075);
   // Room labels remain legible independent of model complexity.
   const labelGroup = new THREE.Group();
   scene.add(labelGroup);
@@ -629,29 +586,11 @@ export function createApartmentScene(
     materials.add(material);
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(1.63, 0.4075, 1);
-    sprite.position.set(room.x + room.width / 2, 1.15, room.z + room.depth / 2);
+    sprite.position.set(room.label[0], 1.15, room.label[1]);
+    if (room.id === 'balcony') sprite.scale.set(1.15, 0.2875, 1);
     sprite.renderOrder = 5;
     labelGroup.add(sprite);
   }
-  const selection = box(
-    scene,
-    1,
-    0.015,
-    1,
-    0,
-    0.019,
-    0,
-    new THREE.MeshBasicMaterial({
-      color: '#bb7043',
-      transparent: true,
-      opacity: 0.13,
-      depthWrite: false,
-    }),
-  );
-  materials.add(selection.material);
-  selection.castShadow = false;
-  selection.receiveShadow = false;
-  selection.visible = false;
   const ambient = new THREE.HemisphereLight('#ffffff', '#bab5a7', 2.0);
   scene.add(ambient);
   const sun = new THREE.DirectionalLight('#fff4df', 3.5);
@@ -675,10 +614,10 @@ export function createApartmentScene(
   scene.add(fill);
   const practicals: THREE.PointLight[] = [];
   for (const [x, y, z] of [
-    [3.15, 1.85, 2.3],
-    [0.5, 1.4, 6.5],
-    [7.2, 2, 1.8],
-    [7.1, 2.1, 6.1],
+    [2.5, 1.85, 4.9],
+    [0.5, 1.4, 8.5],
+    [3.75, 2, 1.3],
+    [6.1, 2.1, 8.2],
   ]) {
     const light = new THREE.PointLight('#ffd49c', 0, 7, 2);
     light.position.set(x, y, z);
@@ -697,7 +636,9 @@ export function createApartmentScene(
       item.object.scale.y = visibleHeight / item.fullHeight;
       item.object.position.y = item.base + visibleHeight / 2;
     }
-    doors.visible = !options.cutaway;
+    cutawayDetails.forEach((details) => {
+      details.visible = !options.cutaway;
+    });
     const palette = palettes[options.palette];
     wood.color.set(palette.wood);
     floorWood.color.set(palette.wood).lerp(new THREE.Color('#ffffff'), 0.25);
@@ -722,14 +663,10 @@ export function createApartmentScene(
   function selectRoom(id: RoomId | null) {
     selectedRoom = id;
     const room = rooms.find((r) => r.id === id);
-    selection.visible = !!room;
+    selections.forEach((mesh, roomId) => {
+      mesh.visible = roomId === id;
+    });
     if (room) {
-      selection.scale.set(room.width, 1, room.depth);
-      selection.position.set(
-        room.x + room.width / 2,
-        0.019,
-        room.z + room.depth / 2,
-      );
       const fit = fitCamera(
         {
           min: [room.x, -0.1, room.z],
@@ -830,7 +767,9 @@ export function createApartmentScene(
     selectRoom,
     reset() {
       selectedRoom = null;
-      selection.visible = false;
+      selections.forEach((mesh) => {
+        mesh.visible = false;
+      });
       frameOverview();
     },
     zoom(factor: number) {

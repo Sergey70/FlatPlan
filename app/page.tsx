@@ -32,6 +32,12 @@ import {
   defaultOptions,
   formatArea,
   roomArea,
+  roomPath,
+  polygonPath,
+  walls,
+  wallLength,
+  wallPoint,
+  solidOutlines,
   type RoomId,
   type SceneOptions,
   type PaletteId,
@@ -43,7 +49,7 @@ const roomIcons = {
   living: Sofa,
   bedroom: BedDouble,
   bathroom: Bath,
-  hall: DoorOpen,
+  balcony: DoorOpen,
 };
 
 function FloorPlan({
@@ -59,8 +65,8 @@ function FloorPlan({
   return (
     <div className="plan-view">
       <svg
-        viewBox="-.7 -.7 10.4 8.5"
-        aria-label="План демонстрационной квартиры, 9 на 7 метров"
+        viewBox="-.95 -.95 9.3 10.85"
+        aria-label="Предварительный план квартиры по техпаспорту: кухня-гостиная, жилая комната, санузел и лоджия"
       >
         <defs>
           <pattern
@@ -82,30 +88,47 @@ function FloorPlan({
               opacity=".3"
             />
           </pattern>
+          <pattern
+            id="service-hatch"
+            width=".18"
+            height=".18"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width=".18" height=".18" fill="#d8dad5" />
+            <path d="M0 0V.18" stroke="#8a9290" strokeWidth=".025" />
+          </pattern>
+          {rooms.map((room) => (
+            <clipPath
+              key={room.id}
+              id={`clip-${room.id}`}
+              clipPathUnits="userSpaceOnUse"
+            >
+              <path d={roomPath(room)} clipRule="evenodd" />
+            </clipPath>
+          ))}
         </defs>
         {rooms.map((room) => (
           <g key={room.id}>
-            <rect
-              x={room.x}
-              y={room.z}
-              width={room.width}
-              height={room.depth}
+            <path
+              d={roomPath(room)}
+              fillRule="evenodd"
               fill={
                 room.id === 'living' || room.id === 'bedroom'
                   ? 'url(#boards)'
                   : palette.stone
               }
-              stroke={selected === room.id ? '#b35735' : '#f5f2ed'}
-              strokeWidth=".06"
+              stroke="#f5f2ed"
+              strokeWidth=".025"
             />
             {selected === room.id && (
-              <rect
-                x={room.x + 0.04}
-                y={room.z + 0.04}
-                width={room.width - 0.08}
-                height={room.depth - 0.08}
+              <path
+                d={roomPath(room)}
+                fillRule="evenodd"
                 fill="#ba643c"
-                fillOpacity=".08"
+                fillOpacity=".13"
+                stroke="#b35735"
+                strokeWidth=".045"
               />
             )}
             <foreignObject
@@ -113,6 +136,7 @@ function FloorPlan({
               y={room.z}
               width={room.width}
               height={room.depth}
+              clipPath={`url(#clip-${room.id})`}
             >
               <button
                 className="plan-hit"
@@ -128,160 +152,231 @@ function FloorPlan({
             pointerEvents="none"
             fill="#f9f7f2"
             stroke="#9a9a8d"
-            strokeWidth=".02"
+            strokeWidth=".025"
           >
-            <rect x=".3" y=".2" width="4.6" height=".64" rx=".02" />
-            <rect x=".3" y=".92" width=".65" height=".67" rx=".03" />
+            <rect x=".27" y="2.89" width="4.7" height=".69" rx=".02" />
+            <rect x=".30" y="3.74" width=".63" height=".64" rx=".03" />
             <rect
-              x="1.7"
-              y=".33"
-              width=".67"
-              height=".41"
+              x="1.81"
+              y="3.01"
+              width=".68"
+              height=".47"
               rx=".02"
               fill="#555e5d"
             />
             <rect
-              x="3.13"
-              y=".32"
+              x="3.20"
+              y="3.04"
               width=".54"
-              height=".4"
+              height=".40"
               rx=".05"
               fill="#bdc4bf"
             />
             {[0, 1, 2, 3].map((i) => (
               <rect
                 key={i}
-                x={2.94 + Math.sin((i * Math.PI) / 2)}
-                y={2.1 + Math.cos((i * Math.PI) / 2)}
-                width=".42"
-                height=".4"
-                rx=".08"
+                x={2.5 + Math.sin((i * Math.PI) / 2) - 0.235}
+                y={4.9 + Math.cos((i * Math.PI) / 2) - 0.225}
+                width=".47"
+                height=".45"
+                rx=".06"
               />
             ))}
-            <circle cx="3.15" cy="2.3" r=".7" fill={palette.wood} />
+            <circle cx="2.5" cy="4.9" r=".72" fill={palette.wood} />
             <rect
-              x=".5"
-              y="3.9"
-              width=".95"
-              height="2.5"
-              rx=".12"
-              fill={palette.fabric}
+              x=".6"
+              y="6.07"
+              width="3.4"
+              height="2.9"
+              rx=".07"
+              fill="#e3e0d7"
             />
+            <g transform="translate(.8 7.5) rotate(90)" fill={palette.fabric}>
+              <rect x="-1.3" y="-.465" width="2.6" height=".93" rx=".1" />
+              <rect x=".37" y="-1.265" width=".82" height="1.15" rx=".1" />
+              <path d="M-1.2 .28H1.2M-.43 -.4V.28M.43 -.4V.28" />
+            </g>
+            <circle cx="2.65" cy="7.45" r=".5" fill={palette.wood} />
             <rect
-              x="1.25"
-              y="5.65"
-              width=".9"
-              height=".75"
-              rx=".1"
-              fill={palette.fabric}
-            />
-            <circle cx="2.9" cy="5.08" r=".58" fill={palette.wood} />
-            <rect
-              x="4.82"
-              y="4.24"
-              width=".38"
+              x="3.65"
+              y="6.765"
+              width=".4"
               height="2.17"
               rx=".02"
               fill={palette.wood}
             />
-            <rect
-              x="6.23"
-              y=".75"
-              width="1.84"
-              height="2.18"
-              rx=".05"
-              fill="#f9f6ef"
+            <g transform="translate(3.75 1.3) rotate(-90)">
+              <rect x="-.83" y="-1.06" width="1.66" height="2.12" rx=".05" />
+              <rect
+                x="-.825"
+                y=".52"
+                width="1.65"
+                height=".42"
+                fill={palette.accent}
+              />
+              <rect x="-.71" y="-.88" width=".65" height=".45" rx=".06" />
+              <rect x=".07" y="-.88" width=".65" height=".45" rx=".06" />
+              {[-0.99, 0.99].map((x) => (
+                <rect
+                  key={x}
+                  x={x - 0.17}
+                  y="-1.005"
+                  width=".34"
+                  height=".35"
+                  fill={palette.wood}
+                />
+              ))}
+            </g>
+            <rect x="6.65" y=".28" width=".46" height="1.6" />
+            <rect x="6.3" y="7.265" width=".8" height="1.07" rx=".03" />
+            <path
+              d="M6.3 7.265L7.1 8.335M7.1 7.265L6.3 8.335"
+              stroke="#becacb"
             />
             <rect
-              x="6.28"
-              y="2.3"
-              width="1.74"
-              height=".4"
-              fill={palette.accent}
-            />
-            <rect x="6.38" y=".88" width=".69" height=".45" rx=".07" />
-            <rect x="7.18" y=".88" width=".69" height=".45" rx=".07" />
-            <rect
-              x="5.55"
-              y="4.66"
-              width="1.63"
-              height=".37"
+              x="5.165"
+              y="8.47"
+              width=".91"
+              height=".46"
               fill={palette.wood}
             />
-            <rect
-              x="7.77"
-              y="4.61"
-              width=".83"
-              height=".37"
-              fill={palette.fabric}
-            />
-            <rect x="5.5" y="5.3" width="1.02" height="1.62" rx=".03" />
-            <rect
-              x="7.73"
-              y="6.45"
-              width="1.07"
-              height=".44"
-              fill={palette.wood}
-            />
-            <circle cx="8.26" cy="6.68" r=".18" />
-            <ellipse cx="7.17" cy="6.46" rx=".19" ry=".29" />
+            <circle cx="5.62" cy="8.7" r=".18" />
+            <rect x="4.78" y="8.55" width=".4" height=".2" rx=".04" />
+            <ellipse cx="4.98" cy="8.36" rx=".205" ry=".288" />
           </g>
         )}
-        <g
-          stroke="#586168"
-          strokeWidth=".12"
-          fill="none"
-          strokeLinejoin="miter"
-          pointerEvents="none"
-        >
-          <path d="M9 4.75V7H0V0H1.4M3.6 0H5.7M8.5 0H9V3.8M5.4 0V3.75M5.4 4.7V7M5.4 3.6H7.45M8.35 3.6H9M5.4 5.1H7.45M8.35 5.1H9" />
-        </g>
-        <g stroke="#a6bac2" strokeWidth=".03" fill="none" pointerEvents="none">
-          <path d="M1.4 -.04H3.6M1.4 .04H3.6M5.7 -.04H8.5M5.7 .04H8.5" />
-          <path d="M7.45 3.6v-.9a.9 .9 0 0 1 .9 .9M8.35 5.1V6a.9 .9 0 0 1-.9-.9M9 3.8h-.95a.95 .95 0 0 0 .95 .95" />
+        <g pointerEvents="none">
+          {walls.map((wall) => {
+            const intervals: [number, number][] = [];
+            let cursor = 0;
+            for (const opening of wall.openings) {
+              intervals.push([cursor, opening.from]);
+              cursor = opening.to;
+            }
+            intervals.push([cursor, wallLength(wall)]);
+            return (
+              <g key={wall.id}>
+                {intervals.map(([from, to], i) => {
+                  const a = wallPoint(wall, from),
+                    b = wallPoint(wall, to);
+                  return (
+                    <line
+                      key={i}
+                      x1={a[0]}
+                      y1={a[1]}
+                      x2={b[0]}
+                      y2={b[1]}
+                      stroke="#64716f"
+                      strokeWidth={wall.thickness}
+                    />
+                  );
+                })}
+                {wall.openings.map((opening, i) => {
+                  const a = wallPoint(wall, opening.from),
+                    b = wallPoint(wall, opening.to);
+                  return (
+                    <line
+                      key={i}
+                      x1={a[0]}
+                      y1={a[1]}
+                      x2={b[0]}
+                      y2={b[1]}
+                      stroke={opening.kind === 'window' ? '#8baab8' : '#c7ccc6'}
+                      strokeWidth={opening.kind === 'window' ? 0.04 : 0.02}
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+          {solidOutlines.map((solid) => (
+            <path
+              key={solid.id}
+              d={polygonPath(solid.polygon)}
+              fill={solid.id === 'service' ? 'url(#service-hatch)' : '#a8b0aa'}
+              stroke="#64716f"
+              strokeWidth=".045"
+            >
+              <title>{solid.name}</title>
+            </path>
+          ))}
+          <path
+            d="M7.98 6.57H7.48m.16-.13-.16.13.16.13"
+            fill="none"
+            stroke="#ad633d"
+            strokeWidth=".025"
+          />
+          <text
+            x="7.88"
+            y="6.30"
+            textAnchor="middle"
+            fill="#8e684f"
+            fontSize=".15"
+          >
+            Вход
+          </text>
         </g>
         {options.labels &&
           rooms.map((room) => (
-            <g key={room.id} pointerEvents="none">
-              <g pointerEvents="none">
+            <g
+              key={room.id}
+              pointerEvents="none"
+              transform={`translate(${room.label[0]} ${room.label[1]})`}
+            >
+              <rect
+                x={room.id === 'balcony' ? -0.51 : -1.05}
+                y="-.25"
+                width={room.id === 'balcony' ? 1.02 : 2.1}
+                height={room.id === 'balcony' ? 0.85 : 0.64}
+                rx=".08"
+                fill="#fffdf8"
+                fillOpacity=".91"
+              />
+              <text
+                textAnchor="middle"
+                fill="#35444c"
+                fontSize={room.id === 'balcony' ? '.16' : '.2'}
+                fontWeight="600"
+              >
+                {room.name}
+              </text>
+              <text y=".27" textAnchor="middle" fill="#6e7a82" fontSize=".18">
+                {formatArea(roomArea(room))} м²
+              </text>
+              {room.accountedArea && (
                 <text
-                  x={room.x + room.width / 2}
-                  y={room.z + room.depth / 2 + 0.04}
-                  textAnchor="middle"
-                  fill="#35444c"
-                  fontSize=".18"
-                  fontWeight="600"
-                >
-                  {room.name}
-                </text>
-                <text
-                  x={room.x + room.width / 2}
-                  y={room.z + room.depth / 2 + 0.31}
+                  y=".49"
                   textAnchor="middle"
                   fill="#6e7a82"
-                  fontSize=".15"
+                  fontSize=".125"
                 >
-                  {formatArea(roomArea(room))} м²
+                  в расчёте {formatArea(room.accountedArea)}
                 </text>
-              </g>
+              )}
             </g>
           ))}
-        <g stroke="#9dabb5" strokeWidth=".012" fill="none">
-          <path d="M0 -.3H9M0 -.4v.2M9 -.4v.2M-.3 0V7M-.4 0h.2M-.4 7h.2" />
+        <g stroke="#9dabb5" strokeWidth=".012" fill="none" pointerEvents="none">
+          <path d="M0 9.6H7.13M0 9.49v.22M7.13 9.49v.22M-.6 2.65V9M-.71 2.65h.22M-.71 9h.22M1.29 -.65H7.13M1.29 -.76v.22M7.13 -.76v.22" />
         </g>
-        <text x="4.5" y="-.4" textAnchor="middle" fill="#7b8992" fontSize=".16">
-          9,00 м
-        </text>
-        <text
-          x="-3.5"
-          y="-.42"
-          transform="rotate(-90)"
-          textAnchor="middle"
+        <g
           fill="#7b8992"
-          fontSize=".16"
+          fontSize=".17"
+          textAnchor="middle"
+          pointerEvents="none"
         >
-          7,00 м
-        </text>
+          <text x="3.565" y="9.48">
+            7,13 м
+          </text>
+          <text x="4.21" y="-.75">
+            5,84 м
+          </text>
+          <text x="-5.825" y="-.70" transform="rotate(-90)">
+            6,35 м
+          </text>
+          <text x="7.69" y="1.30" fontSize=".15">
+            2,55 м
+          </text>
+        </g>
       </svg>
     </div>
   );
@@ -392,22 +487,24 @@ export default function Home() {
         </div>
         <div className="project-title">
           <h1>{apartment.name}</h1>
-          <span className="demo-badge">ДЕМО</span>
+          <span className="demo-badge">ЭСКИЗ</span>
         </div>
         <div className="header-note">
           <span />
-          Можно исследовать
+          По исходному плану
         </div>
       </header>
       <main className="workspace">
         <aside className="sidebar" aria-label="Комнаты и настройки интерьера">
           <h2 className="section-heading">Пространство</h2>
           <div className="summary">
-            <strong>{formatArea(apartment.width * apartment.depth)}</strong>
+            <strong>{formatArea(apartment.accountedArea)}</strong>
             <span>м²</span>
           </div>
           <p className="summary-note">
-            1 спальня · потолки {formatArea(apartment.ceiling)} м
+            С учётом лоджии (2,4 м²).
+            <br />
+            Внутри — 58,1 м²; лоджия — 3,4 м².
           </p>
           <nav className="room-list" aria-label="Выбор комнаты">
             <button
@@ -448,7 +545,7 @@ export default function Home() {
               />
             </div>
             <div className="setting">
-              <label htmlFor="furniture">Мебель</label>
+              <label htmlFor="furniture">Пример мебели</label>
               <Switch
                 id="furniture"
                 checked={options.furniture}
@@ -515,9 +612,9 @@ export default function Home() {
             </div>
           </div>
           <p className="demo-note">
-            <strong>Место для вашей квартиры</strong>Это демонстрационная
-            планировка. Позже заменим её точным планом, размерами и вашим
-            интерьером.
+            <strong>Предварительная модель</strong>Площади — из техпаспорта.
+            Высота {formatArea(apartment.ceiling)} м, детали проёмов и отделка
+            пока условные. Уточним их по обмерам.
           </p>
         </aside>
         <section
@@ -581,7 +678,12 @@ export default function Home() {
           )}
           <div className="viewer-bottom">
             <div className="view-caption">
-              <strong>{title}</strong>
+              <strong>
+                {title}
+                {currentRoom?.accountedArea
+                  ? ` · ${formatArea(currentRoom.accountedArea)} м² в расчёте`
+                  : ''}
+              </strong>
               <span>
                 {view === '3d'
                   ? 'Перетаскивайте для вращения · колесо для масштаба'
@@ -589,7 +691,7 @@ export default function Home() {
                 <br />
                 {view === '3d'
                   ? 'Два пальца — масштаб и перемещение'
-                  : 'Размеры и площади приведены для примера'}
+                  : 'Площади — из документа; проёмы приблизительные'}
               </span>
             </div>
             {view === '3d' && (
@@ -628,7 +730,7 @@ export default function Home() {
         </section>
       </main>
       <footer className="footer">
-        <span>Демонстрационная модель · размеры условные</span>
+        <span>По техпаспорту · геометрия предварительная</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <MousePointer2 size={12} />
           Исследуйте пространство

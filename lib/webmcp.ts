@@ -1,5 +1,5 @@
 import { parseViewPatch, type ViewPatch } from './view-state';
-import { rooms, palettes } from './apartment';
+import { apartment, rooms, palettes } from './apartment';
 
 interface Tool {
   name: string;
@@ -28,7 +28,8 @@ export function registerViewTools(
     {
       name: 'get_apartment_view',
       title: 'Read apartment view',
-      description: 'Read current demo rooms, palette and viewer settings.',
+      description:
+        'Read the approximate technical-passport layout, reported areas and viewer settings.',
       inputSchema: {
         type: 'object',
         properties: {},
@@ -39,14 +40,15 @@ export function registerViewTools(
         view: read(),
         rooms,
         palettes: Object.keys(palettes),
-        demo: true,
+        apartment,
+        demo: false,
       }),
     },
     {
       name: 'configure_apartment_view',
       title: 'Configure apartment view',
       description:
-        'Change the visible demo apartment view, selected room, materials or display options. Does not edit the apartment layout or save data.',
+        'Change the visible preliminary apartment view, selected room, materials or display options. Does not edit the apartment layout or save data.',
       inputSchema: {
         type: 'object',
         properties: {

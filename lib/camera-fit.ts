@@ -5,8 +5,8 @@ export interface Bounds {
   max: [number, number, number];
 }
 export const apartmentBounds: Bounds = {
-  min: [-0.2, -0.4, -0.2],
-  max: [9.2, 2.9, 7.2],
+  min: [-0.4, -0.4, -0.4],
+  max: [7.5, 2.9, 9.4],
 };
 /** Fit every corner to both axes, reserving space for the viewer toolbar/caption. */
 export function fitCamera(bounds: Bounds, aspect: number, verticalFov = 36) {
