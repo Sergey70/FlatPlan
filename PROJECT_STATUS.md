@@ -4,11 +4,11 @@ Updated: 2026-09-08.
 
 ## Objective and current phase
 
-Active iteration: **GALLERY-005**, separate interior concept gallery. Implementation and local acceptance are complete; GitHub Pages publication is pending. Last published iteration: **PLAN-004**, kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
+Last completed and published iteration: **GALLERY-005**, separate interior concept gallery. Local acceptance, GitHub Actions and public-site checks are complete; no implementation iteration is active. PLAN-004 placed the kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
 
-## Active iteration: GALLERY-005
+## Completed iteration: GALLERY-005
 
-User requests a separate collection of visual renovation/layout concepts. Build a query-routed gallery at `?view=gallery`: 12 generated images crossing three layouts (separate kitchen, glass divider, open living/kitchen) with four styles (Scandinavian, warm minimalism, modern classic, soft loft). Keep the corrected kitchen at the bathroom wall and show independently generated SVG diagrams from the model with all existing windows. Gallery filters, accessible detail/compare dialogs and a return link must not read or mutate the editor project. Generated images are illustrative and can deviate in dimensions/furniture; diagrams describe the proposed wall scheme. No new dependencies or automatic application of photo concepts to the model.
+User requests a separate collection of visual renovation/layout concepts. Implemented a query-routed gallery at `?view=gallery`: 12 generated images crossing three layouts (separate kitchen, glass divider, open living/kitchen) with four styles (Scandinavian, warm minimalism, modern classic, soft loft). Keep the corrected kitchen at the bathroom wall and show independently generated SVG diagrams from the model with all existing windows. Gallery filters, accessible detail/compare dialogs and a return link must not read or mutate the editor project. Generated images are illustrative and can deviate in dimensions/furniture; diagrams describe the proposed wall scheme. No new dependencies or automatic application of photo concepts to the model.
 
 Acceptance: `npm run verify`, `npm run test:browser` including gallery filters/details/comparison/mobile and editor-storage preservation; independent source/geometry review, visual review of all generated images and desktop/mobile gallery. Publish through existing GitHub Pages workflow and verify the live gallery and assets.
 
@@ -54,11 +54,11 @@ Repository: https://github.com/Sergey70/FlatPlan (public).
 Live URL: https://sergey70.github.io/FlatPlan/.
 New-layout URL: https://sergey70.github.io/FlatPlan/?layout=kitchen-by-bathroom.
 Gallery URL: https://sergey70.github.io/FlatPlan/?view=gallery.
-GALLERY-005 publication: pending; local acceptance complete.
+GALLERY-005 published application: `2fdc2106454cb6b0dee684bea5cf039d97443384`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34165933124. Fresh public gallery contexts passed the full gallery scenario: 12 image decodes, three diagrams, layout/style filters, detail and two-concept comparison, keyboard focus, mobile widths and byte-identical editor storage after reload. Fresh public desktop/mobile editors loaded 222 elements, two arrangements and three removable walls; WebGL and 2D worked, and the new gallery link opened a separate tab without changing the saved project. All 25 public production files returned HTTP 200 and matched the final build byte-for-byte. No page/asset errors. Screenshots and hash results remain ignored under `.local/qa/`.
 Source: `.github/workflows/pages.yml`; full unit/static/build and browser acceptance gate deployment.
 
 Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34164187248. Fresh public desktop/mobile contexts loaded 222 elements, verified the kitchen at [4.03, 0, 7.14], two variants, three removable walls, live WebGL and 2D, with no page/asset errors. All six public production files returned HTTP 200 and matched a fresh build of the final committed source byte-for-byte. The first comparison used an earlier pre-documentation build; rebuilding the committed source resolved the asset-name difference. Hashes/screenshots are in ignored `.local/qa/`. The existing local server remains available at http://127.0.0.1:5173/.
 
 ## Next
 
-Publish GALLERY-005 through the existing workflow, verify the public gallery/editor and production asset hashes, then record the deployment. After publication, wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied.
+Wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied. No required work remains for GALLERY-005.
