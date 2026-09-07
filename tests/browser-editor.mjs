@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { checkGallery } from './browser-gallery.mjs';
 import { chromium } from 'playwright';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { spawn } from 'node:child_process';
@@ -129,6 +130,7 @@ try {
     headless: true,
     args: ['--enable-unsafe-swiftshader'],
   });
+  await checkGallery(browser, url, out);
   const desktop = await browser.newContext({
     viewport: { width: 1365, height: 900 },
     deviceScaleFactor: 1,

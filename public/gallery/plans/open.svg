@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="830" height="1010" viewBox="-0.5 -0.5 8.3 10.1" role="img" aria-labelledby="plan-title plan-desc" data-layout="open">
+  <title id="plan-title">Открытая кухня-гостиная — схема квартиры</title>
+  <desc id="plan-desc">Геометрия исходной модели. Лоджия слева сверху, спальня сверху, санузел справа снизу. Все пять окон сохранены. Кухня расположена вдоль стены санузла. Удалены только три предлагаемые перегородки; исходные стены и колонна сохранены. Мебель показана схематично. Размеры исходной модели предварительные; схема не является строительным чертежом.</desc>
+  <defs><pattern id="service-hatch" width="0.12" height="0.12" patternUnits="userSpaceOnUse"><rect width="0.12" height="0.12" fill="#dedfd9"/><path d="M0,0.12L0.12,0" stroke="#a0a69e" stroke-width="0.015"/></pattern></defs>
+  <rect x="-0.5" y="-0.5" width="8.3" height="10.1" fill="#faf8f4"/>
+  <path data-node-id="floor-room2" data-root-id="floor-room2" data-feature="floor" d="M0,2.65L4.205,2.65L4.205,5.65L4.04,5.65L4.04,5.875L0.3,5.875L0.3,5.65L0,5.65Z" fill="#eee9e1" fill-rule="evenodd"/>
+  <path data-node-id="floor-kitchen" data-root-id="floor-kitchen" data-feature="floor" d="M0.3,5.875L4.04,5.875L4.04,6.1L4.205,6.1L4.205,7.1L4.15,7.1L4.15,9L0,9L0,6.1L0.3,6.1Z" fill="#eee9e1" fill-rule="evenodd"/>
+  <path data-node-id="floor-living" data-root-id="floor-living" data-feature="floor" d="M4.205,2.65L7.13,2.65L7.13,7.1L4.205,7.1L4.205,6.1L4.49,6.1L4.49,5.65L4.205,5.65Z" fill="#eee9e1" fill-rule="evenodd"/>
+  <path data-node-id="floor-bedroom" data-root-id="floor-bedroom" data-feature="floor" d="M1.29,0L7.13,0L7.13,2.55L1.29,2.55Z" fill="#eee9e1" fill-rule="evenodd"/>
+  <path data-node-id="floor-bathroom" data-root-id="floor-bathroom" data-feature="floor" d="M5.31,7.21L7.13,7.21L7.13,8.97L4.71,8.97L4.71,7.66L5.31,7.66Z" fill="#e6e8e4" fill-rule="evenodd"/>
+  <path data-node-id="floor-balcony" data-root-id="floor-balcony" data-feature="floor" d="M-0.08,-0.19L1.18,-0.19L1.18,2.55L-0.08,2.55Z" fill="#e6e8e4" fill-rule="evenodd"/>
+  <path data-node-id="furniture-137" data-root-id="furniture-135" data-feature="furniture" d="M6.345,7.24L7.095,7.24L7.095,8.94L6.345,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-142" data-root-id="furniture-135" data-feature="furniture" d="M6.445,7.39L6.995,7.39L6.995,8.79L6.445,8.79Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-121" data-root-id="furniture-120" data-feature="furniture" d="M2.69,0.47L4.81,0.47L4.81,2.13L2.69,2.13Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-66" data-root-id="furniture-65" data-feature="furniture" d="M0.6,4.835L3.2,4.835L3.2,5.765L0.6,5.765Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-41" data-root-id="furniture-35" data-feature="furniture" d="M1.295,8.205L1.345,8.205L1.345,8.255L1.295,8.255Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-42" data-root-id="furniture-35" data-feature="furniture" d="M1.295,8.545L1.345,8.545L1.345,8.595L1.295,8.595Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-43" data-root-id="furniture-35" data-feature="furniture" d="M1.655,8.205L1.705,8.205L1.705,8.255L1.655,8.255Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-44" data-root-id="furniture-35" data-feature="furniture" d="M1.655,8.545L1.705,8.545L1.705,8.595L1.655,8.595Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-48" data-root-id="furniture-35" data-feature="furniture" d="M1.655,6.945L1.705,6.945L1.705,6.995L1.655,6.995Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-49" data-root-id="furniture-35" data-feature="furniture" d="M1.655,6.605L1.705,6.605L1.705,6.655L1.655,6.655Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-50" data-root-id="furniture-35" data-feature="furniture" d="M1.295,6.945L1.345,6.945L1.345,6.995L1.295,6.995Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-51" data-root-id="furniture-35" data-feature="furniture" d="M1.295,6.605L1.345,6.605L1.345,6.655L1.295,6.655Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-128" data-root-id="furniture-120" data-feature="furniture" d="M2.745,2.12L3.095,2.12L3.095,2.46L2.745,2.46Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-131" data-root-id="furniture-120" data-feature="furniture" d="M2.745,0.14L3.095,0.14L3.095,0.48L2.745,0.48Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-78" data-root-id="furniture-65" data-feature="furniture" d="M2.27,4.035L3.09,4.035L3.09,5.185L2.27,5.185Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-39" data-root-id="furniture-35" data-feature="furniture" d="M1.265,8.175L1.735,8.175L1.735,8.625L1.265,8.625Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-46" data-root-id="furniture-35" data-feature="furniture" d="M1.265,6.575L1.735,6.575L1.735,7.025L1.265,7.025Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-151" data-root-id="furniture-135" data-feature="furniture" d="M4.79,8.12L5.17,8.12L5.17,8.6L4.79,8.6Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-150" data-root-id="furniture-135" data-feature="furniture" d="M4.7736,8.072L5.1864,8.072L5.1864,8.648L4.7736,8.648Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-70" data-root-id="furniture-65" data-feature="furniture" d="M0.74,4.855L1.48,4.855L1.48,5.605L0.74,5.605Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-72" data-root-id="furniture-65" data-feature="furniture" d="M1.53,4.855L2.27,4.855L2.27,5.605L1.53,5.605Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-74" data-root-id="furniture-65" data-feature="furniture" d="M2.32,4.855L3.06,4.855L3.06,5.605L2.32,5.605Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-122" data-root-id="furniture-120" data-feature="furniture" d="M2.74,0.5L4.76,0.5L4.76,2.1L2.74,2.1Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-149" data-root-id="furniture-135" data-feature="furniture" d="M4.78,8.55L5.18,8.55L5.18,8.75L4.78,8.75Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-138" data-root-id="furniture-135" data-feature="furniture" d="M6.345,7.24L6.435,7.24L6.435,8.94L6.345,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-139" data-root-id="furniture-135" data-feature="furniture" d="M7.005,7.24L7.095,7.24L7.095,8.94L7.005,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-140" data-root-id="furniture-135" data-feature="furniture" d="M6.41,7.24L7.03,7.24L7.03,7.34L6.41,7.34Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-141" data-root-id="furniture-135" data-feature="furniture" d="M6.41,8.84L7.03,8.84L7.03,8.94L6.41,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-19" data-root-id="furniture-1" data-feature="furniture" d="M3.3845,7.2L3.4095,7.2L3.4095,7.72L3.3845,7.72Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-129" data-root-id="furniture-120" data-feature="furniture" d="M2.82,2.19L3.02,2.19L3.02,2.39L2.82,2.39Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-132" data-root-id="furniture-120" data-feature="furniture" d="M2.82,0.21L3.02,0.21L3.02,0.41L2.82,0.41Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-68" data-root-id="furniture-65" data-feature="furniture" d="M0.58,4.765L0.76,4.765L0.76,5.805L0.58,5.805Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-69" data-root-id="furniture-65" data-feature="furniture" d="M3.04,4.765L3.22,4.765L3.22,5.805L3.04,5.805Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-124" data-root-id="furniture-120" data-feature="furniture" d="M3.43,0.49L4.73,0.49L4.73,2.11L3.43,2.11Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-20" data-root-id="furniture-1" data-feature="furniture" d="M3.3575,7.22L3.3925,7.22L3.3925,7.7L3.3575,7.7Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-126" data-root-id="furniture-120" data-feature="furniture" d="M2.875,1.365L3.325,1.365L3.325,2.015L2.875,2.015Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-127" data-root-id="furniture-120" data-feature="furniture" d="M2.875,0.585L3.325,0.585L3.325,1.235L2.875,1.235Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-37" data-root-id="furniture-35" data-feature="furniture" d="M1.21,7.31L1.79,7.31L1.79,7.89L1.21,7.89Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-125" data-root-id="furniture-120" data-feature="furniture" d="M4.27,0.475L4.69,0.475L4.69,2.125L4.27,2.125Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-145" data-root-id="furniture-135" data-feature="furniture" d="M5.18,8.485L6.06,8.485L6.06,8.915L5.18,8.915Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-3" data-root-id="furniture-1" data-feature="furniture" d="M3.3735,7.25L3.4065,7.25L3.4065,7.67L3.3735,7.67Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-6" data-root-id="furniture-1" data-feature="furniture" d="M3.3735,7.85L3.4065,7.85L3.4065,8.27L3.3735,8.27Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-9" data-root-id="furniture-1" data-feature="furniture" d="M3.3735,8.45L3.4065,8.45L3.4065,8.87L3.3735,8.87Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-36" data-root-id="furniture-35" data-feature="furniture" d="M1.05,7.15L1.95,7.15L1.95,8.05L1.05,8.05Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-146" data-root-id="furniture-135" data-feature="furniture" d="M5.165,8.47L6.075,8.47L6.075,8.93L5.165,8.93Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-143" data-root-id="furniture-135" data-feature="furniture" d="M6.907,7.407L6.953,7.407L6.953,7.453L6.907,7.453Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-52" data-root-id="furniture-35" data-feature="furniture" d="M1.09,7.46L1.51,7.46L1.51,7.88L1.09,7.88Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-144" data-root-id="furniture-135" data-feature="furniture" d="M6.915,7.395L6.945,7.395L6.945,7.585L6.915,7.585Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-130" data-root-id="furniture-120" data-feature="furniture" d="M2.78,2.15L3.06,2.15L3.06,2.43L2.78,2.43Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-133" data-root-id="furniture-120" data-feature="furniture" d="M2.78,0.17L3.06,0.17L3.06,0.45L2.78,0.45Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-40" data-root-id="furniture-35" data-feature="furniture" d="M1.26,8.5525L1.74,8.5525L1.74,8.6275L1.26,8.6275Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-47" data-root-id="furniture-35" data-feature="furniture" d="M1.26,6.5725L1.74,6.5725L1.74,6.6475L1.26,6.6475Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-67" data-root-id="furniture-65" data-feature="furniture" d="M0.6,5.6L3.2,5.6L3.2,5.8L0.6,5.8Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-2" data-root-id="furniture-1" data-feature="furniture" d="M3.415,7.17L4.025,7.17L4.025,7.75L3.415,7.75Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-5" data-root-id="furniture-1" data-feature="furniture" d="M3.415,7.77L4.025,7.77L4.025,8.35L3.415,8.35Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-8" data-root-id="furniture-1" data-feature="furniture" d="M3.415,8.37L4.025,8.37L4.025,8.95L3.415,8.95Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-71" data-root-id="furniture-65" data-feature="furniture" d="M0.77,5.43849L1.45,5.43849L1.45,5.66151L0.77,5.66151Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-73" data-root-id="furniture-65" data-feature="furniture" d="M1.56,5.43849L2.24,5.43849L2.24,5.66151L1.56,5.66151Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-75" data-root-id="furniture-65" data-feature="furniture" d="M2.35,5.43849L3.03,5.43849L3.03,5.66151L2.35,5.66151Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-77" data-root-id="furniture-65" data-feature="furniture" d="M2.34447,5.285L2.83553,5.285L2.83553,5.455L2.34447,5.455Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-11" data-root-id="furniture-1" data-feature="furniture" d="M3.335,7.13L4.025,7.13L4.025,8.97L3.335,8.97Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-147" data-root-id="furniture-135" data-feature="furniture" d="M5.44,8.52L5.8,8.52L5.8,8.88L5.44,8.88Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-76" data-root-id="furniture-65" data-feature="furniture" d="M0.82763,5.29L1.33237,5.29L1.33237,5.45L0.82763,5.45Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-21" data-root-id="furniture-1" data-feature="furniture" d="M3.485,8.38L3.895,8.38L3.895,8.94L3.485,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-22" data-root-id="furniture-1" data-feature="furniture" d="M3.54,8.44L3.84,8.44L3.84,8.88L3.54,8.88Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-14" data-root-id="furniture-1" data-feature="furniture" d="M3.435,7.195L3.905,7.195L3.905,7.725L3.435,7.725Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-15" data-root-id="furniture-1" data-feature="furniture" d="M3.705,7.245L3.875,7.245L3.875,7.415L3.705,7.415Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-16" data-root-id="furniture-1" data-feature="furniture" d="M3.455,7.245L3.625,7.245L3.625,7.415L3.455,7.415Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-17" data-root-id="furniture-1" data-feature="furniture" d="M3.705,7.505L3.875,7.505L3.875,7.675L3.705,7.675Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-18" data-root-id="furniture-1" data-feature="furniture" d="M3.455,7.505L3.625,7.505L3.625,7.675L3.455,7.675Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-53" data-root-id="furniture-35" data-feature="furniture" d="M1.545,7.395L1.715,7.395L1.715,7.565L1.545,7.565Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-148" data-root-id="furniture-135" data-feature="furniture" d="M5.608,8.868L5.632,8.868L5.632,8.892L5.608,8.892Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-123" data-root-id="furniture-120" data-feature="furniture" d="M2.66,0.42L2.78,0.42L2.78,2.18L2.66,2.18Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-28" data-root-id="furniture-1" data-feature="furniture" d="M3.615,7.975L3.785,7.975L3.785,8.145L3.615,8.145Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-23" data-root-id="furniture-1" data-feature="furniture" d="M3.912,8.642L3.948,8.642L3.948,8.678L3.912,8.678Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-24" data-root-id="furniture-1" data-feature="furniture" d="M3.755,8.6435L3.945,8.6435L3.945,8.6765L3.755,8.6765Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-27" data-root-id="furniture-1" data-feature="furniture" d="M2.6725,8.26L2.7075,8.26L2.7075,8.3L2.6725,8.3Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-54" data-root-id="furniture-35" data-feature="furniture" d="M1.59921,7.476L1.66079,7.476L1.66079,7.484L1.59921,7.484Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-58" data-root-id="furniture-35" data-feature="furniture" d="M1.63521,7.476L1.69679,7.476L1.69679,7.484L1.63521,7.484Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-56" data-root-id="furniture-35" data-feature="furniture" d="M1.644,7.476L1.652,7.476L1.652,7.484L1.644,7.484Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-55" data-root-id="furniture-35" data-feature="furniture" d="M1.598,7.448L1.662,7.448L1.662,7.512L1.598,7.512Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-57" data-root-id="furniture-35" data-feature="furniture" d="M1.623,7.448L1.687,7.448L1.687,7.512L1.623,7.512Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-59" data-root-id="furniture-35" data-feature="furniture" d="M1.648,7.448L1.712,7.448L1.712,7.512L1.648,7.512Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-12" data-root-id="furniture-1" data-feature="furniture" d="M4.11,7.12L4.15,7.12L4.15,8.98L4.11,8.98Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-29" data-root-id="furniture-1" data-feature="furniture" d="M3.696,8.02921L3.704,8.02921L3.704,8.09079L3.696,8.09079Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-33" data-root-id="furniture-1" data-feature="furniture" d="M3.696,8.06521L3.704,8.06521L3.704,8.12679L3.696,8.12679Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-31" data-root-id="furniture-1" data-feature="furniture" d="M3.696,8.074L3.704,8.074L3.704,8.082L3.696,8.082Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-30" data-root-id="furniture-1" data-feature="furniture" d="M3.668,8.028L3.732,8.028L3.732,8.092L3.668,8.092Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-32" data-root-id="furniture-1" data-feature="furniture" d="M3.668,8.053L3.732,8.053L3.732,8.117L3.668,8.117Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-34" data-root-id="furniture-1" data-feature="furniture" d="M3.668,8.078L3.732,8.078L3.732,8.142L3.668,8.142Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-13" data-root-id="furniture-1" data-feature="furniture" d="M3.736,7.23L3.764,7.23L3.764,8.87L3.736,8.87Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-26" data-root-id="furniture-1" data-feature="furniture" d="M2.605,8.3L3.235,8.3L3.235,8.94L2.605,8.94Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-4" data-root-id="furniture-1" data-feature="furniture" d="M3.7,7.17L4.02,7.17L4.02,7.75L3.7,7.75Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-7" data-root-id="furniture-1" data-feature="furniture" d="M3.7,7.77L4.02,7.77L4.02,8.35L3.7,8.35Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="furniture-10" data-root-id="furniture-1" data-feature="furniture" d="M3.7,8.37L4.02,8.37L4.02,8.95L3.7,8.95Z" fill="#f8f6f0" fill-rule="evenodd" stroke="#a5a69c" stroke-width="0.012" stroke-linejoin="round"/>
+  <path data-node-id="solid-column" data-root-id="solid-column" data-feature="original-wall" d="M4.04,5.65L4.49,5.65L4.49,6.1L4.04,6.1Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="solid-facade-pier" data-root-id="solid-facade-pier" data-feature="original-wall" d="M-0.15,5.65L0.3,5.65L0.3,6.1L-0.15,6.1Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="solid-service" data-root-id="solid-service" data-feature="original-wall" d="M4.26,7.21L5.31,7.21L5.31,7.66L4.71,7.66L4.71,8.97L4.26,8.97Z" fill="url(#service-hatch)" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west" data-root-id="wall-balcony-west" data-feature="original-wall" d="M-0.08,-0.2L-0.08,2.53L-0.15,2.53L-0.15,-0.2Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back" data-root-id="wall-balcony-back" data-feature="original-wall" d="M-0.09,-0.26L1.23,-0.26L1.23,-0.19L-0.09,-0.19Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back" data-root-id="wall-bedroom-back" data-feature="original-wall" d="M2.395,-0.27L6.095,-0.27L6.095,0L2.395,0Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west" data-root-id="wall-living-west" data-feature="original-wall" d="M0,3.05L0,4.95L-0.27,4.95L-0.27,3.05Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west" data-root-id="wall-living-west" data-feature="original-wall" d="M0,6.6L0,8.4L-0.27,8.4L-0.27,6.6Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back" data-root-id="wall-bedroom-back" data-feature="original-wall" d="M1.235,-0.27L2.395,-0.27L2.395,0L1.235,0Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back" data-root-id="wall-bedroom-back" data-feature="original-wall" d="M6.095,-0.27L7.4,-0.27L7.4,0L6.095,0Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-east" data-root-id="wall-east" data-feature="original-wall" d="M7.4,-0.135L7.4,6.1L7.13,6.1L7.13,-0.135Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-east" data-root-id="wall-east" data-feature="original-wall" d="M7.4,7.04L7.4,9.27L7.13,9.27L7.13,7.04Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-south" data-root-id="wall-south" data-feature="original-wall" d="M-0.27,9L7.4,9L7.4,9.27L-0.27,9.27Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west" data-root-id="wall-living-west" data-feature="original-wall" d="M0,2.65L0,3.05L-0.27,3.05L-0.27,2.65Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west" data-root-id="wall-living-west" data-feature="original-wall" d="M0,4.95L0,6.6L-0.27,6.6L-0.27,4.95Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west" data-root-id="wall-living-west" data-feature="original-wall" d="M0,8.4L0,9L-0.27,9L-0.27,8.4Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-divider" data-root-id="wall-bedroom-divider" data-feature="original-wall" d="M1.18,2.55L5.43,2.55L5.43,2.65L1.18,2.65Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-divider" data-root-id="wall-bedroom-divider" data-feature="original-wall" d="M6.33,2.55L7.13,2.55L7.13,2.65L6.33,2.65Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-door" data-root-id="wall-balcony-door" data-feature="original-wall" d="M1.29,-0.19L1.29,0.79L1.18,0.79L1.18,-0.19Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-door" data-root-id="wall-balcony-door" data-feature="original-wall" d="M1.29,1.66L1.29,2.6L1.18,2.6L1.18,1.66Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-bottom" data-root-id="wall-balcony-bottom" data-feature="original-wall" d="M-0.14,2.55L1.29,2.55L1.29,2.65L-0.14,2.65Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west" data-root-id="wall-balcony-west" data-feature="original-wall" d="M-0.08,-0.26L-0.08,-0.2L-0.15,-0.2L-0.15,-0.26Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west" data-root-id="wall-balcony-west" data-feature="original-wall" d="M-0.08,2.53L-0.08,2.6L-0.15,2.6L-0.15,2.53Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back" data-root-id="wall-balcony-back" data-feature="original-wall" d="M-0.15,-0.26L-0.09,-0.26L-0.09,-0.19L-0.15,-0.19Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back" data-root-id="wall-balcony-back" data-feature="original-wall" d="M1.23,-0.26L1.29,-0.26L1.29,-0.19L1.23,-0.19Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bathroom-top" data-root-id="wall-bathroom-top" data-feature="original-wall" d="M4.15,7.1L5.41,7.1L5.41,7.21L4.15,7.21Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bathroom-top" data-root-id="wall-bathroom-top" data-feature="original-wall" d="M6.25,7.1L7.13,7.1L7.13,7.21L6.25,7.21Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bathroom-south-finish" data-root-id="wall-bathroom-south-finish" data-feature="original-wall" d="M4.15,8.97L7.13,8.97L7.13,9L4.15,9Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-bathroom-left" data-root-id="wall-bathroom-left" data-feature="original-wall" d="M4.26,7.1L4.26,9L4.15,9L4.15,7.1Z" fill="#3f4442" fill-rule="evenodd"/>
+  <path data-node-id="wall-east-opening-0-part-0" data-root-id="wall-east" data-feature="frame" d="M7.115,6.1L7.415,6.1L7.415,7.04L7.115,7.04Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-divider-opening-0-part-0" data-root-id="wall-bedroom-divider" data-feature="frame" d="M5.43,2.535L6.33,2.535L6.33,2.665L5.43,2.665Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-door-opening-0-part-0" data-root-id="wall-balcony-door" data-feature="frame" d="M1.165,0.79L1.305,0.79L1.305,1.66L1.165,1.66Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bathroom-top-opening-0-part-0" data-root-id="wall-bathroom-top" data-feature="frame" d="M5.41,7.085L6.25,7.085L6.25,7.225L5.41,7.225Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-4" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.165,-0.2L-0.065,-0.2L-0.065,2.53L-0.165,2.53Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-4" data-root-id="wall-balcony-back" data-feature="frame" d="M-0.09,-0.275L1.23,-0.275L1.23,-0.175L-0.09,-0.175Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-4" data-root-id="wall-bedroom-back" data-feature="frame" d="M2.395,-0.285L6.095,-0.285L6.095,0.015L2.395,0.015Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-4" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,3.05L0.015,3.05L0.015,4.95L-0.285,4.95Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-4" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,6.6L0.015,6.6L0.015,8.4L-0.285,8.4Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-0" data-root-id="wall-bedroom-back" data-feature="frame" d="M2.425,-0.141L6.065,-0.141L6.065,-0.129L2.425,-0.129Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-0" data-root-id="wall-living-west" data-feature="frame" d="M-0.141,3.08L-0.129,3.08L-0.129,4.92L-0.141,4.92Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-0" data-root-id="wall-living-west" data-feature="frame" d="M-0.141,6.63L-0.129,6.63L-0.129,8.37L-0.141,8.37Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-1" data-root-id="wall-bedroom-back" data-feature="frame" d="M2.375,-0.285L2.415,-0.285L2.415,0.015L2.375,0.015Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-2" data-root-id="wall-bedroom-back" data-feature="frame" d="M4.225,-0.285L4.265,-0.285L4.265,0.015L4.225,0.015Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-3" data-root-id="wall-bedroom-back" data-feature="frame" d="M6.075,-0.285L6.115,-0.285L6.115,0.015L6.075,0.015Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-1" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,3.03L0.015,3.03L0.015,3.07L-0.285,3.07Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-2" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,3.98L0.015,3.98L0.015,4.02L-0.285,4.02Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-3" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,4.93L0.015,4.93L0.015,4.97L-0.285,4.97Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-1" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,6.58L0.015,6.58L0.015,6.62L-0.285,6.62Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-2" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,7.48L0.015,7.48L0.015,7.52L-0.285,7.52Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-3" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,8.38L0.015,8.38L0.015,8.42L-0.285,8.42Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0-part-5" data-root-id="wall-bedroom-back" data-feature="frame" d="M2.395,-0.285L6.095,-0.285L6.095,0.015L2.395,0.015Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-0-part-5" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,3.05L0.015,3.05L0.015,4.95L-0.285,4.95Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-living-west-opening-1-part-5" data-root-id="wall-living-west" data-feature="frame" d="M-0.285,6.6L0.015,6.6L0.015,8.4L-0.285,8.4Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-0" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.121,-0.17L-0.109,-0.17L-0.109,2.5L-0.121,2.5Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-0" data-root-id="wall-balcony-back" data-feature="frame" d="M-0.06,-0.231L1.2,-0.231L1.2,-0.219L-0.06,-0.219Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-1" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.165,-0.22L-0.065,-0.22L-0.065,-0.18L-0.165,-0.18Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-2" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.165,1.145L-0.065,1.145L-0.065,1.185L-0.165,1.185Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-3" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.165,2.51L-0.065,2.51L-0.065,2.55L-0.165,2.55Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-1" data-root-id="wall-balcony-back" data-feature="frame" d="M-0.11,-0.275L-0.07,-0.275L-0.07,-0.175L-0.11,-0.175Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-2" data-root-id="wall-balcony-back" data-feature="frame" d="M0.55,-0.275L0.59,-0.275L0.59,-0.175L0.55,-0.175Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-3" data-root-id="wall-balcony-back" data-feature="frame" d="M1.21,-0.275L1.25,-0.275L1.25,-0.175L1.21,-0.175Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-west-opening-0-part-5" data-root-id="wall-balcony-west" data-feature="frame" d="M-0.165,-0.2L-0.065,-0.2L-0.065,2.53L-0.165,2.53Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-balcony-back-opening-0-part-5" data-root-id="wall-balcony-back" data-feature="frame" d="M-0.09,-0.275L1.23,-0.275L1.23,-0.175L-0.09,-0.175Z" fill="#b4b8b0" fill-rule="evenodd"/>
+  <path data-node-id="wall-bedroom-back-opening-0" data-root-id="wall-bedroom-back" data-feature="window" d="M2.395,-0.285L6.095,-0.285L6.095,0.015L2.395,0.015Z" fill="#62a7ca" fill-rule="evenodd" stroke="#397f9f" stroke-width="0.012"/>
+  <path data-node-id="wall-living-west-opening-0" data-root-id="wall-living-west" data-feature="window" d="M0.015,3.05L0.015,4.95L-0.285,4.95L-0.285,3.05Z" fill="#62a7ca" fill-rule="evenodd" stroke="#397f9f" stroke-width="0.012"/>
+  <path data-node-id="wall-living-west-opening-1" data-root-id="wall-living-west" data-feature="window" d="M0.015,6.6L0.015,8.4L-0.285,8.4L-0.285,6.6Z" fill="#62a7ca" fill-rule="evenodd" stroke="#397f9f" stroke-width="0.012"/>
+  <path data-node-id="wall-balcony-west-opening-0" data-root-id="wall-balcony-west" data-feature="window" d="M-0.065,-0.2L-0.065,2.53L-0.165,2.53L-0.165,-0.2Z" fill="#62a7ca" fill-rule="evenodd" stroke="#397f9f" stroke-width="0.012"/>
+  <path data-node-id="wall-balcony-back-opening-0" data-root-id="wall-balcony-back" data-feature="window" d="M-0.09,-0.275L1.23,-0.275L1.23,-0.175L-0.09,-0.175Z" fill="#62a7ca" fill-rule="evenodd" stroke="#397f9f" stroke-width="0.012"/>
+  <g font-family="Arial, sans-serif" text-anchor="middle" fill="#3f4442">
+    <g font-size="0.23" font-weight="600">
+      <text x="0.57" y="1.15" transform="rotate(-90 0.57 1.15)">Лоджия</text>
+      <text x="5.85" y="1.1">Спальня</text>
+      <text x="2.02" y="3.4">Гостиная</text>
+      <text x="5.75" y="4.65">Холл</text>
+      <text x="1.85" y="6.3">Кухня</text>
+      <text x="5.67" y="8.03" font-size="0.19">Санузел</text>
+    </g>
+    <g font-size="0.145" fill="#777f78">
+      <text x="5.85" y="1.37">исходная комната</text>
+      <text x="2.02" y="3.65">единое пространство</text>
+      <text x="1.85" y="6.51">у стены санузла</text>
+      <text x="5.75" y="5.75">Колонна</text>
+      <path d="M5.14,5.8L4.55,5.87" fill="none" stroke="#888f87" stroke-width="0.015"/>
+    </g>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="0.15" fill="#626b63">
+    <path d="M0.05,9.47h0.42" stroke="#62a7ca" stroke-width="0.08"/><text x="0.59" y="9.52">Окна · 5</text>
+
+
+  </g>
+</svg>

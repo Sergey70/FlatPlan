@@ -1661,6 +1661,18 @@ export default function Editor() {
             {panel === 'variants' && (
               <>
                 <h2>Варианты интерьера</h2>
+                <a
+                  className="ed-gallery-link"
+                  href="?view=gallery"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Palette size={22} aria-hidden="true" />
+                  <span>
+                    <strong>Галерея интерьеров ↗</strong>
+                    <small>12 концепций · планировки и стили</small>
+                  </span>
+                </a>
                 <p className="ed-hint">
                   Палитра меняет материалы с исходными цветами. Индивидуально
                   заданные цвета сохраняются.

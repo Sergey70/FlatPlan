@@ -1600,3 +1600,31 @@ button svg {
 .ed-layout-card button {
   font-size: 13px;
 }
+
+.ed-gallery-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 12px;
+  margin: 12px 0 20px;
+  border: 1px solid #dac8b9;
+  border-radius: 12px;
+  background: #faf4ed;
+  color: #61422f;
+  text-decoration: none;
+}
+.ed-gallery-link strong,
+.ed-gallery-link small {
+  display: block;
+}
+.ed-gallery-link strong {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.ed-gallery-link small {
+  font-size: 11px;
+  color: #756657;
+}
+.ed-gallery-link:hover {
+  background: #f4e8db;
+}

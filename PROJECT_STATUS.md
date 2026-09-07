@@ -1,12 +1,23 @@
 # FlatPlan status
 
-Updated: 2026-09-07.
+Updated: 2026-09-08.
 
 ## Objective and current phase
 
-Last completed iteration: **PLAN-004**, kitchen at the former TV location by the bathroom wall, with an independently resizable wall extension and a kitchen/room divider. Local/CI acceptance and Pages publication are verified; no implementation iteration is active. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
+Active iteration: **GALLERY-005**, separate interior concept gallery. Implementation and local acceptance are complete; GitHub Pages publication is pending. Last published iteration: **PLAN-004**, kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
+
+## Active iteration: GALLERY-005
+
+User requests a separate collection of visual renovation/layout concepts. Build a query-routed gallery at `?view=gallery`: 12 generated images crossing three layouts (separate kitchen, glass divider, open living/kitchen) with four styles (Scandinavian, warm minimalism, modern classic, soft loft). Keep the corrected kitchen at the bathroom wall and show independently generated SVG diagrams from the model with all existing windows. Gallery filters, accessible detail/compare dialogs and a return link must not read or mutate the editor project. Generated images are illustrative and can deviate in dimensions/furniture; diagrams describe the proposed wall scheme. No new dependencies or automatic application of photo concepts to the model.
+
+Acceptance: `npm run verify`, `npm run test:browser` including gallery filters/details/comparison/mobile and editor-storage preservation; independent source/geometry review, visual review of all generated images and desktop/mobile gallery. Publish through existing GitHub Pages workflow and verify the live gallery and assets.
 
 ## Implemented
+
+- GALLERY-005 adds `?view=gallery` and a new-tab link in editor **Варианты → Галерея интерьеров**. Twelve full apartment concept images cross three layouts (closed, glass, open) with four styles (Scandinavian, warm minimalism, modern classic, soft loft). The separate lazy-loaded page has layout/style filters, detail dialogs with materials and exact base-model diagrams, and comparison of any two concepts. Comparison choices survive filter changes; mobile comparison is stacked. Gallery navigation, reload and even a combined gallery/layout query never read or change editor storage.
+- All 12 PNGs were visually inspected and copied unchanged to `public/gallery/images/`; total gallery assets about 24 MiB. Images load lazily, support retry and full-image viewing. The gallery itself needs no WebGL, service, API key or new dependency. Original project geometry and presets remain unchanged.
+- Three deterministic SVG diagrams under `public/gallery/plans/` use `createInitialProject()` and `planDrawing()`. They preserve all five exact window footprints and original structures; glass changes only the transverse divider symbol, open removes only the three proposed walls. The schematics represent the base model, not saved visitor edits. The diagram export script and geometry/asset regression checks are committed.
+- AI images remain conceptual: some contain a short residual wall or a changed column/door/cabinet detail. Specific discrepancies are noted in detail and comparison views. Broad geometry drift in early attempts was corrected; the selected glass Scandinavian image has no extra bathroom window. `GALLERY_ASSETS.md` records public asset provenance. Automatic review rejected publishing the full prompt payload; all actual prompts/reference paths/discarded attempts remain only in ignored `.local/imagegen/`, including `GALLERY_PROMPTS.md` and `gallery-manifest.json`.
 
 - Default `kitchen-by-bathroom-v2` has 222 editable objects/parts: kitchen in the lower zone, room 2 above, existing bedroom, common hall, bathroom with 170 × 75 cm bathtub and loggia. The open alternative keeps the corrected furniture placement without the new walls. Three material palettes remain available.
 - Kitchen cabinets, sink, hob and oven occupy the former TV location along the bathroom wall. Three 60 cm modules share a 1.84 m worktop. A separate fridge stands at the bottom wall; a 90 cm dining table has two chairs and a 1.385 m working aisle. Sofa, TV, rug, coffee table and floor lamp have moved into the upper room; its TV does not block the hall door.
@@ -19,6 +30,12 @@ Last completed iteration: **PLAN-004**, kitchen at the former TV location by the
 
 ## Verification
 
+- GALLERY-005: `npm run verify` passed all **33 tests**, lint, TypeScript and production build. Four gallery checks cover all 12 asset/layout pairs, exact preservation of five windows and original structures, the intended wall differences and deterministic SVG exports.
+- `npm run test:browser` passed gallery and the entire existing editor suite against the production build: 12 image decodes, three diagrams, both filters, detail/compare/clear, two-selection limit, keyboard Escape/focus restoration, 360/390/768 widths, mobile dialogs, byte-for-byte storage preservation and reload. Existing desktop/touch editing, JSON transfer, 3D manipulation, save recovery and both old-project upgrades still pass; no page errors.
+- Inspected desktop/mobile gallery, detail and comparison screenshots and every chosen illustration. A separate source review found one wording issue (static diagrams called current model); changed to base model. Three-plan geometry implementation was separately reviewed and its tests independently rerun. Final diff and ignored prompt storage checked. Artifacts under `.local/qa/`; entry/gallery/editor/renderer are separate chunks, largest approximately 396 kB.
+
+### Earlier editor acceptance
+
 - `npm run verify`: passed, 29 tests, lint, TypeScript and production build. Updated window/room and kitchen-aisle assertions; new checks cover exact independent wall resizing, preservation of its opening/bathroom wall, and old-arrangement restoration including hidden snapshots.
 - Final `npm run test:browser` passed against the final built `dist/`: delete/restore all three walls, independent wall length/height/thickness through the shortcut, desktop/mobile editing and JSON transfer/reload, old open and v1 upgrades by button/deep link with full backup, 3D gizmos, storage recovery, touch and widths 360/390/768. No page errors.
 - Independent read-only geometry audit evaluated 136 furniture leaf meshes against 81 structure volumes/details: no real wall/column/furniture intersections; clear door approaches. A 2.5 cm grid with a 30 cm traveller radius finds paths from hall to kitchen, both rooms and bathroom. Split floors continuously cover 39.276 m²; all five window openings are preserved.
@@ -29,17 +46,19 @@ Last completed iteration: **PLAN-004**, kitchen at the former TV location by the
 
 Only the photographed technical passport is available. The user's latest correction determines the kitchen location. «Расширение стены» is interpreted as extending the bathroom west wall to the column; this remains an adjustable proposal. Reported areas are 58.1 m² inside and 60.5 m² accounted with loggia. Model large-zone area is 39.276 m² versus passport 39.4 m². Ceiling 2.8 m, exact window dimensions/sills, service enclosure, columns and furniture remain preliminary. The sofa has about 1 cm clearance to the proposed divider, so actual measurements must guide later refinement. See PLAN_ASSUMPTIONS.md for coordinates/history.
 
-Photo and identifiers remain ignored under `.local/reference/`. Walls/floors are independently editable: moving/removing a wall does not rebuild room contours automatically. No automatic collision prevention, construction documentation, cloud sync or photorealistic rendering. Browser data is origin-specific; JSON is the portable backup. Mobile testing uses Chromium touch emulation, not real iOS/Android hardware.
+Photo and identifiers remain ignored under `.local/reference/`. Walls/floors are independently editable: moving/removing a wall does not rebuild room contours automatically. No automatic collision prevention, construction documentation, cloud sync or automatic photorealistic rendering of the edited scene. The separate image gallery illustrates styles and is not a measured construction model. Browser data is origin-specific; JSON is the portable backup. Mobile testing uses Chromium touch emulation, not real iOS/Android hardware.
 
 ## Publication
 
 Repository: https://github.com/Sergey70/FlatPlan (public).
 Live URL: https://sergey70.github.io/FlatPlan/.
 New-layout URL: https://sergey70.github.io/FlatPlan/?layout=kitchen-by-bathroom.
+Gallery URL: https://sergey70.github.io/FlatPlan/?view=gallery.
+GALLERY-005 publication: pending; local acceptance complete.
 Source: `.github/workflows/pages.yml`; full unit/static/build and browser acceptance gate deployment.
 
 Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34164187248. Fresh public desktop/mobile contexts loaded 222 elements, verified the kitchen at [4.03, 0, 7.14], two variants, three removable walls, live WebGL and 2D, with no page/asset errors. All six public production files returned HTTP 200 and matched a fresh build of the final committed source byte-for-byte. The first comparison used an earlier pre-documentation build; rebuilding the committed source resolved the asset-name difference. Hashes/screenshots are in ignored `.local/qa/`. The existing local server remains available at http://127.0.0.1:5173/.
 
 ## Next
 
-Wait for a detailed measured plan and further interior preferences while preserving saved browser projects. Existing walls, kitchen, furniture and materials can be refined in the editor. No required work remains for PLAN-004.
+Publish GALLERY-005 through the existing workflow, verify the public gallery/editor and production asset hashes, then record the deployment. After publication, wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied.
