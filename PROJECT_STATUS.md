@@ -4,7 +4,7 @@ Updated: 2026-09-07.
 
 ## Objective and current phase
 
-Active iteration: **PLAN-002**, separate kitchen and a second room using the passport window locations. Implementation and local acceptance are complete; GitHub Pages publication is the remaining gate. Last completed iteration: **EDITOR-001**, the full editable apartment with verified Pages publication. PLAN-001 supplied the preliminary passport reconstruction. Commits and pushes are explicitly authorized.
+Last completed iteration: **PLAN-002**, separate kitchen and a second room using the passport window locations, including local/CI acceptance and verified GitHub Pages publication. No implementation iteration is active. EDITOR-001 supplied the full editable apartment; PLAN-001 supplied the preliminary passport reconstruction. Commits and pushes are explicitly authorized.
 
 The user wants an editable 3D apartment with materials, browser saving, independent arrangements, exact dimensions/colors for objects and nested parts, full JSON transfer and mobile controls. The latest request makes the default layout a separate kitchen and one additional room, each with its own window, with removable proposed walls and the ability to add walls elsewhere.
 
@@ -43,8 +43,8 @@ Live URL: https://sergey70.github.io/FlatPlan/.
 Explicit new-layout URL: https://sergey70.github.io/FlatPlan/?layout=separate-kitchen.
 Source: GitHub Actions, `.github/workflows/pages.yml`; unit/static/build and full browser checks gate deployment.
 
-Previous published application commit: `eaffadd743d862a1e5a34a53ad5bc5bdc6166c23`, successful run https://github.com/Sergey70/FlatPlan/actions/runs/34161376312. PLAN-002 publication and live verification are pending.
+Published PLAN-002 application commit: `a96505d262567cedee1c798abf52bbb98f30d996`. Successful build, browser acceptance and deploy: https://github.com/Sergey70/FlatPlan/actions/runs/34162889121. All six public production files returned HTTP 200 and matched the verified local build byte-for-byte. Fresh desktop and mobile contexts loaded the live WebGL editor with 224 elements, two variants and three proposed walls; 2D, hide and restore worked with no page/asset errors. Published desktop 3D and desktop/mobile 2D screenshots were visually inspected; screenshots and SHA-256 evidence are in ignored `.local/qa/`. The local development server remains available at http://127.0.0.1:5173/; the new-layout query works there as well.
 
 ## Next
 
-Publish PLAN-002, wait for its Actions checks/deployment, compare public production files to the verified local build and run fresh desktop/mobile live smoke checks. Then mark the iteration complete. Future refinements depend on the detailed measured plan and interior preferences; updates must preserve saved browser projects.
+Wait for the detailed measured plan and interior preferences. Update the seed or a saved project explicitly while preserving existing browser documents. Current window coordinates, room divisions and furniture remain preliminary. No required work remains for PLAN-002.
