@@ -4,7 +4,7 @@ Updated: 2026-09-07.
 
 ## Objective and current phase
 
-Active iteration: **PLAN-004**, correct kitchen placement to the former TV location by the bathroom wall, with an independently resizable wall extension and a kitchen/room divider. Last completed: UI-003 switch-thumb fix; PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized. Implementation and final local acceptance are complete; Pages publication is the remaining gate.
+Last completed iteration: **PLAN-004**, kitchen at the former TV location by the bathroom wall, with an independently resizable wall extension and a kitchen/room divider. Local/CI acceptance and Pages publication are verified; no implementation iteration is active. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
 
 ## Implemented
 
@@ -23,7 +23,7 @@ Active iteration: **PLAN-004**, correct kitchen placement to the former TV locat
 - Final `npm run test:browser` passed against the final built `dist/`: delete/restore all three walls, independent wall length/height/thickness through the shortcut, desktop/mobile editing and JSON transfer/reload, old open and v1 upgrades by button/deep link with full backup, 3D gizmos, storage recovery, touch and widths 360/390/768. No page errors.
 - Independent read-only geometry audit evaluated 136 furniture leaf meshes against 81 structure volumes/details: no real wall/column/furniture intersections; clear door approaches. A 2.5 cm grid with a 30 cm traveller radius finds paths from hall to kitchen, both rooms and bathroom. Split floors continuously cover 39.276 m²; all five window openings are preserved.
 - A separate read-only migration/UI audit confirmed complete backup preservation and accessible v1 upgrades; its two restore findings were fixed and covered by unit/browser checks.
-- Desktop default-plan and mobile screenshots inspected. Published visual verification remains pending. QA artifacts remain ignored under `.local/qa/`. Vite reports a nonblocking approximately 547 kB main chunk; renderer is lazy-loaded. Final source diff and `git diff --check` passed.
+- Desktop default-plan and mobile screenshots inspected, followed by fresh published desktop 3D and desktop/mobile 2D screenshots. QA artifacts remain ignored under `.local/qa/`. Vite reports a nonblocking approximately 547 kB main chunk; renderer is lazy-loaded. Final source diff and `git diff --check` passed.
 
 ## Source assumptions and limits
 
@@ -38,8 +38,8 @@ Live URL: https://sergey70.github.io/FlatPlan/.
 New-layout URL: https://sergey70.github.io/FlatPlan/?layout=kitchen-by-bathroom.
 Source: `.github/workflows/pages.yml`; full unit/static/build and browser acceptance gate deployment.
 
-Previous published UI-003 application: `46864cc2c58636449790cc11a9b022dcfd730e18`, successful run https://github.com/Sergey70/FlatPlan/actions/runs/34163388090. PLAN-004 publication is pending. The existing local server remains available at http://127.0.0.1:5173/.
+Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34164187248. Fresh public desktop/mobile contexts loaded 222 elements, verified the kitchen at [4.03, 0, 7.14], two variants, three removable walls, live WebGL and 2D, with no page/asset errors. All six public production files returned HTTP 200 and matched a fresh build of the final committed source byte-for-byte. The first comparison used an earlier pre-documentation build; rebuilding the committed source resolved the asset-name difference. Hashes/screenshots are in ignored `.local/qa/`. The existing local server remains available at http://127.0.0.1:5173/.
 
 ## Next
 
-Publish PLAN-004 and verify public production files plus fresh desktop/mobile editor contexts. Then wait for a detailed measured plan and further interior preferences while preserving saved browser projects.
+Wait for a detailed measured plan and further interior preferences while preserving saved browser projects. Existing walls, kitchen, furniture and materials can be refined in the editor. No required work remains for PLAN-004.
