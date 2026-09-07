@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createInitialProject,
+  createOpenProject,
   catalogObject,
   catalog,
 } from '../lib/editor-seed.ts';
@@ -58,15 +59,15 @@ test('editor seed has complete editable geometry, two arrangements and a real ba
   assert.ok(tub.children.length >= 5);
   assert.ok(!nodes.some((n) => /душ/i.test(n.node.name)));
   assert.equal(p.arrangements.length, 2);
-  const a = p.arrangements[0].scene.objects,
-    b = p.arrangements[1].scene.objects;
-  assert.deepEqual(
-    a.filter((n) => n.category === 'structure'),
-    b.filter((n) => n.category === 'structure'),
+  assert.equal(p.activeArrangement, 'separate-kitchen-v1');
+  assert.equal(
+    p.scene.objects.filter((n) => n.id.startsWith('wall-proposed-')).length,
+    3,
   );
-  assert.notDeepEqual(
-    a.find((n) => n.name === 'Диван')!.position,
-    b.find((n) => n.name === 'Диван')!.position,
+  assert.ok(
+    !p.arrangements[1].scene.objects.some((n) =>
+      n.id.startsWith('wall-proposed-'),
+    ),
   );
   for (const item of catalog) {
     const object = catalogObject(item.id);
@@ -127,7 +128,7 @@ test('wall resizing preserves openings and clips wall volume correctly', () => {
 });
 
 test('floor geometry has editable thickness and true concave holes', () => {
-  const p = fresh(),
+  const p = createOpenProject(),
     floor = findNode(p.scene.objects, 'floor-living')!;
   const geometry = createNodeGeometry(floor)!;
   geometry.computeBoundingBox();

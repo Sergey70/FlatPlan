@@ -162,7 +162,7 @@ export const walls: Wall[] = [
     to: [7.4, -0.135],
     thickness: 0.27,
     cutaway: false,
-    openings: [win(1.1, 4.7)],
+    openings: [win(1.16, 4.86)],
   },
   {
     id: 'east',
@@ -186,7 +186,8 @@ export const walls: Wall[] = [
     to: [-0.135, 9],
     thickness: 0.27,
     cutaway: true,
-    openings: [win(0.4, 2.3), win(3.45, 5.65)],
+    // Photo: two separate glazed spans, with a broad solid pier between them.
+    openings: [win(0.4, 2.3), win(3.95, 5.75)],
   },
   {
     id: 'bedroom-divider',

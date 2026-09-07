@@ -140,6 +140,66 @@ try {
   await loaded(page);
   await saved(page);
   await noOverflow(page);
+  const partitionIds = [
+    'wall-proposed-kitchen-hall',
+    'wall-proposed-kitchen-room',
+    'wall-proposed-room-hall',
+  ];
+  assert.equal((await status(page)).activeArrangement, 'separate-kitchen-v1');
+  await page
+    .getByRole('button', { name: 'Убрать новые перегородки', exact: true })
+    .click();
+  assert.ok(
+    (await project(page)).scene.objects
+      .filter((n) => partitionIds.includes(n.id))
+      .every((n) => !n.visible),
+  );
+  await page
+    .getByRole('button', { name: 'Вернуть новые перегородки', exact: true })
+    .click();
+  assert.ok(
+    (await project(page)).scene.objects
+      .filter((n) => partitionIds.includes(n.id))
+      .every((n) => n.visible),
+  );
+  await select(page, partitionIds[1]);
+  await page.getByRole('button', { name: 'Удалить', exact: true }).click();
+  assert.ok(
+    !(await project(page)).scene.objects.some((n) => n.id === partitionIds[1]),
+  );
+  await page
+    .getByRole('button', { name: 'Отменить изменение', exact: true })
+    .click();
+  assert.ok(
+    (await project(page)).scene.objects.some((n) => n.id === partitionIds[1]),
+  );
+  await panel(page, 'Объекты');
+  await page
+    .getByRole('button', { name: 'Добавить стену на план', exact: true })
+    .click();
+  const addedWall = (await status(page)).view.selected;
+  assert.equal((await status(page)).view.mode, '2d');
+  await editField(page, 'Ширина', 1.234);
+  await editField(page, 'X — вправо', 5.55);
+  await editField(page, 'Z — вниз плана', 4.1);
+  const extraWall = await call(page, 'get_editor_project', {
+    objectId: addedWall,
+  });
+  assert.ok(Math.abs(extraWall.dimensions[0] - 1.234) < 1e-5);
+  assert.equal(extraWall.node.position[0], 5.55);
+  await page.getByRole('button', { name: 'Удалить', exact: true }).click();
+  await call(page, 'configure_editor_view', { mode: '2d', selected: null });
+  await panel(page, 'Объекты');
+  await page.screenshot({
+    path: path.join(out, 'partition-plan-desktop.png'),
+    fullPage: true,
+  });
+  await call(page, 'configure_editor_view', { mode: '3d', selected: null });
+  await page.getByRole('button', { name: 'Вращать вид', exact: true }).click();
+  console.log(
+    'PASS proposed layout: default rooms/windows, hide/restore, individual delete/undo, add wall at precise coordinates',
+  );
+
   const initial = await project(page);
   assert.equal((await status(page)).status.unavailable, false);
   const sofa = initial.scene.objects.find((n) => n.name === 'Диван');
@@ -429,6 +489,58 @@ try {
   await corrupt.close();
   console.log(
     'PASS recovery: quota error remains visible; corrupt storage is not overwritten',
+  );
+
+  // Existing browser projects change only after an explicit request, with a full backup.
+  const legacy = structuredClone(initial);
+  legacy.scene = structuredClone(
+    initial.arrangements.find((a) => a.id === 'initial').scene,
+  );
+  legacy.arrangements = legacy.arrangements.filter((a) => a.id === 'initial');
+  legacy.activeArrangement = 'initial';
+  legacy.scene.view.camera = structuredClone(initial.scene.view.camera);
+  legacy.scene.objects.find((n) => n.name === 'Диван').color = '#abcdef';
+  legacy.name = 'Сохранённый пользовательский проект';
+  for (const viaLink of [false, true]) {
+    const upgrade = await browser.newContext();
+    await installTools(upgrade);
+    await upgrade.addInitScript((value) => {
+      if (!localStorage.getItem('flatplan.editor.v1'))
+        localStorage.setItem('flatplan.editor.v1', value);
+    }, JSON.stringify(legacy));
+    const up = await upgrade.newPage();
+    up.on('pageerror', (e) => errors.push(e.message));
+    await up.goto(viaLink ? `${url}?layout=separate-kitchen` : url);
+    await loaded(up);
+    if (!viaLink) {
+      assert.deepEqual(await project(up), legacy);
+      await up
+        .getByRole('button', {
+          name: 'Открыть новый план с перегородками',
+          exact: true,
+        })
+        .click();
+    }
+    await saved(up);
+    const upgraded = await project(up);
+    assert.equal(upgraded.activeArrangement, 'separate-kitchen-v1');
+    assert.equal(upgraded.name, legacy.name);
+    assert.deepEqual(
+      upgraded.arrangements.find(
+        (a) => a.name === 'До разделения кухни и комнаты',
+      ).scene,
+      legacy.scene,
+    );
+    assert.ok(upgraded.scene.objects.some((n) => n.id === 'floor-room2'));
+    assert.ok(!new URL(up.url()).searchParams.has('layout'));
+    await up.reload();
+    await loaded(up);
+    await saved(up);
+    assert.deepEqual(await project(up), upgraded);
+    await upgrade.close();
+  }
+  console.log(
+    'PASS saved-project upgrade: explicit button/deep link, full backup and stable reload',
   );
 
   // A separate storage partition simulates another device.

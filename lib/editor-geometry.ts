@@ -262,7 +262,26 @@ export function planDrawing(
           y,
         );
       }
-    else {
+    else if (
+      node.geometry.kind === 'opening' &&
+      node.geometry.openingType === 'window'
+    ) {
+      const [w, h, d] = node.geometry.size;
+      add(
+        project(
+          [
+            [-w / 2, -d / 2],
+            [w / 2, -d / 2],
+            [w / 2, d / 2],
+            [-w / 2, d / 2],
+          ],
+          h,
+        ),
+        [],
+        // The window symbol must remain above the projected horizontal frame.
+        new THREE.Vector3(0, h + 0.1, 0).applyMatrix4(matrix).y,
+      );
+    } else {
       const geo = createNodeGeometry(node);
       if (geo) {
         geo.computeBoundingBox();

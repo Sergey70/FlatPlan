@@ -1583,3 +1583,23 @@ button svg {
   padding: 6px;
   flex: 1;
 }
+
+.ed-layout-card {
+  padding: 12px;
+  border: 1px solid #dbc9ba;
+  border-radius: 9px;
+  background: #faf4ed;
+  margin-bottom: 16px;
+}
+.ed-layout-card strong {
+  font-size: 14px;
+}
+.ed-layout-card p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64747a;
+  margin: 7px 0;
+}
+.ed-layout-card button {
+  font-size: 13px;
+}

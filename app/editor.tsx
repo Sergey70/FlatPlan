@@ -42,6 +42,10 @@ import { Switch } from '@/components/ui/switch';
 import { apartment, palettes, polygonPath, formatArea } from '@/lib/apartment';
 import {
   createInitialProject,
+  applyPartitionedPreset,
+  PARTITION_PRESET_ID,
+  PARTITION_WALL_IDS,
+  togglePartitionWalls,
   catalog,
   catalogObject,
   makeOpening,
@@ -671,19 +675,36 @@ function Plan({
 
 export default function Editor() {
   const [boot] = useState(() => {
+    let restored: EditorProject | null = null;
     try {
+      const saved = readStoredProject(window.localStorage);
+      restored = saved;
+      const requested =
+        new URLSearchParams(window.location.search).get('layout') ===
+        'separate-kitchen';
       return {
-        project:
-          readStoredProject(window.localStorage) ?? createInitialProject(),
+        project: saved
+          ? requested &&
+            !saved.arrangements.some((a) => a.id === PARTITION_PRESET_ID)
+            ? applyPartitionedPreset(saved)
+            : saved
+          : createInitialProject(),
         error: null as string | null,
       };
     } catch (error) {
       return {
-        project: createInitialProject(),
-        error: `Не удалось восстановить проект: ${(error as Error).message}`,
+        project: restored ?? createInitialProject(),
+        error: `${restored ? 'Не удалось открыть новый план' : 'Не удалось восстановить проект'}: ${(error as Error).message}`,
       };
     }
   });
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('layout') === 'separate-kitchen') {
+      url.searchParams.delete('layout');
+      window.history.replaceState(null, '', url);
+    }
+  }, []);
   const [history, setHistory] = useState<History>({
     past: [],
     present: boot.project,
@@ -721,7 +742,7 @@ export default function Editor() {
   const host = useRef<HTMLDivElement>(null),
     controller = useRef<EditorScene | null>(null),
     fileInput = useRef<HTMLInputElement>(null),
-    cameraEmitted = useRef<EditorView['camera']>(null),
+    cameraEmitted = useRef<EditorView['camera'] | undefined>(undefined),
     importRef = useRef<EditorProject | null>(null),
     [importName, setImportName] = useState<string | null>(null);
   const selected = project.scene.view.selected,
@@ -1106,6 +1127,78 @@ export default function Editor() {
                     Добавить
                   </button>
                 </div>
+                <section
+                  className="ed-layout-card"
+                  aria-label="Предложенные перегородки"
+                >
+                  <strong>Кухня и вторая комната</strong>
+                  <p>
+                    Кухня — у верхнего левого окна, комната 2 — у нижнего.
+                    Проход к входу и санузлу остаётся справа.
+                  </p>
+                  {project.scene.objects.some(
+                    (n) => n.id === 'floor-kitchen',
+                  ) ? (
+                    <>
+                      <button
+                        className="ed-full"
+                        onClick={() =>
+                          attempt(() =>
+                            commit(
+                              togglePartitionWalls(
+                                project,
+                                !project.scene.objects.some(
+                                  (n) =>
+                                    (
+                                      PARTITION_WALL_IDS as readonly string[]
+                                    ).includes(n.id) && n.visible,
+                                ),
+                              ),
+                            ),
+                          )
+                        }
+                      >
+                        {project.scene.objects.some(
+                          (n) =>
+                            (PARTITION_WALL_IDS as readonly string[]).includes(
+                              n.id,
+                            ) && n.visible,
+                        )
+                          ? 'Убрать новые перегородки'
+                          : 'Вернуть новые перегородки'}
+                      </button>
+                      <p>
+                        Каждую стену можно отдельно выбрать, передвинуть или
+                        удалить. Окна на плане выделены голубым.
+                      </p>
+                    </>
+                  ) : (
+                    <button
+                      className="ed-primary ed-full"
+                      onClick={() =>
+                        attempt(() => {
+                          commit(applyPartitionedPreset(project));
+                          setNotice(
+                            'Открыт новый план. Предыдущая сцена сохранена в варианте «До разделения кухни и комнаты».',
+                          );
+                        })
+                      }
+                    >
+                      Открыть новый план с перегородками
+                    </button>
+                  )}
+                  <button
+                    className="ed-full"
+                    onClick={() => {
+                      addObject('wall');
+                      updateView({ mode: '2d' });
+                      setTool('translate');
+                    }}
+                  >
+                    <Plus />
+                    Добавить стену на план
+                  </button>
+                </section>
                 <input
                   className="ed-search"
                   placeholder="Найти объект или деталь"
@@ -1815,8 +1908,8 @@ export default function Editor() {
                 <details>
                   <summary>Новый проект по техпаспорту</summary>
                   <p className="ed-hint">
-                    Вернёт исходную геометрию и расстановку с ванной. Сначала
-                    скачайте свой проект; сброс можно отменить.
+                    Откроет план с отдельной кухней, второй комнатой и ванной.
+                    Сначала скачайте свой проект; сброс можно отменить.
                   </p>
                   <button
                     className="ed-danger"
