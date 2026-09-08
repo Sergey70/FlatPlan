@@ -103,7 +103,52 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
           await img.decode();
           return [img.naturalWidth, img.naturalHeight];
         });
-        assert.deepEqual(size, [1800, 1200]);
+        if (shot.kind === 'generated') {
+          assert.ok(
+            size[0] >= 1024 && size[1] >= 768,
+            `${concept.id}/${shot.id}`,
+          );
+          assert.equal(
+            await viewer.getAttribute('data-image-kind'),
+            'generated',
+          );
+          await viewer
+            .getByRole('button', { name: '3D-основа', exact: true })
+            .click();
+          assert.equal(await viewer.getAttribute('data-image-kind'), 'model');
+          assert.equal(await large.getAttribute('src'), shot.modelSrc);
+          assert.equal(
+            await viewer
+              .getByRole('link', { name: 'Открыть изображение целиком' })
+              .getAttribute('href'),
+            shot.modelSrc,
+          );
+          assert.deepEqual(
+            await large.evaluate(async (img) => {
+              await img.decode();
+              return [img.naturalWidth, img.naturalHeight];
+            }),
+            [1800, 1200],
+          );
+          await viewer
+            .getByRole('button', { name: 'Готовый интерьер', exact: true })
+            .click();
+          assert.equal(await large.getAttribute('src'), shot.src);
+          assert.equal(
+            await viewer.getAttribute('data-image-kind'),
+            'generated',
+          );
+          // Switching the angle resets the source toggle to the finished image.
+          await viewer
+            .getByRole('button', { name: '3D-основа', exact: true })
+            .click();
+        } else {
+          assert.deepEqual(size, [1800, 1200]);
+          assert.equal(
+            await viewer.locator('.gallery-source-options').count(),
+            0,
+          );
+        }
       }
       await viewer
         .getByRole('button', { name: 'Следующий ракурс', exact: true })
@@ -217,6 +262,23 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       secondBefore,
       'Comparison viewers navigate independently',
     );
+    await viewers
+      .nth(0)
+      .getByRole('button', { name: '3D-основа', exact: true })
+      .click();
+    assert.equal(await viewers.nth(0).getAttribute('data-image-kind'), 'model');
+    assert.equal(
+      await viewers.nth(1).getAttribute('data-image-kind'),
+      'generated',
+    );
+    assert.equal(
+      await viewers.nth(1).locator('img.gallery-render').getAttribute('src'),
+      secondBefore,
+    );
+    await viewers
+      .nth(0)
+      .getByRole('button', { name: 'Готовый интерьер', exact: true })
+      .click();
     await page.screenshot({
       path: path.join(outputDirectory, 'gallery-compare-desktop.png'),
     });
@@ -228,7 +290,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       .getByRole('button', { name: 'Очистить сравнение', exact: true })
       .click();
     // A failed non-cover image can be left, selected again, and retried.
-    const failedImage = /\/plan-2-natural-bedroom\.png$/;
+    const failedImage = /\/gallery-013\/images\/plan-2-natural-bedroom\.png$/;
     let failImage = true;
     await page.route(failedImage, (route) =>
       failImage ? route.abort() : route.continue(),
@@ -241,6 +303,23 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     await recovery.waitFor();
     await recovery
       .getByRole('button', { name: 'Спальня · 13,55 м²', exact: true })
+      .click();
+    await recovery
+      .getByText('Изображение не загрузилось', { exact: true })
+      .waitFor();
+    await recovery
+      .getByRole('button', { name: '3D-основа', exact: true })
+      .click();
+    await recovery
+      .locator('img.gallery-render')
+      .evaluate((img) => img.decode());
+    assert.match(
+      await recovery.locator('img.gallery-render').getAttribute('src'),
+      /gallery-012\/images\/plan-2-natural-bedroom\.png$/,
+    );
+    assert.equal(await recovery.locator('.gallery-image-error').count(), 0);
+    await recovery
+      .getByRole('button', { name: 'Готовый интерьер', exact: true })
       .click();
     await recovery
       .getByText('Изображение не загрузилось', { exact: true })
@@ -359,7 +438,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     );
     assert.deepEqual(errors, []);
     console.log(
-      'PASS gallery: 42 renders in 12 variants, 4 plans, all thumbnails, full-image links, wrapping/keyboard navigation, independent comparison, 360/390/768 widths, project bytes unchanged and reload',
+      'PASS gallery: 30 finished interiors, 42 model references in 12 variants, 4 plans, all thumbnails, source toggles/full-image links, wrapping/keyboard navigation, independent comparison, 360/390/768 widths, project bytes unchanged and reload',
     );
   } finally {
     await context.close();

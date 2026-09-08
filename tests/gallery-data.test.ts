@@ -18,11 +18,14 @@ import {
   galleryLayouts,
   galleryStyles,
   galleryImageCount,
+  galleryFinishedImageCount,
+  GALLERY_FINISH_REVISION,
 } from '../lib/gallery-data.ts';
 
 test('gallery offers all 12 layout/style pairs, 42 full-size views and matching plans', () => {
   assert.equal(galleryConcepts.length, 12);
   assert.equal(galleryImageCount, 42);
+  assert.equal(galleryFinishedImageCount, 30);
   assert.equal(new Set(galleryConcepts.map((concept) => concept.id)).size, 12);
   for (const layout of galleryLayouts) {
     const concepts = galleryConcepts.filter(
@@ -50,9 +53,14 @@ test('gallery offers all 12 layout/style pairs, 42 full-size views and matching 
           concept.id,
         );
         assert.ok(
-          image.readUInt32BE(16) === 1800 && image.readUInt32BE(20) === 1200,
+          shot.kind === 'generated'
+            ? image.readUInt32BE(16) >= 1024 && image.readUInt32BE(20) >= 768
+            : image.readUInt32BE(16) === 1800 &&
+                image.readUInt32BE(20) === 1200,
           concept.id,
         );
+        assert.equal(shot.kind === 'model', shot.cutaway);
+        assert.equal(shot.src === shot.modelSrc, shot.cutaway);
       }
       const svg = readFileSync(
         new URL(`../public/${concept.plan}`, import.meta.url),
@@ -119,9 +127,87 @@ test('gallery images and their source scenes match the render manifest', () => {
       entry.id,
     );
     const image = readFileSync(
-      new URL(`../public/${shot.src}`, import.meta.url),
+      new URL(`../public/${shot.modelSrc}`, import.meta.url),
     );
     assert.equal(entry.imageSha256, sha(image), entry.id);
+  }
+});
+
+test('30 finished interiors retain reviewed prompts, reference hashes and current model provenance', () => {
+  const read = (src: string) =>
+    readFileSync(new URL(`../public/${src}`, import.meta.url));
+  const sha = (value: string | Buffer) =>
+    createHash('sha256').update(value).digest('hex');
+  const manifest = JSON.parse(
+    read(`gallery/${GALLERY_FINISH_REVISION}/manifest.json`).toString(),
+  );
+  const prompts = JSON.parse(
+    read(`gallery/${GALLERY_FINISH_REVISION}/prompts.json`).toString(),
+  );
+  const model = JSON.parse(
+    read(`gallery/${GALLERY_REVISION}/manifest.json`).toString(),
+  );
+  const expected = galleryConcepts.flatMap((c) =>
+    c.images
+      .filter((s) => s.kind === 'generated')
+      .map((s) => ({ id: `${c.id}-${s.id}`, concept: c, shot: s })),
+  );
+  assert.equal(manifest.revision, GALLERY_FINISH_REVISION);
+  assert.equal(manifest.sourceRevision, PLAN_REVISION);
+  assert.equal(manifest.generator, 'built-in image_gen');
+  assert.deepEqual(
+    manifest.entries.map((e: { id: string }) => e.id),
+    expected.map((e) => e.id),
+  );
+  assert.deepEqual(
+    prompts.entries.map((e: { id: string }) => e.id).sort(),
+    expected.map((e) => e.id).sort(),
+  );
+  assert.equal(
+    new Set(
+      manifest.entries.map(
+        (e: { image: { sha256: string } }) => e.image.sha256,
+      ),
+    ).size,
+    30,
+  );
+  for (const item of expected) {
+    const entry = manifest.entries.find(
+      (e: { id: string }) => e.id === item.id,
+    );
+    const prompt = prompts.entries.find(
+      (e: { id: string }) => e.id === item.id,
+    );
+    const source = model.entries.find((e: { id: string }) => e.id === item.id);
+    assert.equal(entry.concept, item.concept.id);
+    assert.equal(entry.layout, item.concept.layout.id);
+    assert.equal(entry.palette, item.concept.style.id);
+    assert.equal(entry.shot, item.shot.id);
+    assert.equal(entry.image.src, item.shot.src);
+    assert.equal(entry.model.src, item.shot.modelSrc);
+    assert.equal(entry.model.sha256, source.imageSha256);
+    assert.equal(entry.sceneSha256, source.sceneSha256);
+    assert.notEqual(entry.image.sha256, entry.model.sha256);
+    assert.equal(entry.promptSha256, sha(prompt.prompt));
+    assert.equal(entry.promptRecordSha256, sha(JSON.stringify(prompt)));
+    assert.equal(prompt.output, item.shot.src);
+    assert.ok(prompt.prompt.length > 100 && entry.review.length > 20);
+    assert.equal(entry.review, prompt.review);
+    assert.deepEqual(
+      entry.references.map((r: { src: string }) => r.src),
+      prompt.references,
+    );
+    assert.ok(entry.references.length > 0);
+    for (const asset of [entry.image, entry.model, ...entry.references]) {
+      assert.match(
+        asset.src,
+        /^\.\/gallery\/gallery-01[23]\/images\/[a-z0-9-]+\.png$/,
+      );
+      const bytes = read(asset.src);
+      assert.equal(sha(bytes), asset.sha256, `${item.id}: ${asset.src}`);
+      assert.equal(bytes.readUInt32BE(16), asset.width);
+      assert.equal(bytes.readUInt32BE(20), asset.height);
+    }
   }
 });
 

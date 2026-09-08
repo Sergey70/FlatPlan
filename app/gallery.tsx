@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   galleryConcepts,
-  galleryImageCount,
+  galleryFinishedImageCount,
   galleryLayouts,
   galleryStyles,
   type GalleryConcept,
@@ -52,7 +52,7 @@ function ConceptImage({
     <img
       className="gallery-render"
       src={image.src}
-      alt={`${concept.layout.name} · ${concept.style.name}. ${image.label}.`}
+      alt={`${concept.layout.name} · ${concept.style.name}. ${image.label}. ${image.kind === 'generated' ? 'Фотореалистичная визуализация готового интерьера' : '3D-модель по плану'}.`}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
       onError={() => setFailed(true)}
@@ -62,25 +62,53 @@ function ConceptImage({
 
 function ImageViewer({ concept }: { concept: GalleryConcept }) {
   const [index, setIndex] = useState(0);
-  const image = concept.images[index];
-  const move = (offset: number) =>
+  const [showModel, setShowModel] = useState(false);
+  const selected = concept.images[index];
+  const image = showModel
+    ? { ...selected, src: selected.modelSrc, kind: 'model' as const }
+    : selected;
+  function selectIndex(next: number) {
+    setIndex(next);
+    setShowModel(false);
+  }
+  const move = (offset: number) => {
+    setShowModel(false);
     setIndex(
       (current) =>
         (current + offset + concept.images.length) % concept.images.length,
     );
+  };
   function navigate(event: KeyboardEvent<HTMLButtonElement>) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    if (event.key === 'Home') setIndex(0);
-    else if (event.key === 'End') setIndex(concept.images.length - 1);
+    if (event.key === 'Home') selectIndex(0);
+    else if (event.key === 'End') selectIndex(concept.images.length - 1);
     else move(event.key === 'ArrowRight' ? 1 : -1);
   }
   return (
-    <fieldset className="gallery-viewer">
+    <fieldset className="gallery-viewer" data-image-kind={image.kind}>
       <legend className="sr-only">
         Ракурсы: {concept.layout.name} · {concept.style.name}
       </legend>
       <ConceptImage key={image.src} concept={concept} image={image} eager />
+      {selected.kind === 'generated' && (
+        <div className="gallery-source-options">
+          <Button
+            variant="outline"
+            aria-pressed={!showModel}
+            onClick={() => setShowModel(false)}
+          >
+            Готовый интерьер
+          </Button>
+          <Button
+            variant="outline"
+            aria-pressed={showModel}
+            onClick={() => setShowModel(true)}
+          >
+            3D-основа
+          </Button>
+        </div>
+      )}
       <div className="gallery-viewer-controls">
         <Button
           variant="outline"
@@ -115,13 +143,18 @@ function ImageViewer({ concept }: { concept: GalleryConcept }) {
             className="gallery-thumbnail"
             aria-pressed={shotIndex === index}
             onKeyDown={navigate}
-            onClick={() => setIndex(shotIndex)}
+            onClick={() => selectIndex(shotIndex)}
           >
             <img src={shot.src} alt="" loading="lazy" decoding="async" />
             <span>{shot.label}</span>
           </button>
         ))}
       </div>
+      <p className="gallery-image-note">
+        {image.kind === 'generated'
+          ? 'Фотореалистичная визуализация отделки по 3D-основе. Точные размеры и расположение проёмов — на схеме и в модели.'
+          : '3D-модель из файла .plan: точная геометрия, условная детализация предметов.'}
+      </p>
       <a
         className="gallery-text-link"
         href={image.src}
@@ -182,7 +215,7 @@ function Detail({ concept }: { concept: GalleryConcept }) {
             <span className="gallery-eyebrow">Концепция {concept.number}</span>
             <DialogTitle>{concept.style.name}</DialogTitle>
             <DialogDescription>
-              {concept.layout.name} · Рендер модели из .plan
+              {concept.layout.name} · Визуализации готового интерьера
             </DialogDescription>
           </div>
           <DialogClose
@@ -200,10 +233,6 @@ function Detail({ concept }: { concept: GalleryConcept }) {
         <div className="gallery-detail-grid">
           <div>
             <ImageViewer concept={concept} />
-            <p className="gallery-image-note">
-              Изображение получено из модели редактора. Контуры, проёмы и
-              габариты перенесены из .plan; детали мебели и отделка условные.
-            </p>
             {concept.imageNote && (
               <p className="gallery-image-note">{concept.imageNote}</p>
             )}
@@ -275,8 +304,9 @@ export default function Gallery() {
             <p className="gallery-eyebrow">Планировка и отделка</p>
             <h1 id="gallery-title">Варианты интерьера</h1>
             <p className="gallery-intro">
-              Визуализации планировок из файла .plan в трёх палитрах отделки. В
-              каждом варианте — несколько ракурсов интерьера и общий вид.
+              Готовый интерьер в трёх вариантах отделки. Фотореалистичные
+              изображения созданы по плану квартиры; в каждом варианте доступно
+              несколько ракурсов.
             </p>
             <div className="gallery-numbers">
               <span>
@@ -286,7 +316,7 @@ export default function Gallery() {
                 <strong>{galleryStyles.length}</strong> палитры
               </span>
               <span>
-                <strong>{galleryImageCount}</strong> изображения
+                <strong>{galleryFinishedImageCount}</strong> визуализаций
               </span>
             </div>
             <a className="gallery-hero-link" href="#concepts">
@@ -299,7 +329,7 @@ export default function Gallery() {
               <span>
                 {featured.number} / {featured.style.name}
               </span>
-              <span>План квартиры из файла .plan</span>
+              <span>Кухня · готовый интерьер</span>
             </figcaption>
           </figure>
         </section>
@@ -318,9 +348,9 @@ export default function Gallery() {
               сохранены координаты стен, проёмов и предметов из файла.
             </p>
             <p className="gallery-muted">
-              Рендеры и схемы построены по одной модели. В файле нет готовых
-              3D-моделей предметов: их внешний вид восстановлен условно, с
-              сохранением габаритов. Палитры отделки — варианты оформления.
+              Фотореалистичные изображения сгенерированы по ракурсам 3D-модели и
+              показывают материалы, мебель и освещение после ремонта. В
+              просмотре доступна 3D-основа для сверки с планом.
             </p>
           </div>
         </section>
@@ -406,8 +436,12 @@ export default function Gallery() {
                   <span className="gallery-card-number">{concept.number}</span>
                   <span className="gallery-card-views">
                     <Images size={14} aria-hidden="true" />
-                    {concept.images.length}{' '}
-                    {concept.images.length === 5 ? 'ракурсов' : 'ракурса'}
+                    {
+                      concept.images.filter(
+                        (image) => image.kind === 'generated',
+                      ).length
+                    }{' '}
+                    визуализации
                   </span>
                 </div>
                 <div className="gallery-card-body">
@@ -532,8 +566,8 @@ export default function Gallery() {
                 <div>
                   <DialogTitle>Сравнение концепций</DialogTitle>
                   <DialogDescription>
-                    Несколько ракурсов и схема каждого варианта. Геометрия из
-                    .plan; детали мебели и материалы показаны условно.
+                    Фотореалистичные варианты отделки и несколько ракурсов. Для
+                    сверки планировки доступна 3D-основа каждого кадра.
                   </DialogDescription>
                 </div>
                 <DialogClose

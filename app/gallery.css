@@ -876,6 +876,17 @@
   gap: 12px;
   margin: 12px 0;
 }
+.gallery-source-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.gallery-source-options button[aria-pressed='true'] {
+  color: #fff;
+  background: #3c594b;
+  border-color: #3c594b;
+}
 .gallery-viewer-controls output {
   flex: 1;
   min-width: 0;

@@ -1,6 +1,7 @@
-import { palettes, type PaletteId } from './apartment.ts';
+import { type PaletteId } from './apartment.ts';
 import { planLayouts, PLAN_REVISION } from './plan-data.ts';
 import { galleryShots, GALLERY_REVISION } from './gallery-shots.ts';
+export const GALLERY_FINISH_REVISION = 'gallery-013';
 const descriptions: Record<string, string> = {
   'plan-2':
     'Кухня 21,43 м² внизу, спальня 13,55 м² у верхнего левого окна, комната 14,91 м², гардеробная, лоджия и санузел с ванной.',
@@ -25,32 +26,40 @@ export const galleryLayouts = ['plan-2', 'bath-1', 'bath-2', 'bath-3'].map(
         ? 'Четыре оконных и французских проёма'
         : 'Самостоятельная схема санузла',
       tradeoff:
-        'Положение и размеры объектов соответствуют файлу .plan. Детали мебели и материалы показаны условно.',
+        '3D-основа сохраняет геометрию файла .plan. Фотореалистичные изображения показывают вариант завершённой отделки.',
       walls: `${layout.walls.length} стеновых отрезков · высота 2,70 м`,
     };
   },
 );
 const styleInfo: Record<
   PaletteId,
-  { name: string; mood: string; description: string }
+  {
+    name: string;
+    mood: string;
+    description: string;
+    swatches: [string, string, string, string];
+  }
 > = {
   natural: {
     name: 'Светлая отделка',
     mood: 'Светлое дерево и спокойный текстиль',
     description:
-      'Светлая палитра редактора: дерево, нейтральные стены, текстиль и камень.',
+      'Светлый дуб, белые стены, льняной текстиль и светлый камень. Спокойный современный интерьер.',
+    swatches: ['#f1efeb', '#d5c4a8', '#e0d7ca', '#e4dfd3'],
   },
   warm: {
     name: 'Тёплая отделка',
     mood: 'Тёплые оттенки дерева и ткани',
     description:
-      'Тёплая палитра редактора. Цвета отделки меняются при сохранении всей геометрии и расстановки.',
+      'Медовый дуб, тёплые нейтральные стены, бежевый текстиль и бронзовые детали.',
+    swatches: ['#e9dfcf', '#bc8d51', '#cbbb9f', '#d6c5a9'],
   },
   contrast: {
     name: 'Контрастная отделка',
     mood: 'Выразительные акценты',
     description:
-      'Контрастная палитра редактора с более тёмными материалами и выразительным текстилем.',
+      'Тёмный орех, светло-серые стены, графитовый текстиль и чёрные металлические детали.',
+    swatches: ['#d9d6d0', '#645246', '#858482', '#cfc7bb'],
   },
 };
 export const galleryStyles = (['natural', 'warm', 'contrast'] as const).map(
@@ -58,10 +67,10 @@ export const galleryStyles = (['natural', 'warm', 'contrast'] as const).map(
     id,
     ...styleInfo[id],
     materials: [
-      { name: 'Стены', color: palettes[id].wall },
-      { name: 'Дерево', color: palettes[id].wood },
-      { name: 'Текстиль', color: palettes[id].fabric },
-      { name: 'Камень', color: palettes[id].stone },
+      { name: 'Стены', color: styleInfo[id].swatches[0] },
+      { name: 'Дерево', color: styleInfo[id].swatches[1] },
+      { name: 'Текстиль', color: styleInfo[id].swatches[2] },
+      { name: 'Камень', color: styleInfo[id].swatches[3] },
     ],
   }),
 );
@@ -71,7 +80,9 @@ export const galleryConcepts = galleryLayouts.flatMap((layout) =>
   galleryStyles.map((style, index) => {
     const images = galleryShots(layout.id).map((shot) => ({
       ...shot,
-      src: `./gallery/${GALLERY_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
+      kind: shot.cutaway ? ('model' as const) : ('generated' as const),
+      modelSrc: `./gallery/${GALLERY_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
+      src: `./gallery/${shot.cutaway ? GALLERY_REVISION : GALLERY_FINISH_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
     }));
     return {
       id: `${layout.id}-${style.id}`,
@@ -87,6 +98,11 @@ export const galleryConcepts = galleryLayouts.flatMap((layout) =>
 );
 export const galleryImageCount = galleryConcepts.reduce(
   (sum, concept) => sum + concept.images.length,
+  0,
+);
+export const galleryFinishedImageCount = galleryConcepts.reduce(
+  (sum, concept) =>
+    sum + concept.images.filter((image) => image.kind === 'generated').length,
   0,
 );
 export type GalleryConcept = (typeof galleryConcepts)[number];
