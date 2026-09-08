@@ -4,9 +4,9 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-010 implemented; publication pending** — reconcile the newer local Plan v3 export (15:35) with every retained scene. Keep the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Remove the eight now-absent loose objects, update the widened/moved upper-room nightstand and precise wall/opening coordinates. Correct source room-label anchors, bed orientation and door/frame representation. Preserve existing user edits with an anonymous, field-level source delta; refresh gallery assets and publish after acceptance. Catalog details and absent heights remain illustrative; no source files or original identifiers are published.
+**PLAN-010 complete and published** — reconciled the model with the newer 15:35 Plan v3 export. Four source scenes retain the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Updated geometry, openings and nightstand, removed obsolete loose objects, corrected labels, beds and round 2D silhouettes, added door leaves/swing arcs, preserved saved user edits, and regenerated the gallery. Local, CI and public acceptance all passed. No active implementation work remains.
 
-Acceptance: independent comparison of extracted geometry with the supplied file; regression tests for conversion, door/label geometry and saved-project migration; `npm run verify`; complete `npm run test:browser`; regenerated gallery provenance, visual review, final diff, CI deployment and public-source/gallery checks. No external blockers. Previous published revision: PLAN-009.
+Acceptance completed: independent 2160-value comparison with the supplied file; 48 unit/regression tests, lint, TypeScript and production build; complete final browser acceptance locally and in CI; visual and diff review; public source/gallery checks; byte comparison of every published production file. No blockers.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -18,7 +18,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 - Source room `pc` anchors now drive both 2D and 3D labels. Fixed short-end headboard orientation for both beds. Added static door leaves and 2D swing arcs, matching the supplied screenshot and orientation codes; inner balcony door is paired, outer balcony glazing remains fixed. Frame plane uses `pcb` while the wall cutout remains in the wall centre plane. Round furniture now projects its mesh silhouette instead of a rectangular bounding box.
 - An anonymous canonical delta updates untouched fields in PLAN-008/009 current and saved scenes, preserving edited transforms/materials/names, deleted objects and custom arrangements. Invalid combinations retain the complete edited root. An unchanged retired loose starter is removed; edited loose arrangements survive. A real previous canonical model upgrades exactly to the new complete model. Regression fixture is a compact anonymous subset of the actual previous canonical export.
 - Regenerated all 12 PNGs and four SVGs under `public/gallery/plan-010/`; removed previous gallery assets. Scene/image provenance passes. Existing setup/start/test/stop/reset/import instructions updated. No new dependencies; source file and source identifiers remain private.
-- Local `npm run verify` passed 48 tests, lint, typecheck and build. Complete final `npm run test:browser` passed: source/migration/door/label checks, legacy editor, 3D interactions, JSON, reset/recovery, touch and mobile widths. Inspected final 2D and 3D screenshots and mobile interface; reviewed source and migration diffs with `git diff --check`. Only CI deployment and public acceptance remain. Local evidence under ignored `.local/qa/plan-010/`.
+- Local `npm run verify` passed 48 tests, lint, typecheck and build. Complete final `npm run test:browser` passed: source/migration/door/label checks, legacy editor, 3D interactions, JSON, reset/recovery, touch and mobile widths. Inspected final 2D and 3D screenshots and mobile interface; reviewed source and migration diffs with `git diff --check`. GitHub Actions independently passed build and full browser acceptance and deployed successfully. Public source/gallery acceptance also passed; all 27 production files returned HTTP 200 and matched the final `dist/` byte-for-byte. Local evidence under ignored `.local/qa/plan-010/`.
 
 ## PLAN-009 implementation and acceptance
 
@@ -59,6 +59,8 @@ Repository: https://github.com/Sergey70/FlatPlan
 Editor: https://sergey70.github.io/FlatPlan/
 Default deep link: https://sergey70.github.io/FlatPlan/?layout=plan-2
 Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
+
+PLAN-010 published application: `55a79785b7992646c5e99f1c055f5579a0f41e43`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34236438360. Public acceptance covers the four current scenes, source labels/windows/door arcs, old PLAN-008 and actual PLAN-009 storage migrations, preserved edits/reload, retired left link, mobile widths and 12 gallery PNGs/four SVGs. All 27 public production files match the verified build byte-for-byte. Evidence remains ignored in `.local/qa/plan-010-public/` and `.local/qa/plan-010/public-assets.json`. The completion-record commit changes documentation only.
 
 PLAN-008 published application: `12082659873f04a70495d109aa65a96e7b0c863f`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34227401936.
 
