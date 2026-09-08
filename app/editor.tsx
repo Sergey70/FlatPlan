@@ -66,6 +66,7 @@ import {
   exportProject,
   readStoredProject,
   persistProject,
+  clearStoredProject,
   pushHistory,
   undoHistory,
   redoHistory,
@@ -748,7 +749,9 @@ export default function Editor() {
     fileInput = useRef<HTMLInputElement>(null),
     cameraEmitted = useRef<EditorView['camera'] | undefined>(undefined),
     importRef = useRef<EditorProject | null>(null),
+    importRequest = useRef(0),
     [importName, setImportName] = useState<string | null>(null);
+  const [resetPending, setResetPending] = useState(false);
   const selected = project.scene.view.selected,
     node = findNode(project.scene.objects, selected),
     view = project.scene.view;
@@ -765,6 +768,39 @@ export default function Editor() {
     setHistory((old) => pushHistory(old, next));
     setNotice(null);
   }, []);
+  const replaceProject = useCallback((next: EditorProject) => {
+    // Update refs before any pending autosave or unload can use the old scene.
+    projectRef.current = next;
+    pausedRef.current = false;
+    setHistory({ past: [], present: next, future: [] });
+    setStoragePaused(false);
+    setSavedProject(null);
+    setSaveFailed(false);
+    setError(null);
+    setTool('orbit');
+    setDetail(false);
+    setFilter('');
+    setAdd(false);
+    setVariantName('Новый вариант');
+    cameraEmitted.current = undefined;
+    importRequest.current++;
+    importRef.current = null;
+    setImportName(null);
+    if (fileInput.current) fileInput.current.value = '';
+    setResetPending(false);
+  }, []);
+  function resetUserData() {
+    try {
+      const initial = createInitialProject();
+      clearStoredProject(window.localStorage);
+      replaceProject(initial);
+      setNotice('Пользовательские данные удалены. Открыт исходный план.');
+    } catch (error) {
+      setError(
+        `Не удалось удалить данные: ${(error as Error).message}. Текущий проект сохранён в редакторе. Скачайте JSON и повторите сброс.`,
+      );
+    }
+  }
   const updateView = useCallback((patch: Partial<EditorView>) => {
     setHistory((old) => {
       const next = {
@@ -1015,16 +1051,19 @@ export default function Editor() {
     });
   }
   async function readFile(file: File) {
+    const request = ++importRequest.current;
     try {
       if (file.size > MAX_FILE_BYTES) throw new Error('Максимум 8 МБ.');
       const imported = importProject(await file.text());
+      if (request !== importRequest.current) return;
       importRef.current = imported;
       setImportName(imported.name);
       setError(null);
     } catch (error) {
-      setError((error as Error).message);
+      if (request === importRequest.current) setError((error as Error).message);
     } finally {
-      if (fileInput.current) fileInput.current.value = '';
+      if (request === importRequest.current && fileInput.current)
+        fileInput.current.value = '';
     }
   }
   async function saveImage() {
@@ -1923,9 +1962,8 @@ export default function Editor() {
                       onClick={() =>
                         attempt(() => {
                           const saved = readStoredProject(window.localStorage);
-                          if (saved) commit(saved);
-                          setStoragePaused(false);
-                          setError(null);
+                          replaceProject(saved ?? createInitialProject());
+                          setNotice('Открыт проект из хранилища браузера.');
                         })
                       }
                     >
@@ -1964,6 +2002,39 @@ export default function Editor() {
                     Создать заново
                   </button>
                 </details>
+                <button
+                  className="ed-danger ed-full"
+                  aria-expanded={resetPending}
+                  aria-controls="reset-user-data"
+                  onClick={() => setResetPending((pending) => !pending)}
+                >
+                  <Trash2 />
+                  Сбросить пользовательские данные
+                </button>
+                {resetPending && (
+                  <section
+                    id="reset-user-data"
+                    className="ed-import"
+                    aria-label="Подтверждение сброса"
+                  >
+                    <strong>Удалить все пользовательские данные?</strong>
+                    <p>
+                      Будут удалены изменения планировки, мебели и материалов,
+                      сохранённые варианты, название проекта и настройки вида в
+                      этом браузере. Откроется исходный план.
+                    </p>
+                    <p>
+                      История отмены будет очищена. Сброс нельзя отменить. Для
+                      резервной копии сначала скачайте проект JSON.
+                    </p>
+                    <button onClick={() => setResetPending(false)}>
+                      Отмена
+                    </button>
+                    <button className="ed-danger" onClick={resetUserData}>
+                      Сбросить безвозвратно
+                    </button>
+                  </section>
+                )}
                 <div className="ed-reference">
                   <h3>Основа — техпаспорт</h3>
                   <p>

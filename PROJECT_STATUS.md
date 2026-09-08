@@ -4,7 +4,9 @@ Updated: 2026-09-08.
 
 ## Objective and current phase
 
-Last completed and published iteration: **GALLERY-005**, separate interior concept gallery. Local acceptance, GitHub Actions and public-site checks are complete; GALLERY-006 is active: simplify the gallery introduction into formal wording at the user’s request. Acceptance: build/lint and desktop/mobile visual check, then existing CI and public-page verification. PLAN-004 placed the kitchen at the bathroom wall with independently resizable partitions. UI-003 fixed switch thumbs, PLAN-002 supplied the first partition proposal and EDITOR-001 the full editor. Commits and pushes are explicitly authorized.
+Active iteration: **DATA-007**, a manual permanent reset of saved editor data. Add an explicit confirmation in File, remove only FlatPlan's storage entry, restore the initial project, and clear undo/redo and pending imports. Cancellation or storage deletion failure must preserve the current project. Other open tabs must not silently restore the old save. Acceptance: focused storage tests, `npm run verify`, desktop/mobile browser reset scenarios and existing browser suite, followed by GitHub Pages deployment verification. No new dependencies; actual visitor data is not touched during isolated QA. Commits and pushes are explicitly authorized.
+
+Last published iteration: **GALLERY-006**, formal gallery introduction, application `8c4df68c3ffa39cbd6ae25d3d6bbd310d9277b4c`; deployment succeeded in https://github.com/Sergey70/FlatPlan/actions/runs/34166338337. Its post-publication browser check was blocked by a tool usage limit. Earlier GALLERY-005 supplied the concept gallery, PLAN-004 corrected the kitchen, UI-003 fixed switches, PLAN-002 supplied the partition proposal, and EDITOR-001 the editor.
 
 ## Completed iteration: GALLERY-005
 
@@ -13,6 +15,8 @@ User requests a separate collection of visual renovation/layout concepts. Implem
 Acceptance: `npm run verify`, `npm run test:browser` including gallery filters/details/comparison/mobile and editor-storage preservation; independent source/geometry review, visual review of all generated images and desktop/mobile gallery. Publish through existing GitHub Pages workflow and verify the live gallery and assets.
 
 ## Implemented
+
+- DATA-007 adds **Файл → Сбросить пользовательские данные** with explicit permanent-reset confirmation and JSON backup instructions. It removes only `flatplan.editor.v1`, restores the initial scene and two base arrangements, clears undo/redo and pending/in-flight imports, and resets view/editor controls. Failure to remove storage preserves the current scene and history; cancellation changes nothing. Autosave/unload uses the new project immediately. Other tabs pause on the storage change; loading browser data now replaces their history and opens the initial project when the saved entry is absent, instead of writing their stale scene back. Explicitly continuing the current project in another tab still allows deliberate recovery. No new dependencies.
 
 - GALLERY-005 adds `?view=gallery` and a new-tab link in editor **Варианты → Галерея интерьеров**. Twelve full apartment concept images cross three layouts (closed, glass, open) with four styles (Scandinavian, warm minimalism, modern classic, soft loft). The separate lazy-loaded page has layout/style filters, detail dialogs with materials and exact base-model diagrams, and comparison of any two concepts. Comparison choices survive filter changes; mobile comparison is stacked. Gallery navigation, reload and even a combined gallery/layout query never read or change editor storage.
 - All 12 PNGs were visually inspected and copied unchanged to `public/gallery/images/`; total gallery assets about 24 MiB. Images load lazily, support retry and full-image viewing. The gallery itself needs no WebGL, service, API key or new dependency. Original project geometry and presets remain unchanged.
@@ -29,6 +33,8 @@ Acceptance: `npm run verify`, `npm run test:browser` including gallery filters/d
 - Existing full editor capabilities remain: common 2D/3D document, nested geometry/dimensions/materials, validated wall openings and floor holes, desktop/touch manipulation, history, arrangements, JSON import/export, camera, lighting and local save recovery. UI-003's switch fix remains in place. No new dependencies.
 
 ## Verification
+
+- DATA-007: focused storage deletion regression passed, followed by `npm run verify` (**34 tests**, lint, TypeScript and production build) and the complete `npm run test:browser` suite. New browser coverage verifies cancellation, denied deletion, corrupted save reset, exact initial geometry/arrangements, cleared undo/redo and pending import, persistence after reload, unrelated-key preservation, other-tab unload protection, empty-storage recovery, mobile confirmation and failed autosave after successful deletion. Desktop/360 px confirmation screenshots visually inspected; no overflow or page errors. Existing gallery, editor, geometry manipulation, JSON, upgrade and touch scenarios passed. Final diff reviewed. Publication and public-site verification are next.
 
 - GALLERY-005: `npm run verify` passed all **33 tests**, lint, TypeScript and production build. Four gallery checks cover all 12 asset/layout pairs, exact preservation of five windows and original structures, the intended wall differences and deterministic SVG exports.
 - `npm run test:browser` passed gallery and the entire existing editor suite against the production build: 12 image decodes, three diagrams, both filters, detail/compare/clear, two-selection limit, keyboard Escape/focus restoration, 360/390/768 widths, mobile dialogs, byte-for-byte storage preservation and reload. Existing desktop/touch editing, JSON transfer, 3D manipulation, save recovery and both old-project upgrades still pass; no page errors.
@@ -61,8 +67,8 @@ Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, succ
 
 ## Next
 
-Wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied. No required work remains for GALLERY-005.
+Publish DATA-007 through the existing GitHub Pages workflow and verify the public reset flow in isolated browser contexts. Afterwards wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied.
 
 ## GALLERY-006 follow-up
 
-Replace the promotional two-line slogan and italic styling with «Варианты интерьера». Use a concise factual introduction, neutral section label and a direct collection link. No layout data or editor behavior changes. `npm run lint` and `npm run build` pass; isolated Chromium checks and visual review pass at 1440/390/360 widths with the new heading, no italic slogan and no horizontal overflow. Final diff reviewed. Publication pending.
+Replace the promotional two-line slogan and italic styling with «Варианты интерьера». Use a concise factual introduction, neutral section label and a direct collection link. No layout data or editor behavior changes. `npm run lint` and `npm run build` pass; isolated Chromium checks and visual review pass at 1440/390/360 widths with the new heading, no italic slogan and no horizontal overflow. Final diff reviewed. Published successfully; see current phase for the deployment and public-check limitation.

@@ -21,6 +21,7 @@ import {
   exportProject,
   persistProject,
   readStoredProject,
+  clearStoredProject,
   STORAGE_KEY,
   MAX_FILE_BYTES,
   pushHistory,
@@ -194,6 +195,34 @@ test('full JSON round-trip and browser reload retain nested edits, arrangements 
         p,
       ),
     /Quota/,
+  );
+});
+
+test('permanent reset removes only editor data, including corrupt saves, and reports storage errors', () => {
+  for (const value of [exportProject(fresh()), '{broken', null]) {
+    const entries = new Map([['other-project', 'keep']]);
+    if (value !== null) entries.set(STORAGE_KEY, value);
+    clearStoredProject({
+      removeItem: (key) => {
+        entries.delete(key);
+      },
+    });
+    assert.deepEqual([...entries], [['other-project', 'keep']]);
+    clearStoredProject({
+      removeItem: (key) => {
+        entries.delete(key);
+      },
+    });
+    assert.deepEqual([...entries], [['other-project', 'keep']]);
+  }
+  assert.throws(
+    () =>
+      clearStoredProject({
+        removeItem: () => {
+          throw new Error('Storage access denied');
+        },
+      }),
+    /Storage access denied/,
   );
 });
 

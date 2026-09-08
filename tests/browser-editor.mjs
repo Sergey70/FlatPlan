@@ -518,9 +518,269 @@ try {
     await cp.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
     '{broken-original',
   );
+  await panel(cp, 'Файл');
+  await cp
+    .getByRole('button', {
+      name: 'Сбросить пользовательские данные',
+      exact: true,
+    })
+    .click();
+  await cp
+    .getByRole('button', { name: 'Сбросить безвозвратно', exact: true })
+    .click();
+  await saved(cp);
+  assert.equal((await status(cp)).status.storagePaused, false);
+  assert.equal(
+    JSON.parse(
+      await cp.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
+    ).name,
+    initial.name,
+  );
   await corrupt.close();
   console.log(
     'PASS recovery: quota error remains visible; corrupt storage is not overwritten',
+  );
+
+  // Reset is explicitly confirmed, scoped to FlatPlan and permanent across reload/undo.
+  const resetContext = await browser.newContext({
+    viewport: { width: 1365, height: 900 },
+  });
+  await installTools(resetContext);
+  const resetPage = await resetContext.newPage();
+  resetPage.on('pageerror', (error) => errors.push(error.message));
+  await resetPage.goto(url);
+  await loaded(resetPage);
+  const baseline = await project(resetPage);
+  await panel(resetPage, 'Файл');
+  await editField(resetPage, 'Название проекта', 'Личный проект для сброса');
+  await call(resetPage, 'edit_editor_object', {
+    action: 'remove',
+    id: partitionIds[0],
+  });
+  await call(resetPage, 'configure_editor_view', {
+    mode: '2d',
+    night: true,
+    palette: 'warm',
+    planZoom: 1.5,
+  });
+  await call(resetPage, 'manage_editor_arrangement', {
+    action: 'save',
+    name: 'Удаляемый вариант',
+  });
+  await saved(resetPage);
+  await resetPage.evaluate(() => localStorage.setItem('other-project', 'keep'));
+  const userProject = await project(resetPage);
+  const userBytes = await resetPage.evaluate(() =>
+    localStorage.getItem('flatplan.editor.v1'),
+  );
+  const confirmReset = resetPage.getByRole('region', {
+    name: 'Подтверждение сброса',
+    exact: true,
+  });
+  const resetButton = resetPage.getByRole('button', {
+    name: 'Сбросить пользовательские данные',
+    exact: true,
+  });
+  await resetButton.click();
+  await confirmReset
+    .getByRole('button', { name: 'Отмена', exact: true })
+    .click();
+  assert.deepEqual(await project(resetPage), userProject);
+  assert.equal(
+    await resetPage.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
+    userBytes,
+  );
+  assert.equal(
+    await resetPage
+      .getByRole('button', { name: 'Отменить изменение', exact: true })
+      .isEnabled(),
+    true,
+  );
+
+  // Failed deletion must retain the exact save, current project and undo history.
+  await resetPage.evaluate(() => {
+    window.__qaRemoveItem = Storage.prototype.removeItem;
+    Storage.prototype.removeItem = () => {
+      throw new DOMException('QA deletion denied', 'SecurityError');
+    };
+  });
+  await resetButton.click();
+  await confirmReset
+    .getByRole('button', { name: 'Сбросить безвозвратно', exact: true })
+    .click();
+  await resetPage
+    .getByRole('alert')
+    .filter({ hasText: 'Не удалось удалить данные' })
+    .waitFor();
+  assert.deepEqual(await project(resetPage), userProject);
+  assert.equal(
+    await resetPage.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
+    userBytes,
+  );
+  assert.equal(
+    await resetPage
+      .getByRole('button', { name: 'Отменить изменение', exact: true })
+      .isEnabled(),
+    true,
+  );
+  await resetPage.evaluate(() => {
+    Storage.prototype.removeItem = window.__qaRemoveItem;
+  });
+  await confirmReset
+    .getByRole('button', { name: 'Отмена', exact: true })
+    .click();
+
+  // Pending imports are also cleared; a second tab must stop saving its stale scene.
+  await resetPage.locator('input[type=file]').setInputFiles({
+    name: 'pending.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(userBytes),
+  });
+  await resetPage
+    .getByRole('region', { name: 'Подтверждение импорта', exact: true })
+    .waitFor();
+  const otherTab = await resetContext.newPage();
+  otherTab.on('pageerror', (error) => errors.push(error.message));
+  await otherTab.goto(url);
+  await loaded(otherTab);
+  await saved(otherTab);
+  await resetButton.click();
+  await confirmReset.scrollIntoViewIfNeeded();
+  await resetPage.screenshot({
+    path: path.join(out, 'reset-confirm-desktop.png'),
+  });
+  await confirmReset
+    .getByRole('button', { name: 'Сбросить безвозвратно', exact: true })
+    .click();
+  await saved(resetPage);
+  const clean = await project(resetPage);
+  assert.equal(clean.name, baseline.name);
+  assert.deepEqual(clean.scene.objects, baseline.scene.objects);
+  assert.deepEqual(clean.arrangements, baseline.arrangements);
+  assert.equal(clean.activeArrangement, baseline.activeArrangement);
+  for (const key of ['mode', 'night', 'palette', 'planZoom', 'selected'])
+    assert.deepEqual(clean.scene.view[key], baseline.scene.view[key]);
+  assert.equal(
+    await resetPage
+      .getByRole('region', { name: 'Подтверждение импорта', exact: true })
+      .count(),
+    0,
+  );
+  for (const name of ['Отменить изменение', 'Повторить изменение'])
+    assert.equal(
+      await resetPage.getByRole('button', { name, exact: true }).isDisabled(),
+      true,
+    );
+  await call(resetPage, 'editor_history', { action: 'undo' });
+  await call(resetPage, 'editor_history', { action: 'redo' });
+  assert.deepEqual(await project(resetPage), clean);
+  await otherTab.waitForFunction(
+    () =>
+      window.__flatplanTools.get_editor_project.execute({}).status
+        .storagePaused,
+  );
+  await otherTab.evaluate(() => {
+    window.dispatchEvent(new Event('beforeunload'));
+    window.dispatchEvent(new Event('pagehide'));
+  });
+  assert.equal(
+    JSON.parse(
+      await otherTab.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
+    ).name,
+    baseline.name,
+  );
+  await panel(otherTab, 'Файл');
+  await otherTab
+    .getByRole('button', {
+      name: 'Загрузить сохранённое в браузере',
+      exact: true,
+    })
+    .click();
+  assert.deepEqual(
+    (await project(otherTab)).arrangements,
+    baseline.arrangements,
+  );
+  assert.equal(
+    await otherTab
+      .getByRole('button', { name: 'Отменить изменение', exact: true })
+      .isDisabled(),
+    true,
+  );
+  await otherTab.close();
+  await resetPage.reload();
+  await loaded(resetPage);
+  await saved(resetPage);
+  assert.deepEqual(
+    (await project(resetPage)).scene.objects,
+    baseline.scene.objects,
+  );
+  assert.deepEqual(
+    (await project(resetPage)).arrangements,
+    baseline.arrangements,
+  );
+  assert.equal(
+    await resetPage.evaluate(() => localStorage.getItem('other-project')),
+    'keep',
+  );
+
+  // Mobile reset is usable even when the browser cannot write the fresh default save.
+  await resetPage.setViewportSize({ width: 360, height: 844 });
+  await panel(resetPage, 'Файл');
+  await editField(resetPage, 'Название проекта', 'Повторный сброс');
+  await saved(resetPage);
+  const emptyTab = await resetContext.newPage();
+  await emptyTab.goto(url);
+  await loaded(emptyTab);
+  await saved(emptyTab);
+  await resetPage.evaluate(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException('QA quota exceeded', 'QuotaExceededError');
+    };
+  });
+  await resetButton.click();
+  await confirmReset.scrollIntoViewIfNeeded();
+  await noOverflow(resetPage);
+  await resetPage.screenshot({
+    path: path.join(out, 'reset-confirm-mobile.png'),
+  });
+  await confirmReset
+    .getByRole('button', { name: 'Сбросить безвозвратно', exact: true })
+    .click();
+  await resetPage
+    .getByRole('alert')
+    .filter({ hasText: 'Не удалось сохранить в браузере' })
+    .waitFor();
+  assert.equal(
+    await resetPage.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
+    null,
+  );
+  await emptyTab.waitForFunction(
+    () =>
+      window.__flatplanTools.get_editor_project.execute({}).status
+        .storagePaused,
+  );
+  await panel(emptyTab, 'Файл');
+  await emptyTab
+    .getByRole('button', {
+      name: 'Загрузить сохранённое в браузере',
+      exact: true,
+    })
+    .click();
+  await saved(emptyTab);
+  assert.equal((await project(emptyTab)).name, baseline.name);
+  assert.deepEqual(
+    (await project(emptyTab)).arrangements,
+    baseline.arrangements,
+  );
+  assert.equal(
+    await emptyTab
+      .getByRole('button', { name: 'Отменить изменение', exact: true })
+      .isDisabled(),
+    true,
+  );
+  await resetContext.close();
+  console.log(
+    'PASS permanent reset: cancellation, deletion failure, defaults, variants, history, pending import, reload, other tabs, storage scope, mobile and quota recovery',
   );
 
   // Existing browser projects change only after an explicit request, with a full backup.

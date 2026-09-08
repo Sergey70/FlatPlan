@@ -488,6 +488,9 @@ export function readStoredProject(storage: StoragePort): EditorProject | null {
 export function persistProject(storage: StoragePort, project: EditorProject) {
   storage.setItem(STORAGE_KEY, exportProject(project));
 }
+export function clearStoredProject(storage: Pick<Storage, 'removeItem'>) {
+  storage.removeItem(STORAGE_KEY);
+}
 export interface History {
   past: EditorProject[];
   present: EditorProject;
