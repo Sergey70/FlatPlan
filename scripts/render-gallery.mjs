@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { galleryConcepts } from '../lib/gallery-data.ts';
-import { GALLERY_REVISION } from '../lib/gallery-shots.ts';
-import { gallerySceneKey } from './gallery-scene-key.mjs';
 import {
-  createPlanProject,
-  PLAN_REVISION,
-  planLayouts,
-  planArrangementId,
-} from '../lib/plan-project.ts';
+  GALLERY_REVISION,
+  ORIGINAL_MODEL_REVISION,
+} from '../lib/gallery-shots.ts';
+import { createGalleryScene } from '../lib/room-proposal.ts';
+import { gallerySceneKey } from './gallery-scene-key.mjs';
+import { PLAN_REVISION, planLayouts } from '../lib/plan-project.ts';
 
 const output = resolve(`public/gallery/${GALLERY_REVISION}`);
 const url = process.env.FLATPLAN_RENDER_URL || 'http://127.0.0.1:4189/';
@@ -58,30 +57,52 @@ try {
   await page.waitForFunction(
     () => typeof window.renderGalleryShot === 'function',
   );
-  const canonical = createPlanProject();
+  const original = JSON.parse(
+    await readFile(
+      resolve(`public/gallery/${ORIGINAL_MODEL_REVISION}/manifest.json`),
+      'utf8',
+    ),
+  );
   const entries = [];
   const sha = (value) => createHash('sha256').update(value).digest('hex');
   for (const concept of galleryConcepts.filter(
     (c) => !selected || c.id === selected,
   )) {
-    const expected = canonical.arrangements.find(
-      (a) => a.id === planArrangementId(concept.layout.id),
-    );
     for (const shot of concept.images) {
+      const expected = createGalleryScene(concept.layout.id, shot.id);
+      const id = `${concept.id}-${shot.id}`;
+      if (shot.modelSrc.includes(`/${ORIGINAL_MODEL_REVISION}/`)) {
+        const entry = original.entries.find((e) => e.id === id);
+        assert.ok(entry, id);
+        assert.equal(
+          entry.sceneSha256,
+          sha(gallerySceneKey(expected.objects)),
+          id,
+        );
+        assert.deepEqual(entry.camera, shot.camera, id);
+        assert.equal(entry.fov, shot.fov, id);
+        assert.equal(entry.cutaway, shot.cutaway, id);
+        assert.equal(
+          entry.imageSha256,
+          sha(await readFile(resolve('public', shot.modelSrc))),
+          id,
+        );
+        entries.push(entry);
+        continue;
+      }
       const actual = await page.evaluate(
         ({ conceptId, shotId }) => window.renderGalleryShot(conceptId, shotId),
         { conceptId: concept.id, shotId: shot.id },
       );
       assert.equal(
         gallerySceneKey(actual.objects),
-        gallerySceneKey(expected.scene.objects),
+        gallerySceneKey(expected.objects),
         `Rendered scene differs from source: ${concept.id}/${shot.id}`,
       );
       // Wait for the oak texture and its scene rebuild before exporting.
       await page.waitForLoadState('networkidle');
       const dataUrl = await page.evaluate(() => window.exportGalleryShot());
       const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
-      const id = `${concept.id}-${shot.id}`;
       await writeFile(resolve(output, 'images', `${id}.png`), buffer);
       entries.push({
         id,
@@ -95,7 +116,7 @@ try {
         ceilingHeight: shot.cutaway
           ? null
           : planLayouts.find((l) => l.id === concept.layout.id).height / 100,
-        sceneSha256: sha(gallerySceneKey(expected.scene.objects)),
+        sceneSha256: sha(gallerySceneKey(expected.objects)),
         imageSha256: sha(buffer),
         width: buffer.readUInt32BE(16),
         height: buffer.readUInt32BE(20),

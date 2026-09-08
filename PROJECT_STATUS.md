@@ -4,9 +4,17 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**GALLERY-013 complete and published.** The gallery shows photorealistic finished interiors generated with built-in imagegen. Source geometry remains PLAN-011. No active implementation or blockers.
+**ROOM-014 implemented; publication verification pending.** The room has a separate bed/workstation proposal and three regenerated finished interiors. PLAN-011 source geometry and personal saves remain intact. No blockers.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+
+## ROOM-014 implementation and acceptance
+
+- User-requested assumption for room 14.91 m²: retain the 90 × 200 cm bed and nightstand, replace old desk/chairs/lounge chair with a 160 × 70 cm desk, two 27-inch monitors, desktop computer, keyboard/mouse and an office chair facing the screens. Screens are perpendicular to balcony glazing, with daylight from the seated user's left. More than 1.05 m remains behind the chair; furniture clears entrance and balcony swing. Actual direct-sun shading depends on building orientation.
+- `lib/room-proposal.ts` creates an independent furniture study. All source walls/openings, bed/nightstand and other rooms remain equal to PLAN-011. Gallery room/overview/SVG share the proposal; downloadable JSON contains it as an active fifth arrangement alongside the four original arrangements. No saved-project migration, source edit, dependencies or automatic storage writes. Import uses the existing file workflow.
+- Added three reviewed photorealistic room PNGs (1536 × 1024) using built-in imagegen: warm from the new model, then light/contrast material transfers preserving the accepted workspace. All actual prompts, references and reviews are in `gallery-014/prompts.json`; `finished-manifest.json` verifies 30 current finished images. Six new room/overview model PNGs and their current model manifest accompany the proposal. Other 27 finished images and 36 model references retain their verified original files/scenes. Old published URLs remain available.
+- Local acceptance passed: `npm run verify` (54 tests, lint, TypeScript and build), complete `npm run test:browser`, final diff review. New tests verify chair/screen orientation, daylight geometry, circulation, source preservation, independent JSON/SVG and portable round-trip. Browser checks download/import the proposal in a separate context, allow the expected automatic fit for its initially null camera, verify all other fields and reload; full gallery, source/migration, editor, reset/recovery, desktop/touch/mobile scenarios pass. Reviewed all new images in full size/contact sheet and desktop/mobile UI. Evidence: ignored `.local/qa/room-014/` and `.local/qa/`.
+- README and GALLERY_ASSETS document proposal viewing/download/import, setup/start/test/stop/troubleshooting and the current render/provenance workflow. Next: GitHub Actions and public source/gallery/assets acceptance.
 
 ## GALLERY-013 implementation and acceptance
 

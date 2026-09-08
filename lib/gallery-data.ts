@@ -1,10 +1,19 @@
 import { type PaletteId } from './apartment.ts';
 import { planLayouts, PLAN_REVISION } from './plan-data.ts';
-import { galleryShots, GALLERY_REVISION } from './gallery-shots.ts';
-export const GALLERY_FINISH_REVISION = 'gallery-013';
+import {
+  galleryShots,
+  GALLERY_REVISION,
+  ORIGINAL_MODEL_REVISION,
+} from './gallery-shots.ts';
+import {
+  ROOM_PROPOSAL_NOTE,
+  ROOM_PROPOSAL_REVISION,
+  usesRoomProposal,
+} from './room-proposal.ts';
+export const GALLERY_FINISH_REVISION = 'gallery-014';
 const descriptions: Record<string, string> = {
   'plan-2':
-    'Кухня 21,43 м² внизу, спальня 13,55 м² у верхнего левого окна, комната 14,91 м², гардеробная, лоджия и санузел с ванной.',
+    'Кухня 21,43 м², спальня 13,55 м², комната 14,91 м² с кроватью и рабочим местом, гардеробная, лоджия и санузел с ванной.',
   'bath-1':
     'Первый отдельный вариант санузла: ванна вдоль правой стены и оборудование слева.',
   'bath-2':
@@ -78,21 +87,35 @@ export type GalleryLayout = (typeof galleryLayouts)[number];
 export type GalleryStyle = (typeof galleryStyles)[number];
 export const galleryConcepts = galleryLayouts.flatMap((layout) =>
   galleryStyles.map((style, index) => {
-    const images = galleryShots(layout.id).map((shot) => ({
-      ...shot,
-      kind: shot.cutaway ? ('model' as const) : ('generated' as const),
-      modelSrc: `./gallery/${GALLERY_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
-      src: `./gallery/${shot.cutaway ? GALLERY_REVISION : GALLERY_FINISH_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
-    }));
+    const images = galleryShots(layout.id).map((shot) => {
+      const proposal = usesRoomProposal(layout.id, shot.id);
+      const file = `${layout.id}-${style.id}-${shot.id}.png`;
+      const modelSrc = `./gallery/${proposal ? GALLERY_REVISION : ORIGINAL_MODEL_REVISION}/images/${file}`;
+      return {
+        ...shot,
+        proposal,
+        kind: shot.cutaway ? ('model' as const) : ('generated' as const),
+        modelSrc,
+        src: shot.cutaway
+          ? modelSrc
+          : proposal
+            ? `./gallery/${GALLERY_FINISH_REVISION}/finished/${file}`
+            : `./gallery/gallery-013/images/${file}`,
+      };
+    });
     return {
       id: `${layout.id}-${style.id}`,
       number: `${layout.number}.${index + 1}`,
       layout,
       style,
-      imageNote: undefined as string | undefined,
+      imageNote: layout.id === 'plan-2' ? ROOM_PROPOSAL_NOTE : undefined,
       images,
       image: images[0].src,
-      plan: `./gallery/${PLAN_REVISION}/plans/${layout.id}.svg`,
+      plan: `./gallery/${layout.id === 'plan-2' ? ROOM_PROPOSAL_REVISION : PLAN_REVISION}/plans/${layout.id}.svg`,
+      project:
+        layout.id === 'plan-2'
+          ? `./gallery/${ROOM_PROPOSAL_REVISION}/room-workspace.json`
+          : undefined,
     };
   }),
 );

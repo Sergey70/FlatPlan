@@ -8,11 +8,8 @@ import { planLayouts } from '../lib/plan-data.ts';
 import { polygonContains } from '../lib/apartment.ts';
 import { sceneBounds } from '../lib/editor-geometry.ts';
 import { Vector3 } from 'three';
-import {
-  createPlanProject,
-  PLAN_REVISION,
-  planArrangementId,
-} from '../lib/plan-project.ts';
+import { PLAN_REVISION } from '../lib/plan-project.ts';
+import { createGalleryScene } from '../lib/room-proposal.ts';
 import {
   galleryConcepts,
   galleryLayouts,
@@ -85,7 +82,6 @@ test('gallery images and their source scenes match the render manifest', () => {
       'utf8',
     ),
   );
-  const seed = createPlanProject();
   const sha = (value: string | Buffer) =>
     createHash('sha256').update(value).digest('hex');
   assert.equal(manifest.revision, GALLERY_REVISION);
@@ -118,9 +114,7 @@ test('gallery images and their source scenes match the render manifest', () => {
         ? null
         : planLayouts.find((l) => l.id === entry.layout)!.height / 100,
     );
-    const scene = seed.arrangements.find(
-      (a) => a.id === planArrangementId(entry.layout),
-    )!.scene;
+    const scene = createGalleryScene(entry.layout, entry.shot);
     assert.equal(
       entry.sceneSha256,
       sha(gallerySceneKey(scene.objects)),
@@ -139,7 +133,7 @@ test('30 finished interiors retain reviewed prompts, reference hashes and curren
   const sha = (value: string | Buffer) =>
     createHash('sha256').update(value).digest('hex');
   const manifest = JSON.parse(
-    read(`gallery/${GALLERY_FINISH_REVISION}/manifest.json`).toString(),
+    read(`gallery/${GALLERY_FINISH_REVISION}/finished-manifest.json`).toString(),
   );
   const prompts = JSON.parse(
     read(`gallery/${GALLERY_FINISH_REVISION}/prompts.json`).toString(),
@@ -201,7 +195,7 @@ test('30 finished interiors retain reviewed prompts, reference hashes and curren
     for (const asset of [entry.image, entry.model, ...entry.references]) {
       assert.match(
         asset.src,
-        /^\.\/gallery\/gallery-01[23]\/images\/[a-z0-9-]+\.png$/,
+        /^\.\/gallery\/gallery-01[234]\/(?:images|finished)\/[a-z0-9-]+\.png$/,
       );
       const bytes = read(asset.src);
       assert.equal(sha(bytes), asset.sha256, `${item.id}: ${asset.src}`);
@@ -212,12 +206,9 @@ test('30 finished interiors retain reviewed prompts, reference hashes and curren
 });
 
 test('interior cameras are inside their named source rooms, above the floor and outside furniture', () => {
-  const seed = createPlanProject();
   for (const layout of planLayouts) {
-    const scene = seed.arrangements.find(
-      (a) => a.id === planArrangementId(layout.id),
-    )!.scene;
     for (const shot of galleryShots(layout.id).filter((s) => !s.cutaway)) {
+      const scene = createGalleryScene(layout.id, shot.id);
       const room = layout.rooms.find((r) => r.name === shot.room)!;
       assert.ok(room, shot.label);
       const [x, y, z] = shot.camera.position;

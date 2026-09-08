@@ -32,7 +32,10 @@ assert.deepEqual(
 );
 const sha = (value) => createHash('sha256').update(value).digest('hex');
 async function asset(src) {
-  assert.match(src, /^\.\/gallery\/gallery-01[23]\/images\/[a-z0-9-]+\.png$/);
+  assert.match(
+    src,
+    /^\.\/gallery\/gallery-01[234]\/(?:images|finished)\/[a-z0-9-]+\.png$/,
+  );
   const bytes = await readFile(resolve(base, src));
   assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', src);
   return {
@@ -80,7 +83,7 @@ for (const { id, concept, shot } of expected) {
   });
 }
 await writeFile(
-  resolve(directory, 'manifest.json'),
+  resolve(directory, 'finished-manifest.json'),
   JSON.stringify(
     {
       revision: GALLERY_FINISH_REVISION,

@@ -1,6 +1,6 @@
 // Local generation entry, served by Vite only; not a production page.
 import { createEditorScene, type EditorScene } from '../lib/editor-scene';
-import { createPlanProject, planArrangementId } from '../lib/plan-project.ts';
+import { createGalleryScene } from '../lib/room-proposal.ts';
 import { planLayouts } from '../lib/plan-data.ts';
 import { galleryConcepts } from '../lib/gallery-data.ts';
 
@@ -9,9 +9,7 @@ async function renderGalleryShot(conceptId: string, shotId: string) {
   const concept = galleryConcepts.find((c) => c.id === conceptId)!;
   const shot = concept.images.find((s) => s.id === shotId)!;
   const layout = planLayouts.find((l) => l.id === concept.layout.id)!;
-  const arrangement = createPlanProject().arrangements.find(
-    (a) => a.id === planArrangementId(layout.id),
-  )!;
+  const scene = createGalleryScene(layout.id, shot.id);
   renderer?.dispose();
   renderer = createEditorScene(
     document.getElementById('render')!,
@@ -29,8 +27,8 @@ async function renderGalleryShot(conceptId: string, shotId: string) {
       ceilingHeight: shot.cutaway ? undefined : layout.height / 100,
     },
   );
-  renderer.update(arrangement.scene.objects, {
-    ...arrangement.scene.view,
+  renderer.update(scene.objects, {
+    ...scene.view,
     palette: concept.style.id,
     camera: shot.camera,
     cutaway: shot.cutaway,
@@ -43,7 +41,7 @@ async function renderGalleryShot(conceptId: string, shotId: string) {
   await new Promise<void>((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
   );
-  return { objects: arrangement.scene.objects };
+  return { objects: scene.objects };
 }
 async function exportGalleryShot() {
   const blob = await renderer!.snapshot();

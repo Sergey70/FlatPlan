@@ -8,13 +8,21 @@ import {
 } from '../lib/plan-project.ts';
 import { planDrawing } from '../lib/editor-geometry.ts';
 import { findNode } from '../lib/editor-model.ts';
+import {
+  createRoomProposalScene,
+  createRoomProposalProject,
+  ROOM_PROPOSAL_REVISION,
+} from '../lib/room-proposal.ts';
 
 export const GALLERY_PLAN_LAYOUTS = ['plan-2', 'bath-1', 'bath-2', 'bath-3'];
-export function createGalleryPlan(id) {
+export function createGalleryPlan(id, proposal = false) {
   const layout = planLayouts.find((l) => l.id === id);
   if (!layout || !GALLERY_PLAN_LAYOUTS.includes(id))
     throw new Error(`Unknown layout: ${id}`);
-  const scene = createPlanScene(layout);
+  const scene =
+    proposal && id === 'plan-2'
+      ? createRoomProposalScene()
+      : createPlanScene(layout);
   const parts = planDrawing(scene.objects, scene.view).map((part) => ({
     ...part,
     feature: part.strokeOnly
@@ -45,8 +53,8 @@ const escape = (s) =>
       })[c],
   );
 const path = (p) => `M${p.map((x) => x.map(number).join(',')).join('L')}Z`;
-export function renderGalleryPlan(id) {
-  const { layout, parts } = createGalleryPlan(id);
+export function renderGalleryPlan(id, proposal = false) {
+  const { layout, parts } = createGalleryPlan(id, proposal);
   const points = parts.flatMap((p) => p.points);
   const minX = Math.min(0, ...points.map((p) => p[0])),
     maxX = Math.max(layout.width / 100, ...points.map((p) => p[0]));
@@ -57,7 +65,7 @@ export function renderGalleryPlan(id) {
     z = (minZ + maxZ - size) / 2;
   const output = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="${x} ${z} ${size} ${size}" role="img" aria-labelledby="title desc">`,
-    `<title id="title">${escape(layout.name)}</title><desc id="desc">Контуры стен, проёмы и предметы из файла .plan. Синим показаны оконные и французские проёмы. Мебель показана условно, с габаритами из файла.</desc>`,
+    `<title id="title">${escape(layout.name)}</title><desc id="desc">${proposal ? 'Стены и проёмы из файла .plan. В комнате 14,91 м² предложены кровать и рабочее место с двумя мониторами; свет от лоджии сбоку от экранов. Мебель показана условно.' : 'Контуры стен, проёмы и предметы из файла .plan. Синим показаны оконные и французские проёмы. Мебель показана условно, с габаритами из файла.'}</desc>`,
     `<rect x="${x}" y="${z}" width="${size}" height="${size}" fill="#faf8f4"/>`,
   ];
   for (const p of parts) {
@@ -90,5 +98,17 @@ if (
   mkdirSync(target, { recursive: true });
   for (const id of GALLERY_PLAN_LAYOUTS)
     writeFileSync(resolve(target, `${id}.svg`), renderGalleryPlan(id));
-  console.log('Exported four exact .plan diagrams.');
+  const proposalTarget = resolve(`public/gallery/${ROOM_PROPOSAL_REVISION}`);
+  mkdirSync(resolve(proposalTarget, 'plans'), { recursive: true });
+  writeFileSync(
+    resolve(proposalTarget, 'plans/plan-2.svg'),
+    renderGalleryPlan('plan-2', true),
+  );
+  writeFileSync(
+    resolve(proposalTarget, 'room-workspace.json'),
+    JSON.stringify(createRoomProposalProject(), null, 2) + '\n',
+  );
+  console.log(
+    'Exported four source diagrams and the separate workspace proposal (SVG + editable JSON).',
+  );
 }

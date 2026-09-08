@@ -1,7 +1,8 @@
 import { planLayouts } from './plan-data.ts';
 import type { CameraState } from './editor-model.ts';
 
-export const GALLERY_REVISION = 'gallery-012';
+export const GALLERY_REVISION = 'gallery-014';
+export const ORIGINAL_MODEL_REVISION = 'gallery-012';
 export interface GalleryShot {
   id: string;
   label: string;
@@ -51,10 +52,10 @@ export function galleryShots(layoutId: string): GalleryShot[] {
           },
           {
             id: 'room',
-            label: 'Комната · 14,91 м²',
+            label: 'Комната · кровать и рабочее место',
             room: 'Комната 1',
-            camera: { position: [1.85, 1.55, 2.58], target: [5.3, 1.1, 1.25] },
-            fov: 62,
+            camera: { position: [1.85, 1.55, 2.58], target: [4.1, 1.05, 1.1] },
+            fov: 66,
             cutaway: false,
           },
         ]

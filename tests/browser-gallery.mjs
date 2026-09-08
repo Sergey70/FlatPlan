@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { galleryConcepts } from '../lib/gallery-data.ts';
+import {
+  createRoomProposalProject,
+  ROOM_PROPOSAL_ID,
+} from '../lib/room-proposal.ts';
+import { gallerySceneKey } from '../scripts/gallery-scene-key.mjs';
 
 /** Isolated gallery checks; deliberately seed a project value that must stay byte-for-byte intact. */
 export async function checkGallery(browser, baseUrl, outputDirectory) {
@@ -58,6 +64,80 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       path: path.join(outputDirectory, 'gallery-desktop.png'),
       fullPage: true,
     });
+    // The proposal downloads without touching the gallery visitor's save.
+    // Import it in a separate storage partition, as on another device.
+    const downloadEvent = page.waitForEvent('download');
+    await page
+      .getByRole('link', { name: 'Скачать расстановку JSON' })
+      .first()
+      .click();
+    const download = await downloadEvent;
+    const proposalPath = path.join(outputDirectory, 'room-workspace.json');
+    await download.saveAs(proposalPath);
+    const proposal = JSON.parse(await readFile(proposalPath, 'utf8'));
+    assert.equal(
+      gallerySceneKey(proposal),
+      gallerySceneKey(createRoomProposalProject()),
+    );
+    const importedContext = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+    });
+    try {
+      const editor = await importedContext.newPage();
+      editor.on('pageerror', (error) => errors.push(error.message));
+      const editorUrl = new URL(baseUrl);
+      editorUrl.search = '';
+      await editor.goto(editorUrl.href);
+      await editor
+        .locator('.ed-tabs')
+        .getByRole('button', { name: 'Файл', exact: true })
+        .click();
+      await editor.locator('input[type=file]').setInputFiles(proposalPath);
+      await editor
+        .getByRole('button', { name: 'Открыть проект', exact: true })
+        .click();
+      await editor.waitForFunction(
+        (id) =>
+          JSON.parse(localStorage.getItem('flatplan.editor.v1') || '{}')
+            .activeArrangement === id &&
+          JSON.parse(localStorage.getItem('flatplan.editor.v1') || '{}').scene
+            ?.view.camera !== null,
+        ROOM_PROPOSAL_ID,
+      );
+      const saved = () =>
+        editor.evaluate(() =>
+          JSON.parse(localStorage.getItem('flatplan.editor.v1')),
+        );
+      const firstSave = await saved();
+      // A null camera deliberately asks the editor to fit the new scene once.
+      const camera = firstSave.scene.view.camera;
+      assert.ok(
+        camera && [...camera.position, ...camera.target].every(Number.isFinite),
+      );
+      const fitted = structuredClone(proposal);
+      fitted.scene.view.camera = camera;
+      assert.deepEqual(
+        JSON.parse(gallerySceneKey(firstSave)),
+        JSON.parse(gallerySceneKey(fitted)),
+      );
+      await editor.reload();
+      await editor.locator('.ed-app').waitFor();
+      await editor.locator('.ed-canvas canvas').waitFor();
+      assert.deepEqual(
+        JSON.parse(gallerySceneKey(await saved())),
+        JSON.parse(gallerySceneKey(firstSave)),
+      );
+      await editor.screenshot({
+        path: path.join(outputDirectory, 'room-proposal-editor.png'),
+        fullPage: true,
+      });
+    } finally {
+      await importedContext.close();
+    }
+    assert.equal(
+      await page.evaluate(() => JSON.stringify({ ...localStorage })),
+      snapshot,
+    );
     // Every card exposes its own full set of matching source/finish images.
     // Decode the selected large image, not just a hidden thumbnail.
     for (const concept of galleryConcepts) {

@@ -153,7 +153,9 @@ function ImageViewer({ concept }: { concept: GalleryConcept }) {
       <p className="gallery-image-note">
         {image.kind === 'generated'
           ? 'Фотореалистичная визуализация отделки по 3D-основе. Точные размеры и расположение проёмов — на схеме и в модели.'
-          : '3D-модель из файла .plan: точная геометрия, условная детализация предметов.'}
+          : image.proposal
+            ? '3D-основа предлагаемой расстановки. Стены и проёмы сохранены по файлу .plan; в комнате добавлено рабочее место.'
+            : '3D-модель из файла .plan: точная геометрия, условная детализация предметов.'}
       </p>
       <a
         className="gallery-text-link"
@@ -188,12 +190,27 @@ function Plan({ concept }: { concept: GalleryConcept }) {
         width="350"
         height="420"
         loading="lazy"
-        alt={`Схема из файла .plan: ${concept.layout.name}. Стены, проёмы и расстановка предметов.`}
+        alt={`Схема: ${concept.layout.name}. Стены и проёмы из файла .plan.${concept.project ? ' В комнате — предлагаемая расстановка с кроватью и рабочим местом.' : ' Расстановка предметов из файла.'}`}
       />
       <figcaption>
         <span className="gallery-dot gallery-dot-window" /> Окна{' '}
         <span className="gallery-dot gallery-dot-wall" /> Стены
       </figcaption>
+      {concept.project && (
+        <p>
+          <a
+            className="gallery-text-link"
+            href={concept.project}
+            download="flatplan-room-workspace.json"
+          >
+            Скачать расстановку JSON <ArrowUpRight size={16} />
+          </a>
+          <span className="gallery-image-note">
+            {' '}
+            Открывается в редакторе через «Файл → Импортировать проект».
+          </span>
+        </p>
+      )}
     </figure>
   );
 }
@@ -345,7 +362,9 @@ export default function Gallery() {
           <div>
             <p>
               План квартиры и три отдельных варианта санузла. В каждой схеме
-              сохранены координаты стен, проёмов и предметов из файла.
+              сохранены стены и проёмы из файла. В комнате 14,91 м² предложено
+              рабочее место с двумя мониторами и сохранена кровать; остальные
+              помещения сохраняют исходную расстановку.
             </p>
             <p className="gallery-muted">
               Фотореалистичные изображения сгенерированы по ракурсам 3D-модели и
@@ -494,9 +513,11 @@ export default function Gallery() {
           <div className="gallery-section-heading">
             <div>
               <p className="gallery-eyebrow">Окна и стены</p>
-              <h2 id="layouts-title">Схемы из файла .plan</h2>
+              <h2 id="layouts-title">Схемы планировки</h2>
             </div>
-            <span className="gallery-muted">Из базовой 3D-модели</span>
+            <span className="gallery-muted">
+              Стены из .plan · варианты мебели
+            </span>
           </div>
           <div className="gallery-layout-grid">
             {galleryLayouts.map((item) => (

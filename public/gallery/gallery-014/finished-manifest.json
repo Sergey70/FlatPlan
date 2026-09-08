@@ -1,0 +1,1147 @@
+{
+  "revision": "gallery-014",
+  "sourceRevision": "plan-011",
+  "generator": "built-in image_gen",
+  "entries": [
+    {
+      "id": "plan-2-natural-kitchen",
+      "concept": "plan-2-natural",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+        "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-natural-kitchen.png",
+        "sha256": "226c46f63bc78c2647a71e4a9c314750f7b28feb4eca4686c8e61c66e8d25997",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "af4e4b9f8d9a2a746f8b5061fd4b24af84da6ee4d75719897efba4a4d535a732",
+      "promptRecordSha256": "db80a75a055086438cd3e99574b3e9f21d14d1de5537b338ca475ccc3a719be6",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with warm kitchen: unchanged sofa/table/chairs, cabinet outlines, hob, passage and camera; light oak/white/ivory/stainless materials replace the warm finishes."
+    },
+    {
+      "id": "plan-2-natural-kitchen-reverse",
+      "concept": "plan-2-natural",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-natural-kitchen-reverse.png",
+        "sha256": "fb46576111840da47a51f1c02fb61c74e75d3b0c676356207473a506a7ee259c",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-natural-kitchen-reverse.png",
+        "sha256": "2be2d561d6dd83a84ec196f855805a3fc6c4cdf211d2b7e98198aef23bc4e06b",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "d40af7b24b03023c83d92e931a3aa1b17662f5ecb871996e660f64a16a83f759",
+      "promptRecordSha256": "5194b2c90de106d13812d2d40516e036bf817f5af0c2f2da6f3315fa0f0ca1c8",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen-reverse.png",
+          "sha256": "2312660abda1da0e257cc0f720b1675410c72e840da85b51b111bb61b8f2e4ba",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked TV on left solid wall, right-wall window/frame extent, round table/four chairs and camera against warm/source view. Same furniture design and framing, with light oak, ivory linen and white finishes."
+    },
+    {
+      "id": "plan-2-natural-bedroom",
+      "concept": "plan-2-natural",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-natural-bedroom.png",
+        "sha256": "77fb162af45074def95e7a8df693daa1f68b55322a0357b614edbaed05801884",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-natural-bedroom.png",
+        "sha256": "215c7687eaaacf13263f481f7f80bafa0fded3fb16c29233d1121da49a462b08",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "2e5d6f67633036dfe82cbe2ac120ab57659bab550a97099bd925e956b7d62c8e",
+      "promptRecordSha256": "b5a216bf4692e526c9278444476feae35767d84acbc6b55a99f8fe8326de6f6e",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-bedroom.png",
+          "sha256": "b2eb10e39a035e717e47a95cb57668412aaaa9d1235adab6c967a38db7508189",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source layout: room silhouette, camera, openings and furniture design/positions remain aligned. Only wood, textile, wall/stone and metal finishes change to the target kitchen palette."
+    },
+    {
+      "id": "plan-2-natural-room",
+      "concept": "plan-2-natural",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-014/finished/plan-2-natural-room.png",
+        "sha256": "39b2c5e713163bba87e03f58f36a6f7ccf24c20a71fee582412462dba2a21663",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-014/images/plan-2-natural-room.png",
+        "sha256": "fb6b04017b3acb015a93884b2a0b5a1bd8fba96a18014e0333917d96cefe74b1",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "551ff514845b6a9e264248a706a1c5dda0ba98989e9f0466fea2316614d70fa7",
+      "promptSha256": "503e962c85e0eb5186e212a8d09a0c5f9fbb6fcdbbf59bf7a6017347825e1325",
+      "promptRecordSha256": "4ee02759530791402ef1eccd67a14e1467c71e22609f8bc72fda23393b9dbdd6",
+      "references": [
+        {
+          "src": "./gallery/gallery-014/finished/plan-2-warm-room.png",
+          "sha256": "4a1ae31411794a622ad3ee42843d123a682c6f4de855c49e09f69158d4968619",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-014/images/plan-2-natural-room.png",
+          "sha256": "fb6b04017b3acb015a93884b2a0b5a1bd8fba96a18014e0333917d96cefe74b1",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-room.png",
+          "sha256": "7f628feeb9a6b3374bd02eb95989dc1c84636c7b613d48600cef75f4f97bf014",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Reviewed against accepted warm room and matching 3D control: same desk, two monitors facing the chair, computer under desk, clear aisle, bed/nightstand and doorway. No old armchair, spare chair or added opening. Target wood/wall/textile/metal finish matches previous apartment palette. Furniture product detail and decor remain illustrative."
+    },
+    {
+      "id": "plan-2-warm-kitchen",
+      "concept": "plan-2-warm",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+        "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-warm-kitchen.png",
+        "sha256": "f97548f2f91e0f12c7c5ea265a11ea9490e309a2d9de2f8bbcb23edf26cd9a4a",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "4cc5d787599d7a2282f2bc120462bca7064a29b7775f186460f581a158434d6b",
+      "promptRecordSha256": "e3b46b1dd97ea2a9dcdca9865ec11712dd50be675972fbc9346bc5b010504620",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/plan-2-warm-kitchen.png",
+          "sha256": "f97548f2f91e0f12c7c5ea265a11ea9490e309a2d9de2f8bbcb23edf26cd9a4a",
+          "width": 1800,
+          "height": 1200
+        }
+      ],
+      "review": "Wall and ceiling outline, solid sofa partition, sofa/table positions, cabinet volumes and narrow passage visually matched to control; completed furniture and materials are illustrative."
+    },
+    {
+      "id": "plan-2-warm-kitchen-reverse",
+      "concept": "plan-2-warm",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-warm-kitchen-reverse.png",
+        "sha256": "2312660abda1da0e257cc0f720b1675410c72e840da85b51b111bb61b8f2e4ba",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-warm-kitchen-reverse.png",
+        "sha256": "4473304fa4ed4ab12d555ae0b3f1bb98d7aa825c3b93f321bc8671088f3731d4",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "8defab5b59ea9cd2def052a14ce3f044c3eee013eef9c85396054357eb85fcb4",
+      "promptRecordSha256": "58d4cd14dae97cae7808db6b623a221373ed462bfa76649bafa911d1cfbb0df6",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/plan-2-warm-kitchen-reverse.png",
+          "sha256": "4473304fa4ed4ab12d555ae0b3f1bb98d7aa825c3b93f321bc8671088f3731d4",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked TV on solid left wall, window on perpendicular right wall, round table/four chairs and source camera framing; no added openings. Finished joinery, textiles and exterior scenery are illustrative."
+    },
+    {
+      "id": "plan-2-warm-bedroom",
+      "concept": "plan-2-warm",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-warm-bedroom.png",
+        "sha256": "b2eb10e39a035e717e47a95cb57668412aaaa9d1235adab6c967a38db7508189",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-warm-bedroom.png",
+        "sha256": "f3a6c59f2c6ff59258622d6b741037f8e93fcdda0e4c0d56ac8935db3fc838ff",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "ac13e34167585f04cab928893022d97b933d16be8fbbfecd850e2d5a33dfdab0",
+      "promptRecordSha256": "5df104047e953541d42256d03f9dca6fcc26c80a3519dff4dbbe38b7ddfa3b39",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/plan-2-warm-bedroom.png",
+          "sha256": "f3a6c59f2c6ff59258622d6b741037f8e93fcdda0e4c0d56ac8935db3fc838ff",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked left window, solid headboard wall, bed orientation, two bedside cabinets and pendant positions against the source; warm materials match kitchen, with illustrative textile and joinery details."
+    },
+    {
+      "id": "plan-2-warm-room",
+      "concept": "plan-2-warm",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-014/finished/plan-2-warm-room.png",
+        "sha256": "4a1ae31411794a622ad3ee42843d123a682c6f4de855c49e09f69158d4968619",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-014/images/plan-2-warm-room.png",
+        "sha256": "969112ed74a160f40c897bce0289b9051a95c675a9e3d03b1872e5e584657293",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "551ff514845b6a9e264248a706a1c5dda0ba98989e9f0466fea2316614d70fa7",
+      "promptSha256": "82265600b77673d54a07cfab6d7666522f8bdbc57751445c586b04689bf4eab2",
+      "promptRecordSha256": "be52f7d19d4b529158e03db667865df2ea662a29c48760ff9b347b181ad733a1",
+      "references": [
+        {
+          "src": "./gallery/gallery-014/images/plan-2-warm-room.png",
+          "sha256": "969112ed74a160f40c897bce0289b9051a95c675a9e3d03b1872e5e584657293",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-room.png",
+          "sha256": "c0c2926b18e5bc9078e2088f3f6015cfbf91a2bc0a8a0299edb79aa21f0b3ad9",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Reviewed against new 3D control: desk with two complete monitors along solid wall, chair faces screens, computer below desk, original bed/nightstand and right doorway retained; old lounge chair and spare chair absent, open circulation. Warm materials match apartment. AI product detail and small decor remain illustrative."
+    },
+    {
+      "id": "plan-2-contrast-kitchen",
+      "concept": "plan-2-contrast",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+        "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-contrast-kitchen.png",
+        "sha256": "d4cad10f4b10039c8019292deece010f0ded53e12ea5442974984215a776cc2a",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "2abf55d3e71c25fb2e9adcc482de9c37bfb9bf026186b4098d99ca08060b13bf",
+      "promptRecordSha256": "044197a6a682526f5f0ae7105847f3ad73d88821f4aafda8bb0fc8065e8f825e",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with the accepted warm kitchen: same sofa, table/chairs, tall cabinet volumes, right hob and narrow wall return/passage; walnut/grey/black finish changes only."
+    },
+    {
+      "id": "plan-2-contrast-kitchen-reverse",
+      "concept": "plan-2-contrast",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen-reverse.png",
+        "sha256": "ad3eaf182ebd25ede81c13d833b3aaa8bdbb71c0e4c541c1e4d71bde15615843",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-contrast-kitchen-reverse.png",
+        "sha256": "3690a4082203b453f80b9f126e0fddfd865562f120643006a94765d5ddab6b79",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "bb71a4dcb6ad02d7e56f993407954f9b2728641044a66cc65d8d830352afcf4c",
+      "promptRecordSha256": "1b5b870b7ccfa2708ebe89c8f11558f4fc44ffc70db83035779c1de3af969b21",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen-reverse.png",
+          "sha256": "2312660abda1da0e257cc0f720b1675410c72e840da85b51b111bb61b8f2e4ba",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source layout: room silhouette, camera, openings and furniture design/positions remain aligned. Only wood, textile, wall/stone and metal finishes change to the target kitchen palette."
+    },
+    {
+      "id": "plan-2-contrast-bedroom",
+      "concept": "plan-2-contrast",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/plan-2-contrast-bedroom.png",
+        "sha256": "ccef5e9e58e72c90774b3641752c5172997ea33817a0d1a9d4d56162bfe6a592",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/plan-2-contrast-bedroom.png",
+        "sha256": "7373e25a5782e46663ca081ea355c6a2bdbfa09b91d989ea1f0b3882848ed173",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "promptSha256": "d5aeb6fc8d8ca7419978b18e5ae8101903cf64743f212fd97129877cef1cc8d6",
+      "promptRecordSha256": "bb7dc43975a2d7635fcdb2b9f902e797ee90694c0d300ab9ef84426712ad0746",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-bedroom.png",
+          "sha256": "b2eb10e39a035e717e47a95cb57668412aaaa9d1235adab6c967a38db7508189",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source layout: room silhouette, camera, openings and furniture design/positions remain aligned. Only wood, textile, wall/stone and metal finishes change to the target kitchen palette."
+    },
+    {
+      "id": "plan-2-contrast-room",
+      "concept": "plan-2-contrast",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-014/finished/plan-2-contrast-room.png",
+        "sha256": "f58aed9520cba62f967e2affc1382cc50d32475dc5f02eb88d96530b81f00ac0",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-014/images/plan-2-contrast-room.png",
+        "sha256": "8a3247bb51f51d01415f85546948eebcf5f608cfe3130ed87cf57bbeff89fd5d",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "551ff514845b6a9e264248a706a1c5dda0ba98989e9f0466fea2316614d70fa7",
+      "promptSha256": "91518d065a969f78b0c1a6aa69e1338359846462b592d5cbfd8aa7467b98fdc7",
+      "promptRecordSha256": "0758ba05c7b3f3f6272105d198ed810047c949f3db24391389f51b931a92ec90",
+      "references": [
+        {
+          "src": "./gallery/gallery-014/finished/plan-2-warm-room.png",
+          "sha256": "4a1ae31411794a622ad3ee42843d123a682c6f4de855c49e09f69158d4968619",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-014/images/plan-2-contrast-room.png",
+          "sha256": "8a3247bb51f51d01415f85546948eebcf5f608cfe3130ed87cf57bbeff89fd5d",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-room.png",
+          "sha256": "48ee0391150b316c3c50818bc6d5d9cd3e20b76a8db32db10ee135d510292480",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Reviewed against accepted warm room and matching 3D control: same desk, two monitors facing the chair, computer under desk, clear aisle, bed/nightstand and doorway. No old armchair, spare chair or added opening. Target wood/wall/textile/metal finish matches previous apartment palette. Furniture product detail and decor remain illustrative."
+    },
+    {
+      "id": "bath-1-natural-entrance",
+      "concept": "bath-1-natural",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-natural-entrance.png",
+        "sha256": "67b7ce0e5b7cb586612818cab0edc7ac493c8b735e2936d6ce29a263f8408ec2",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-natural-entrance.png",
+        "sha256": "1bbddf8acf9c5171433a43c653723c4b4c738adf2a5129ab19eef8b31c8d24fc",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "08b046ac31a4c05bc63e3e673bd2498b58fc6ad7bb64c4d6f5d53f126b904d7f",
+      "promptRecordSha256": "8e997d60dc3e6e869a907c6cfa45d841fb40d89cfac7bd5c1230b68b2296f282",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-1-warm-entrance.png",
+          "sha256": "e08ed97df43ded03be9b375cca56af987cb6bade74e6466b374343e5af514d5c",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view: unchanged wall recesses, tub/toilet/vanity positions, sanitary shapes and camera framing. Light or contrast materials match the target palette; no added opening, towel warmer or cabinet."
+    },
+    {
+      "id": "bath-1-natural-vanity",
+      "concept": "bath-1-natural",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-natural-vanity.png",
+        "sha256": "bbcf443fcd5d8a4b46e4b255a0289cf893c4e1aa8fae9c6847d17dc28e3fdd75",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-natural-vanity.png",
+        "sha256": "1543ec8880ccebf0fc1d9b7fbbd5343f3da98f6443601c03bff645d38f334070",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "206067b910633b985130db2fdbb97bd435047ea6441816792e258af861c03e8f",
+      "promptRecordSha256": "e4ed1fbbe596db5cc6118212dc97377dfa1b3be39e235eda6b07ab99cfe1e242",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-1-warm-vanity.png",
+          "sha256": "8dc12edafa8978f05b6f5c477f5b576abdaa8db0c382a7de981b7d91be71a05e",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-1-natural-vanity.png",
+          "sha256": "d8e320231af32817def480534ab1f8ae21dae0b15661d44d1b96b1cbb743692e",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked original vanity recess, toilet/tub edges, ladder and inset basin against warm/source angle. Refined cabinet to two horizontal drawers consistent with entrance; blonde oak, stainless and light stone finish retained."
+    },
+    {
+      "id": "bath-1-warm-entrance",
+      "concept": "bath-1-warm",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-warm-entrance.png",
+        "sha256": "e08ed97df43ded03be9b375cca56af987cb6bade74e6466b374343e5af514d5c",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-warm-entrance.png",
+        "sha256": "78c5c9ac15ce83ce32c4f12327cb668e4c20c1e7802a1d91311de37a35adac91",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "69a170858bddff6210fad980795052f0b6ed39e34365d11778d92a05206563f4",
+      "promptRecordSha256": "bb9d2130f487f71cd6b784aa15e95e60bb14764e0c830f186d82359545e52303",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-1-warm-entrance.png",
+          "sha256": "78c5c9ac15ce83ce32c4f12327cb668e4c20c1e7802a1d91311de37a35adac91",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked tub left, toilet at back, ladder above toilet and vanity at right against model; same warm tile, oak fronts and bronze fittings as reverse angle. Mirror and joinery detail are illustrative."
+    },
+    {
+      "id": "bath-1-warm-vanity",
+      "concept": "bath-1-warm",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-warm-vanity.png",
+        "sha256": "78d9c0cb22179f5643a5a293ce6b6cd0e069515188c8fa061bca34baf1b74065",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-warm-vanity.png",
+        "sha256": "08ba79b1971d53dafdff0bbdfea2018c52f6f7c8516fa0efc91c5000636ae224",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "58ddcf9def56222579621956ecacc92bbcb2b6ac26e1c344ecab86f308f1d045",
+      "promptRecordSha256": "fa74460459dc526077ce79f981bea5c9dee4015ef2a84af843309e9654ec78e5",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-1-warm-vanity.png",
+          "sha256": "08ba79b1971d53dafdff0bbdfea2018c52f6f7c8516fa0efc91c5000636ae224",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-1-warm-vanity.png",
+          "sha256": "8dc12edafa8978f05b6f5c477f5b576abdaa8db0c382a7de981b7d91be71a05e",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked vanity recess, right wall return, ladder on left, cropped toilet left and bathtub edge right. Refined cabinet to two stacked drawers matching entrance while retaining inset basin, countertop outline and all fixture locations."
+    },
+    {
+      "id": "bath-1-contrast-entrance",
+      "concept": "bath-1-contrast",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-contrast-entrance.png",
+        "sha256": "ac33285a33fcb6a89a9c3f1e2bbc30a50ffa1ff65655d03d9e4611a9547edf26",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-contrast-entrance.png",
+        "sha256": "ea6ba664fe68589b172ac282239ff29de1ff2e1020c635177e518fa3486ae562",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "1d8f99ef2a8c1c87fa484431e5af0c7741e7b62e983bab01fde407dd026352bb",
+      "promptRecordSha256": "3ad6210911b3b17fe948247a14a26b3e3b4519157499a7e3c25b36753b6515fb",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-1-warm-entrance.png",
+          "sha256": "e08ed97df43ded03be9b375cca56af987cb6bade74e6466b374343e5af514d5c",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view: unchanged wall recesses, tub/toilet/vanity positions, sanitary shapes and camera framing. Light or contrast materials match the target palette; no added opening, towel warmer or cabinet."
+    },
+    {
+      "id": "bath-1-contrast-vanity",
+      "concept": "bath-1-contrast",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-1-contrast-vanity.png",
+        "sha256": "43ab459555b468f9f8529730ee5ee56245e7c3c6c130b1b2e2708a961518a071",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-1-contrast-vanity.png",
+        "sha256": "5223f7d9c66057a9686ed0ae30d063799aa4662c708c1852b747f92e7ea270da",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "promptSha256": "1633d413c819808a47503089c09de246b6d24e265b61822c8f3e401548381fec",
+      "promptRecordSha256": "d0d1719e1186f4d4968f63fd48e2b94883dbf876e3174c325f230a1ead300813",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-1-warm-vanity.png",
+          "sha256": "8dc12edafa8978f05b6f5c477f5b576abdaa8db0c382a7de981b7d91be71a05e",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-1-contrast-vanity.png",
+          "sha256": "febd80a37df3e332f1f8d424aa37bcf0eaa8a956af5c715e96a835dea1a807ad",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked original narrow vanity recess, toilet/tub edges, ladder and inset basin against warm/source angle. Refined cabinet to two horizontal drawers consistent with entrance; dark walnut, black metal and light greige finish retained."
+    },
+    {
+      "id": "bath-2-natural-entrance",
+      "concept": "bath-2-natural",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-natural-entrance.png",
+        "sha256": "27009ba174b8b795d9415a6946a4bdbf13ecce720474f9b07126102655583cb0",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-natural-entrance.png",
+        "sha256": "d46b17b9e40af6ebe29d61a94a33c2f61eb454133bb1c47d0c1da4e9b4eeccd0",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "08b046ac31a4c05bc63e3e673bd2498b58fc6ad7bb64c4d6f5d53f126b904d7f",
+      "promptRecordSha256": "699d8a3ae1520d429cec56d3d062a96e4da98d653d11b1bbae2f171ed617a03f",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-2-warm-entrance.png",
+          "sha256": "bf8657eb1b26331a764294c491c8b8bf4837e8efeb1951b0233967e6beae9694",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source angle: unchanged wall/fixture outlines, tub, toilet, vanity/basin and narrow framing. Tall cabinet and ladder retained only in bathroom 2; light/contrast finishes remain consistent between views."
+    },
+    {
+      "id": "bath-2-natural-vanity",
+      "concept": "bath-2-natural",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-natural-vanity.png",
+        "sha256": "b642af23854e291442a3393876e3a0b10ed31e78707bf2796cddcb40795fe232",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-natural-vanity.png",
+        "sha256": "517f2c3fb95cf8cdba78b42282047bfb1856cb57a27832693517d2740ccb6a0b",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "08b046ac31a4c05bc63e3e673bd2498b58fc6ad7bb64c4d6f5d53f126b904d7f",
+      "promptRecordSha256": "82c1ad4d22e720fa712e9a0facc448c95b0d56df0446f9c555b1d9bb6bc6da21",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-2-warm-vanity.png",
+          "sha256": "f0700925b7c86361d5d9dda060b635147cdf00c0f994c3dd3013b2116b4111dc",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source angle: unchanged wall/fixture outlines, tub, toilet, vanity/basin and narrow framing. Tall cabinet and ladder retained only in bathroom 2; light/contrast finishes remain consistent between views."
+    },
+    {
+      "id": "bath-2-warm-entrance",
+      "concept": "bath-2-warm",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-warm-entrance.png",
+        "sha256": "bf8657eb1b26331a764294c491c8b8bf4837e8efeb1951b0233967e6beae9694",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-warm-entrance.png",
+        "sha256": "40525b71204bb1d194b5fee713ce4ebc6ef0efe13ef7ec3546437309eb3fe188",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "805a8772222624120fdd46f3f869c534d7b9c32a1ea86ac695fe50d161bb5ed9",
+      "promptRecordSha256": "f54b1d1224799f4dac1bdfcb9aa8013b9468752449084f91863f3451dfb52f5a",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-2-warm-entrance.png",
+          "sha256": "40525b71204bb1d194b5fee713ce4ebc6ef0efe13ef7ec3546437309eb3fe188",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked tub left, vanity back-centre, tall cabinet right of vanity, toilet cropped right and ladder at right edge. Warm vessel basin and two-drawer cabinet agree with reverse view."
+    },
+    {
+      "id": "bath-2-warm-vanity",
+      "concept": "bath-2-warm",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-warm-vanity.png",
+        "sha256": "f0700925b7c86361d5d9dda060b635147cdf00c0f994c3dd3013b2116b4111dc",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-warm-vanity.png",
+        "sha256": "d9df96ebaa3c352b42588abcdbebc4a8a976c92b703973520e090193828f0248",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "474cf7d12aa8d67809958ef9b1018148b3040a5484adb281a618cfd646d4cf90",
+      "promptRecordSha256": "144c077628a74335b170414b071941985c26c56b306ccbab87cce7b94b0ed348",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-2-warm-vanity.png",
+          "sha256": "d9df96ebaa3c352b42588abcdbebc4a8a976c92b703973520e090193828f0248",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-2-warm-vanity.png",
+          "sha256": "f59dbe11bc0aa32db4a461833cff0d5d95b1e09e6f30a09e658ee251663b867c",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked toilet niche, tall cabinet left, cropped vessel basin/vanity left and right wall return. Refined overly deep towel-warmer bars into slim rungs; geometry/framing and other fixtures retained. Vanity/basin/materials match entrance."
+    },
+    {
+      "id": "bath-2-contrast-entrance",
+      "concept": "bath-2-contrast",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-contrast-entrance.png",
+        "sha256": "53f5b83711d40eb7bab1cb2e96e00f4626954ad0c4a9e4635396acb658d01124",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-contrast-entrance.png",
+        "sha256": "a576d37b734ae88b5160d7928d96d93abbd8f89c546fd5c9e1255ede60f5fefa",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "1d8f99ef2a8c1c87fa484431e5af0c7741e7b62e983bab01fde407dd026352bb",
+      "promptRecordSha256": "5192a11aba156cae70d76dc3b219a6d135d083460af0f1962678cc4ae9d994ea",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-2-warm-entrance.png",
+          "sha256": "bf8657eb1b26331a764294c491c8b8bf4837e8efeb1951b0233967e6beae9694",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source angle: unchanged wall/fixture outlines, tub, toilet, vanity/basin and narrow framing. Tall cabinet and ladder retained only in bathroom 2; light/contrast finishes remain consistent between views."
+    },
+    {
+      "id": "bath-2-contrast-vanity",
+      "concept": "bath-2-contrast",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-2-contrast-vanity.png",
+        "sha256": "97e159725020cdc1dca438c6c6a237f8207f51d637428500fdc85776afc442c4",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-2-contrast-vanity.png",
+        "sha256": "c6c661b33adebb74d99bd1d3247f5bd58e3de243276f86124b87e3e78493228a",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "promptSha256": "1d8f99ef2a8c1c87fa484431e5af0c7741e7b62e983bab01fde407dd026352bb",
+      "promptRecordSha256": "42cef9c09a4d561a044ee33e86c7334c2620661bea6822361e59337b988f37f1",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-2-warm-vanity.png",
+          "sha256": "f0700925b7c86361d5d9dda060b635147cdf00c0f994c3dd3013b2116b4111dc",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source angle: unchanged wall/fixture outlines, tub, toilet, vanity/basin and narrow framing. Tall cabinet and ladder retained only in bathroom 2; light/contrast finishes remain consistent between views."
+    },
+    {
+      "id": "bath-3-natural-entrance",
+      "concept": "bath-3-natural",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-natural-entrance.png",
+        "sha256": "af40162f50a42b4c3c7e5a92d71c4afc79fa1f01769d46c6eaf06834f40c9f0e",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-natural-entrance.png",
+        "sha256": "1ec436fa50b53d0d063c56c18fb2a05a3bc4e6fe6abe912c03c1cf77887e54cc",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "08b046ac31a4c05bc63e3e673bd2498b58fc6ad7bb64c4d6f5d53f126b904d7f",
+      "promptRecordSha256": "6c77189d6a3e6c27fe4fe65d82e45ede7cb4f54d37817c5bf8299034f652b28a",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-3-warm-entrance.png",
+          "sha256": "592a842301a441d99a5b26ed4784e4c33004503342618b312e84c25bad3a1da7",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked tub left, back toilet, bidet spray left and two-drawer vanity right against warm/source view; no ladder or tall cabinet. Blonde oak, light stone and stainless finishes match the reverse vanity angle."
+    },
+    {
+      "id": "bath-3-natural-vanity",
+      "concept": "bath-3-natural",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "natural",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-natural-vanity.png",
+        "sha256": "62c3b7f1aaabb80ce081278f69f0f2ac436d8707c1b7bd21f7088e6996505245",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-natural-vanity.png",
+        "sha256": "e5c080b02b2140e1fb516b157ce51fe8379d6e1a2d1173bd7331e1b52e7ccf4e",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "08b046ac31a4c05bc63e3e673bd2498b58fc6ad7bb64c4d6f5d53f126b904d7f",
+      "promptRecordSha256": "6683cbed693c1f492622bbc220e17921147a726981cf4333f453e512fa79b588",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-3-warm-vanity.png",
+          "sha256": "839d4fc8b2ab721ccd275d45a440d01d56556b684b76d9b53849fbf989dbd877",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-natural-kitchen.png",
+          "sha256": "14111e5a151a497376a3061a85365fd1d413328f407ca1be67630a343654d17b",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view: unchanged wall recesses, tub/toilet/vanity positions, sanitary shapes and camera framing. Light or contrast materials match the target palette; no added opening, towel warmer or cabinet."
+    },
+    {
+      "id": "bath-3-warm-entrance",
+      "concept": "bath-3-warm",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-warm-entrance.png",
+        "sha256": "592a842301a441d99a5b26ed4784e4c33004503342618b312e84c25bad3a1da7",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-warm-entrance.png",
+        "sha256": "229184d7791ffa90a0cf2606ab356689caffff0beba7a0b2a920af5d6b1dc443",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "9ee90ce8faf236eb2175571b5282f6d24c7d0826a0c3d4f3a417340543427f5c",
+      "promptRecordSha256": "ad2317b3fb9ce7a4180250cad7328d5e245c2b8daffafa26e1abf9a79bf70c36",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-3-warm-entrance.png",
+          "sha256": "229184d7791ffa90a0cf2606ab356689caffff0beba7a0b2a920af5d6b1dc443",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked tub left, toilet back, bidet spray left of toilet and vanity right. No towel warmer or tall cabinet added. Warm vessel basin and two-drawer vanity used for matching reverse view."
+    },
+    {
+      "id": "bath-3-warm-vanity",
+      "concept": "bath-3-warm",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "warm",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-warm-vanity.png",
+        "sha256": "839d4fc8b2ab721ccd275d45a440d01d56556b684b76d9b53849fbf989dbd877",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-warm-vanity.png",
+        "sha256": "d206322548988f851c535d52e3c5178773264bff6dc3fb5e102e8c300923ed9b",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "ff6719dd9fc2ed9890d240239386bc111605814be843e7489cf5997ed9704dd1",
+      "promptRecordSha256": "410dc991447c9fa6c07c9860a0b8d6d973511ac86425580352702483ceecdb04",
+      "references": [
+        {
+          "src": "./gallery/gallery-012/images/bath-3-warm-vanity.png",
+          "sha256": "d206322548988f851c535d52e3c5178773264bff6dc3fb5e102e8c300923ed9b",
+          "width": 1800,
+          "height": 1200
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-warm-kitchen.png",
+          "sha256": "158418552034ff2655a15b0b021116e88c93931586bae12aa35dc8ea19038b87",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/reference-bath-3-warm-vanity.png",
+          "sha256": "2cc129e50b48f9fa7bfebfdad10e94239ce718866b7aefd0c12bd5e691bbcf98",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/bath-3-warm-entrance.png",
+          "sha256": "592a842301a441d99a5b26ed4784e4c33004503342618b312e84c25bad3a1da7",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Checked vanity recess, right wall return, cropped toilet left and tub edge right; no towel warmer or tall cabinet. Refined vanity to match entrance's two bronze-handled drawers and low oval vessel basin, without moving walls or fixture footprints."
+    },
+    {
+      "id": "bath-3-contrast-entrance",
+      "concept": "bath-3-contrast",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-contrast-entrance.png",
+        "sha256": "d91e58b0326ba3fd48563d2ca80c541bfcae72ad4271a6766621d36d42b324a6",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-contrast-entrance.png",
+        "sha256": "f6939636037da1bc8dd2ba8f6633aba43a9b24cd82ce858e5165a52bf41242b5",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "1d8f99ef2a8c1c87fa484431e5af0c7741e7b62e983bab01fde407dd026352bb",
+      "promptRecordSha256": "91a34463c8c0acfa6a0530be927d383b9b3396bcfc53a19cbddd657f708b7922",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-3-warm-entrance.png",
+          "sha256": "592a842301a441d99a5b26ed4784e4c33004503342618b312e84c25bad3a1da7",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view and source angle: unchanged wall/fixture outlines, tub, toilet, vanity/basin and narrow framing. Tall cabinet and ladder retained only in bathroom 2; light/contrast finishes remain consistent between views."
+    },
+    {
+      "id": "bath-3-contrast-vanity",
+      "concept": "bath-3-contrast",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "image": {
+        "src": "./gallery/gallery-013/images/bath-3-contrast-vanity.png",
+        "sha256": "de730dae728aed3fb0a5dd98414ea15ba281a42abb3327866e2f1d8c317ad408",
+        "width": 1536,
+        "height": 1024
+      },
+      "model": {
+        "src": "./gallery/gallery-012/images/bath-3-contrast-vanity.png",
+        "sha256": "8b2afccaf1f8f53697ae53bff2f1677a9d6952c054c56532f7de683d67109ee4",
+        "width": 1800,
+        "height": 1200
+      },
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "promptSha256": "1d8f99ef2a8c1c87fa484431e5af0c7741e7b62e983bab01fde407dd026352bb",
+      "promptRecordSha256": "519fd29a86b04d50c0b2fd80427bf5130daaf6abf92b54f0a5207b162da69beb",
+      "references": [
+        {
+          "src": "./gallery/gallery-013/images/bath-3-warm-vanity.png",
+          "sha256": "839d4fc8b2ab721ccd275d45a440d01d56556b684b76d9b53849fbf989dbd877",
+          "width": 1536,
+          "height": 1024
+        },
+        {
+          "src": "./gallery/gallery-013/images/plan-2-contrast-kitchen.png",
+          "sha256": "c688c0855d8d93115d0c395a16a26e2caa09753106cb0419d481317e225cc22f",
+          "width": 1536,
+          "height": 1024
+        }
+      ],
+      "review": "Compared with matching warm finished view: unchanged wall recesses, tub/toilet/vanity positions, sanitary shapes and camera framing. Light or contrast materials match the target palette; no added opening, towel warmer or cabinet."
+    }
+  ]
+}
