@@ -1,0 +1,1100 @@
+{
+  "revision": "gallery-012",
+  "sourceRevision": "plan-011",
+  "sceneDecimalPlaces": 7,
+  "renderer": "FlatPlan Three.js; interior views with source-derived ceilings and cutaway overviews; no labels or grid",
+  "entries": [
+    {
+      "id": "plan-2-natural-kitchen",
+      "concept": "plan-2-natural",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          0.65,
+          1.55,
+          9
+        ],
+        "target": [
+          2.5,
+          1.1,
+          6.55
+        ]
+      },
+      "fov": 60,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "226c46f63bc78c2647a71e4a9c314750f7b28feb4eca4686c8e61c66e8d25997",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-natural-kitchen-reverse",
+      "concept": "plan-2-natural",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          3.45,
+          1.55,
+          6.95
+        ],
+        "target": [
+          2.05,
+          1.05,
+          8.65
+        ]
+      },
+      "fov": 64,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "2be2d561d6dd83a84ec196f855805a3fc6c4cdf211d2b7e98198aef23bc4e06b",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-natural-bedroom",
+      "concept": "plan-2-natural",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          3.7,
+          1.55,
+          5.5
+        ],
+        "target": [
+          1.85,
+          1,
+          3.8
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "215c7687eaaacf13263f481f7f80bafa0fded3fb16c29233d1121da49a462b08",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-natural-room",
+      "concept": "plan-2-natural",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          1.85,
+          1.55,
+          2.58
+        ],
+        "target": [
+          5.3,
+          1.1,
+          1.25
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "6706fb597106aef357507975ea51b7df4e4fb87c66f67c98a5c6a3cc970b6f1c",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-natural-overview",
+      "concept": "plan-2-natural",
+      "shot": "overview",
+      "layout": "plan-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          -3.1265220599999988,
+          11.816122499999999,
+          14.651991899999999
+        ],
+        "target": [
+          3.6795645,
+          0.35,
+          4.726449
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "640efd248fadf08190d98d7f521794db05a7aafa6f94dce885672837876b8b3d",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-warm-kitchen",
+      "concept": "plan-2-warm",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          0.65,
+          1.55,
+          9
+        ],
+        "target": [
+          2.5,
+          1.1,
+          6.55
+        ]
+      },
+      "fov": 60,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "f97548f2f91e0f12c7c5ea265a11ea9490e309a2d9de2f8bbcb23edf26cd9a4a",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-warm-kitchen-reverse",
+      "concept": "plan-2-warm",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          3.45,
+          1.55,
+          6.95
+        ],
+        "target": [
+          2.05,
+          1.05,
+          8.65
+        ]
+      },
+      "fov": 64,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "4473304fa4ed4ab12d555ae0b3f1bb98d7aa825c3b93f321bc8671088f3731d4",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-warm-bedroom",
+      "concept": "plan-2-warm",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          3.7,
+          1.55,
+          5.5
+        ],
+        "target": [
+          1.85,
+          1,
+          3.8
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "f3a6c59f2c6ff59258622d6b741037f8e93fcdda0e4c0d56ac8935db3fc838ff",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-warm-room",
+      "concept": "plan-2-warm",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          1.85,
+          1.55,
+          2.58
+        ],
+        "target": [
+          5.3,
+          1.1,
+          1.25
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "d68baa19f30effa4a824551a50148cf014cfa0332fc042eb3f260606441971aa",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-warm-overview",
+      "concept": "plan-2-warm",
+      "shot": "overview",
+      "layout": "plan-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          -3.1265220599999988,
+          11.816122499999999,
+          14.651991899999999
+        ],
+        "target": [
+          3.6795645,
+          0.35,
+          4.726449
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "3192819da213ba869e994abc2c15116eaa5b5628b4d3ae9926547e246e000760",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-contrast-kitchen",
+      "concept": "plan-2-contrast",
+      "shot": "kitchen",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          0.65,
+          1.55,
+          9
+        ],
+        "target": [
+          2.5,
+          1.1,
+          6.55
+        ]
+      },
+      "fov": 60,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "d4cad10f4b10039c8019292deece010f0ded53e12ea5442974984215a776cc2a",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-contrast-kitchen-reverse",
+      "concept": "plan-2-contrast",
+      "shot": "kitchen-reverse",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          3.45,
+          1.55,
+          6.95
+        ],
+        "target": [
+          2.05,
+          1.05,
+          8.65
+        ]
+      },
+      "fov": 64,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "3690a4082203b453f80b9f126e0fddfd865562f120643006a94765d5ddab6b79",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-contrast-bedroom",
+      "concept": "plan-2-contrast",
+      "shot": "bedroom",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          3.7,
+          1.55,
+          5.5
+        ],
+        "target": [
+          1.85,
+          1,
+          3.8
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "7373e25a5782e46663ca081ea355c6a2bdbfa09b91d989ea1f0b3882848ed173",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-contrast-room",
+      "concept": "plan-2-contrast",
+      "shot": "room",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          1.85,
+          1.55,
+          2.58
+        ],
+        "target": [
+          5.3,
+          1.1,
+          1.25
+        ]
+      },
+      "fov": 62,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "4a5a2b38874f1192c183e28576874042455156a5832a0e5767b2849c86a2e967",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "plan-2-contrast-overview",
+      "concept": "plan-2-contrast",
+      "shot": "overview",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          -3.1265220599999988,
+          11.816122499999999,
+          14.651991899999999
+        ],
+        "target": [
+          3.6795645,
+          0.35,
+          4.726449
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "1c6ac108acfa9f49b075db7ddca8d1d7d8440bfe0b3971a1d0956bf412e5390a",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-natural-entrance",
+      "concept": "bath-1-natural",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "1bbddf8acf9c5171433a43c653723c4b4c738adf2a5129ab19eef8b31c8d24fc",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-natural-vanity",
+      "concept": "bath-1-natural",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "1543ec8880ccebf0fc1d9b7fbbd5343f3da98f6443601c03bff645d38f334070",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-natural-overview",
+      "concept": "bath-1-natural",
+      "shot": "overview",
+      "layout": "bath-1",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          -0.6563704399999999,
+          4,
+          4.0527600999999995
+        ],
+        "target": [
+          1.4917509999999998,
+          0.35,
+          0.9200830000000001
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "06712ced22f207e2c06a1d095ffedcd9f016b999ad271bbe1a0c0d365555705c",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-warm-entrance",
+      "concept": "bath-1-warm",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "78c5c9ac15ce83ce32c4f12327cb668e4c20c1e7802a1d91311de37a35adac91",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-warm-vanity",
+      "concept": "bath-1-warm",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "08ba79b1971d53dafdff0bbdfea2018c52f6f7c8516fa0efc91c5000636ae224",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-warm-overview",
+      "concept": "bath-1-warm",
+      "shot": "overview",
+      "layout": "bath-1",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          -0.6563704399999999,
+          4,
+          4.0527600999999995
+        ],
+        "target": [
+          1.4917509999999998,
+          0.35,
+          0.9200830000000001
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "1080122d52d72d4c4d01c946ae89c2b853fc4154e119dd2cbe61ea506b30b7e2",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-contrast-entrance",
+      "concept": "bath-1-contrast",
+      "shot": "entrance",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "ea6ba664fe68589b172ac282239ff29de1ff2e1020c635177e518fa3486ae562",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-contrast-vanity",
+      "concept": "bath-1-contrast",
+      "shot": "vanity",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "5223f7d9c66057a9686ed0ae30d063799aa4662c708c1852b747f92e7ea270da",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-1-contrast-overview",
+      "concept": "bath-1-contrast",
+      "shot": "overview",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          -0.6563704399999999,
+          4,
+          4.0527600999999995
+        ],
+        "target": [
+          1.4917509999999998,
+          0.35,
+          0.9200830000000001
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "920246eb4a2993b3fa38967efa1ef6c28e3d7e4efe9f7a27ccc1d594a5844dc6",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-natural-entrance",
+      "concept": "bath-2-natural",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "d46b17b9e40af6ebe29d61a94a33c2f61eb454133bb1c47d0c1da4e9b4eeccd0",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-natural-vanity",
+      "concept": "bath-2-natural",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "517f2c3fb95cf8cdba78b42282047bfb1856cb57a27832693517d2740ccb6a0b",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-natural-overview",
+      "concept": "bath-2-natural",
+      "shot": "overview",
+      "layout": "bath-2",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          -0.65599644,
+          4,
+          4.0562906000000005
+        ],
+        "target": [
+          1.490901,
+          0.35,
+          0.9253985
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "b59ef9e9912d08a9bf3147c3f6dbf7eb6164d7f7abfdd67f91faf46552b41390",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-warm-entrance",
+      "concept": "bath-2-warm",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "40525b71204bb1d194b5fee713ce4ebc6ef0efe13ef7ec3546437309eb3fe188",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-warm-vanity",
+      "concept": "bath-2-warm",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "d9df96ebaa3c352b42588abcdbebc4a8a976c92b703973520e090193828f0248",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-warm-overview",
+      "concept": "bath-2-warm",
+      "shot": "overview",
+      "layout": "bath-2",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          -0.65599644,
+          4,
+          4.0562906000000005
+        ],
+        "target": [
+          1.490901,
+          0.35,
+          0.9253985
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "7b19b29876165ca690ef5c3456101b91194b58590c5212c8b1ec0861bbe22db9",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-contrast-entrance",
+      "concept": "bath-2-contrast",
+      "shot": "entrance",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "a576d37b734ae88b5160d7928d96d93abbd8f89c546fd5c9e1255ede60f5fefa",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-contrast-vanity",
+      "concept": "bath-2-contrast",
+      "shot": "vanity",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "c6c661b33adebb74d99bd1d3247f5bd58e3de243276f86124b87e3e78493228a",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-2-contrast-overview",
+      "concept": "bath-2-contrast",
+      "shot": "overview",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          -0.65599644,
+          4,
+          4.0562906000000005
+        ],
+        "target": [
+          1.490901,
+          0.35,
+          0.9253985
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "6c7b8490980d0fbaaa28375409e080d3dc022e3b0c3a6a57d475829480215832",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-natural-entrance",
+      "concept": "bath-3-natural",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "1ec436fa50b53d0d063c56c18fb2a05a3bc4e6fe6abe912c03c1cf77887e54cc",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-natural-vanity",
+      "concept": "bath-3-natural",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "e5c080b02b2140e1fb516b157ce51fe8379d6e1a2d1173bd7331e1b52e7ccf4e",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-natural-overview",
+      "concept": "bath-3-natural",
+      "shot": "overview",
+      "layout": "bath-3",
+      "palette": "natural",
+      "camera": {
+        "position": [
+          -0.65657922,
+          4,
+          4.084757550000001
+        ],
+        "target": [
+          1.4922255000000002,
+          0.35,
+          0.951084
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "0cf45d0c4eba1a54b65b948cacb2e9e30041263bb8eff65fb767811e78648d49",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-warm-entrance",
+      "concept": "bath-3-warm",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "229184d7791ffa90a0cf2606ab356689caffff0beba7a0b2a920af5d6b1dc443",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-warm-vanity",
+      "concept": "bath-3-warm",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "d206322548988f851c535d52e3c5178773264bff6dc3fb5e102e8c300923ed9b",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-warm-overview",
+      "concept": "bath-3-warm",
+      "shot": "overview",
+      "layout": "bath-3",
+      "palette": "warm",
+      "camera": {
+        "position": [
+          -0.65657922,
+          4,
+          4.084757550000001
+        ],
+        "target": [
+          1.4922255000000002,
+          0.35,
+          0.951084
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "30a45c76e0d4279bb75aab99407e0e3425b6ac6616a87b48a26c2e8bb1685635",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-contrast-entrance",
+      "concept": "bath-3-contrast",
+      "shot": "entrance",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          1.8,
+          1.55,
+          0.3
+        ],
+        "target": [
+          1.9,
+          0.8,
+          1.4
+        ]
+      },
+      "fov": 76,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "f6939636037da1bc8dd2ba8f6633aba43a9b24cd82ce858e5165a52bf41242b5",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-contrast-vanity",
+      "concept": "bath-3-contrast",
+      "shot": "vanity",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          2.05,
+          1.55,
+          0.9
+        ],
+        "target": [
+          1,
+          0.9,
+          1.1
+        ]
+      },
+      "fov": 72,
+      "cutaway": false,
+      "ceilingHeight": 2.7,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "8b2afccaf1f8f53697ae53bff2f1677a9d6952c054c56532f7de683d67109ee4",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "bath-3-contrast-overview",
+      "concept": "bath-3-contrast",
+      "shot": "overview",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "camera": {
+        "position": [
+          -0.65657922,
+          4,
+          4.084757550000001
+        ],
+        "target": [
+          1.4922255000000002,
+          0.35,
+          0.951084
+        ]
+      },
+      "fov": 40,
+      "cutaway": true,
+      "ceilingHeight": null,
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "49ba28538236859b48bd488ce841fc925b1c5870fc7be92d1d280d08746c2451",
+      "width": 1800,
+      "height": 1200
+    }
+  ]
+}

@@ -33,6 +33,7 @@ interface Callbacks {
 export function createEditorScene(
   host: HTMLElement,
   callbacks: Callbacks,
+  renderOptions: { fov?: number; ceilingHeight?: number } = {},
 ): EditorScene {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eef1f3');
@@ -49,7 +50,12 @@ export function createEditorScene(
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.domElement.setAttribute('aria-label', '3D-редактор квартиры');
   host.appendChild(renderer.domElement);
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.03, 500),
+  const camera = new THREE.PerspectiveCamera(
+      renderOptions.fov ?? 40,
+      1,
+      0.03,
+      500,
+    ),
     orbit = new OrbitControls(camera, renderer.domElement);
   orbit.enableDamping = false;
   orbit.minDistance = 0.3;
@@ -215,6 +221,35 @@ export function createEditorScene(
       }
     }
     for (const node of nodes) visit(node, content, node.id);
+    // Optional render environment for eye-level gallery shots. Derive the
+    // ceiling from the same room contours; do not add or edit scene objects.
+    if (!view.cutaway && renderOptions.ceilingHeight !== undefined) {
+      for (const node of nodes.filter(
+        (n) => n.visible && n.category === 'structure' && n.geometry.polygon,
+      )) {
+        const geometry = createNodeGeometry(node);
+        if (!geometry) continue;
+        const ceiling = new THREE.Mesh(
+          geometry,
+          new THREE.MeshStandardMaterial({
+            color: '#f4f2ed',
+            roughness: 1,
+            side: THREE.DoubleSide,
+          }),
+        );
+        ceiling.position.set(
+          node.position[0],
+          renderOptions.ceilingHeight,
+          node.position[2],
+        );
+        ceiling.rotation.set(
+          ...(node.rotation.map(THREE.MathUtils.degToRad) as Vec3),
+        );
+        ceiling.scale.set(...node.scale);
+        ceiling.receiveShadow = true;
+        content.add(ceiling);
+      }
+    }
     if (view.labels) {
       content.updateMatrixWorld(true);
       for (const node of nodes.filter(

@@ -1,9 +1,11 @@
 /* oxlint-disable next/no-img-element, next/no-html-link-for-pages -- This is a static Vite app; assets and document navigation do not use Next.js. */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import {
   ArrowLeft,
   ArrowUpRight,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Columns2,
   Grid2X2,
   Images,
@@ -21,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   galleryConcepts,
+  galleryImageCount,
   galleryLayouts,
   galleryStyles,
   type GalleryConcept,
@@ -29,9 +32,11 @@ import './gallery.css';
 
 function ConceptImage({
   concept,
+  image = concept.images[0],
   eager = false,
 }: {
   concept: GalleryConcept;
+  image?: GalleryConcept['images'][number];
   eager?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
@@ -46,12 +51,86 @@ function ConceptImage({
   ) : (
     <img
       className="gallery-render"
-      src={concept.image}
-      alt={`${concept.layout.name} · ${concept.style.name}. Иллюстрация интерьера квартиры с видом сверху.`}
+      src={image.src}
+      alt={`${concept.layout.name} · ${concept.style.name}. ${image.label}.`}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
       onError={() => setFailed(true)}
     />
+  );
+}
+
+function ImageViewer({ concept }: { concept: GalleryConcept }) {
+  const [index, setIndex] = useState(0);
+  const image = concept.images[index];
+  const move = (offset: number) =>
+    setIndex(
+      (current) =>
+        (current + offset + concept.images.length) % concept.images.length,
+    );
+  function navigate(event: KeyboardEvent<HTMLButtonElement>) {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === 'Home') setIndex(0);
+    else if (event.key === 'End') setIndex(concept.images.length - 1);
+    else move(event.key === 'ArrowRight' ? 1 : -1);
+  }
+  return (
+    <fieldset className="gallery-viewer">
+      <legend className="sr-only">
+        Ракурсы: {concept.layout.name} · {concept.style.name}
+      </legend>
+      <ConceptImage key={image.src} concept={concept} image={image} eager />
+      <div className="gallery-viewer-controls">
+        <Button
+          variant="outline"
+          className="gallery-icon-button"
+          aria-label="Предыдущий ракурс"
+          onKeyDown={navigate}
+          onClick={() => move(-1)}
+        >
+          <ChevronLeft />
+        </Button>
+        <output aria-live="polite" aria-atomic="true">
+          <strong>{image.label}</strong>
+          <span>
+            {index + 1} / {concept.images.length}
+          </span>
+        </output>
+        <Button
+          variant="outline"
+          className="gallery-icon-button"
+          aria-label="Следующий ракурс"
+          onKeyDown={navigate}
+          onClick={() => move(1)}
+        >
+          <ChevronRight />
+        </Button>
+      </div>
+      <div className="gallery-thumbnails" aria-label="Выбор ракурса">
+        {concept.images.map((shot, shotIndex) => (
+          <button
+            key={shot.id}
+            type="button"
+            className="gallery-thumbnail"
+            aria-pressed={shotIndex === index}
+            onKeyDown={navigate}
+            onClick={() => setIndex(shotIndex)}
+          >
+            <img src={shot.src} alt="" loading="lazy" decoding="async" />
+            <span>{shot.label}</span>
+          </button>
+        ))}
+      </div>
+      <a
+        className="gallery-text-link"
+        href={image.src}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Открыть изображение целиком <ArrowUpRight size={16} />
+      </a>
+    </fieldset>
   );
 }
 
@@ -120,7 +199,7 @@ function Detail({ concept }: { concept: GalleryConcept }) {
         </div>
         <div className="gallery-detail-grid">
           <div>
-            <ConceptImage concept={concept} eager />
+            <ImageViewer concept={concept} />
             <p className="gallery-image-note">
               Изображение получено из модели редактора. Контуры, проёмы и
               габариты перенесены из .plan; детали мебели и отделка условные.
@@ -131,14 +210,6 @@ function Detail({ concept }: { concept: GalleryConcept }) {
             <h3>{concept.style.mood}</h3>
             <p>{concept.style.description}</p>
             <Materials concept={concept} />
-            <a
-              className="gallery-text-link"
-              href={concept.image}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Открыть изображение целиком <ArrowUpRight size={16} />
-            </a>
           </div>
           <aside>
             <h3>Как устроена планировка</h3>
@@ -204,8 +275,8 @@ export default function Gallery() {
             <p className="gallery-eyebrow">Планировка и отделка</p>
             <h1 id="gallery-title">Варианты интерьера</h1>
             <p className="gallery-intro">
-              Визуализации планировок из файла .plan в трёх палитрах отделки.
-              Выберите вариант для просмотра и сравнения.
+              Визуализации планировок из файла .plan в трёх палитрах отделки. В
+              каждом варианте — несколько ракурсов интерьера и общий вид.
             </p>
             <div className="gallery-numbers">
               <span>
@@ -215,7 +286,7 @@ export default function Gallery() {
                 <strong>{galleryStyles.length}</strong> палитры
               </span>
               <span>
-                <strong>{galleryConcepts.length}</strong> визуализаций
+                <strong>{galleryImageCount}</strong> изображения
               </span>
             </div>
             <a className="gallery-hero-link" href="#concepts">
@@ -333,6 +404,11 @@ export default function Gallery() {
                 <div className="gallery-card-image">
                   <ConceptImage concept={concept} />
                   <span className="gallery-card-number">{concept.number}</span>
+                  <span className="gallery-card-views">
+                    <Images size={14} aria-hidden="true" />
+                    {concept.images.length}{' '}
+                    {concept.images.length === 5 ? 'ракурсов' : 'ракурса'}
+                  </span>
                 </div>
                 <div className="gallery-card-body">
                   <span className="gallery-eyebrow">{concept.layout.name}</span>
@@ -456,8 +532,8 @@ export default function Gallery() {
                 <div>
                   <DialogTitle>Сравнение концепций</DialogTitle>
                   <DialogDescription>
-                    Материалы, атмосфера и схема перегородок. Иллюстрации могут
-                    отличаться от точных размеров.
+                    Несколько ракурсов и схема каждого варианта. Геометрия из
+                    .plan; детали мебели и материалы показаны условно.
                   </DialogDescription>
                 </div>
                 <DialogClose
@@ -479,7 +555,7 @@ export default function Gallery() {
                       Концепция {c.number} / {c.layout.name}
                     </span>
                     <h3>{c.style.name}</h3>
-                    <ConceptImage concept={c} eager />
+                    <ImageViewer concept={c} />
                     {c.imageNote && (
                       <p className="gallery-image-note">{c.imageNote}</p>
                     )}

@@ -1784,7 +1784,7 @@ export default function Editor() {
                   <Palette size={22} aria-hidden="true" />
                   <span>
                     <strong>Галерея интерьеров ↗</strong>
-                    <small>12 визуализаций · квартира и санузлы</small>
+                    <small>12 вариантов · 42 изображения интерьера</small>
                   </span>
                 </a>
                 <p className="ed-hint">

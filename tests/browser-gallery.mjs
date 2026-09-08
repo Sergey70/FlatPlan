@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { galleryConcepts } from '../lib/gallery-data.ts';
 
 /** Isolated gallery checks; deliberately seed a project value that must stay byte-for-byte intact. */
 export async function checkGallery(browser, baseUrl, outputDirectory) {
@@ -57,6 +58,80 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       path: path.join(outputDirectory, 'gallery-desktop.png'),
       fullPage: true,
     });
+    // Every card exposes its own full set of matching source/finish images.
+    // Decode the selected large image, not just a hidden thumbnail.
+    for (const concept of galleryConcepts) {
+      await page
+        .locator(`[data-concept="${concept.id}"]`)
+        .getByRole('button', { name: /^Подробнее/ })
+        .click();
+      const dialog = page.getByRole('dialog');
+      await dialog.waitFor();
+      const viewer = dialog.locator('.gallery-viewer');
+      assert.equal(
+        await viewer.locator('.gallery-thumbnail').count(),
+        concept.images.length,
+      );
+      for (const shot of concept.images) {
+        const thumbnail = viewer.getByRole('button', {
+          name: shot.label,
+          exact: true,
+        });
+        await thumbnail.click();
+        assert.equal(await thumbnail.getAttribute('aria-pressed'), 'true');
+        assert.equal(
+          await viewer
+            .locator('.gallery-thumbnail[aria-pressed="true"]')
+            .count(),
+          1,
+        );
+        const large = viewer.locator('img.gallery-render');
+        assert.equal(await large.getAttribute('src'), shot.src);
+        assert.equal(
+          await viewer
+            .getByRole('link', { name: 'Открыть изображение целиком' })
+            .getAttribute('href'),
+          shot.src,
+        );
+        assert.match(
+          await viewer.locator('output').innerText(),
+          new RegExp(
+            `${concept.images.indexOf(shot) + 1} / ${concept.images.length}`,
+          ),
+        );
+        const size = await large.evaluate(async (img) => {
+          await img.decode();
+          return [img.naturalWidth, img.naturalHeight];
+        });
+        assert.deepEqual(size, [1800, 1200]);
+      }
+      await viewer
+        .getByRole('button', { name: 'Следующий ракурс', exact: true })
+        .click();
+      assert.equal(
+        await viewer.locator('img.gallery-render').getAttribute('src'),
+        concept.images[0].src,
+      );
+      await viewer.locator('.gallery-thumbnail').first().focus();
+      await page.keyboard.press('ArrowLeft');
+      assert.equal(
+        await viewer.locator('img.gallery-render').getAttribute('src'),
+        concept.images.at(-1).src,
+      );
+      await page.keyboard.press('Home');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(
+        await viewer.locator('img.gallery-render').getAttribute('src'),
+        concept.images[1].src,
+      );
+      await page.keyboard.press('End');
+      assert.equal(
+        await viewer.locator('img.gallery-render').getAttribute('src'),
+        concept.images.at(-1).src,
+      );
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden' });
+    }
     await page.getByRole('button', { name: 'Квартира', exact: true }).click();
     assert.equal(await page.locator('.gallery-card').count(), 3);
     await page
@@ -124,6 +199,24 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       await page.getByRole('dialog').locator('h3').allTextContents(),
       ['Тёплая отделка', 'Контрастная отделка'],
     );
+    const viewers = page.getByRole('dialog').locator('.gallery-viewer');
+    const secondBefore = await viewers
+      .nth(1)
+      .locator('img.gallery-render')
+      .getAttribute('src');
+    await viewers
+      .nth(0)
+      .getByRole('button', { name: 'Следующий ракурс', exact: true })
+      .click();
+    assert.match(
+      await viewers.nth(0).locator('img.gallery-render').getAttribute('src'),
+      /kitchen-reverse\.png$/,
+    );
+    assert.equal(
+      await viewers.nth(1).locator('img.gallery-render').getAttribute('src'),
+      secondBefore,
+      'Comparison viewers navigate independently',
+    );
     await page.screenshot({
       path: path.join(outputDirectory, 'gallery-compare-desktop.png'),
     });
@@ -134,6 +227,53 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     await page
       .getByRole('button', { name: 'Очистить сравнение', exact: true })
       .click();
+    // A failed non-cover image can be left, selected again, and retried.
+    const failedImage = /\/plan-2-natural-bedroom\.png$/;
+    let failImage = true;
+    await page.route(failedImage, (route) =>
+      failImage ? route.abort() : route.continue(),
+    );
+    await page
+      .locator('[data-concept="plan-2-natural"]')
+      .getByRole('button', { name: /^Подробнее/ })
+      .click();
+    const recovery = page.getByRole('dialog');
+    await recovery.waitFor();
+    await recovery
+      .getByRole('button', { name: 'Спальня · 13,55 м²', exact: true })
+      .click();
+    await recovery
+      .getByText('Изображение не загрузилось', { exact: true })
+      .waitFor();
+    await recovery
+      .getByRole('button', { name: 'Общий вид планировки', exact: true })
+      .click();
+    await recovery
+      .locator('img.gallery-render')
+      .evaluate((img) => img.decode());
+    assert.equal(await recovery.locator('.gallery-image-error').count(), 0);
+    await recovery
+      .getByRole('button', { name: 'Спальня · 13,55 м²', exact: true })
+      .click();
+    await recovery
+      .getByText('Изображение не загрузилось', { exact: true })
+      .waitFor();
+    failImage = false;
+    await recovery
+      .getByRole('button', { name: 'Повторить', exact: true })
+      .click();
+    await recovery
+      .locator('img.gallery-render')
+      .evaluate((img) => img.decode());
+    assert.match(
+      await recovery.locator('img.gallery-render').getAttribute('src'),
+      /bedroom\.png$/,
+    );
+    await recovery
+      .getByRole('button', { name: 'Закрыть концепцию', exact: true })
+      .click();
+    await recovery.waitFor({ state: 'hidden' });
+    await page.unroute(failedImage);
     assert.equal(await page.locator('.gallery-compare-bar').count(), 0);
     for (const width of [360, 390, 768]) {
       await page.setViewportSize({ width, height: 844 });
@@ -145,10 +285,28 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
         .click();
       const dialog = page.getByRole('dialog');
       await dialog.waitFor();
+      await dialog
+        .getByRole('button', { name: 'Общий вид планировки', exact: true })
+        .click();
+      assert.match(
+        await dialog.locator('img.gallery-render').getAttribute('src'),
+        /overview\.png$/,
+      );
+      await dialog
+        .getByRole('button', { name: 'Следующий ракурс', exact: true })
+        .click();
+      assert.match(
+        await dialog.locator('img.gallery-render').getAttribute('src'),
+        /kitchen\.png$/,
+      );
       assert.ok(
         await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth),
       );
       await overflow();
+      if (width === 390)
+        await page.screenshot({
+          path: path.join(outputDirectory, 'gallery-detail-mobile.png'),
+        });
       await page
         .getByRole('button', { name: 'Закрыть концепцию', exact: true })
         .click();
@@ -201,7 +359,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     );
     assert.deepEqual(errors, []);
     console.log(
-      'PASS gallery: 12 model renders, 4 plans, filters, detail/comparison, keyboard focus, 360/390/768 widths, project bytes unchanged and reload',
+      'PASS gallery: 42 renders in 12 variants, 4 plans, all thumbnails, full-image links, wrapping/keyboard navigation, independent comparison, 360/390/768 widths, project bytes unchanged and reload',
     );
   } finally {
     await context.close();

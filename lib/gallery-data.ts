@@ -1,5 +1,6 @@
 import { palettes, type PaletteId } from './apartment.ts';
 import { planLayouts, PLAN_REVISION } from './plan-data.ts';
+import { galleryShots, GALLERY_REVISION } from './gallery-shots.ts';
 const descriptions: Record<string, string> = {
   'plan-2':
     'Кухня 21,43 м² внизу, спальня 13,55 м² у верхнего левого окна, комната 14,91 м², гардеробная, лоджия и санузел с ванной.',
@@ -67,14 +68,25 @@ export const galleryStyles = (['natural', 'warm', 'contrast'] as const).map(
 export type GalleryLayout = (typeof galleryLayouts)[number];
 export type GalleryStyle = (typeof galleryStyles)[number];
 export const galleryConcepts = galleryLayouts.flatMap((layout) =>
-  galleryStyles.map((style, index) => ({
-    id: `${layout.id}-${style.id}`,
-    number: `${layout.number}.${index + 1}`,
-    layout,
-    style,
-    imageNote: undefined as string | undefined,
-    image: `./gallery/${PLAN_REVISION}/images/${layout.id}-${style.id}.png`,
-    plan: `./gallery/${PLAN_REVISION}/plans/${layout.id}.svg`,
-  })),
+  galleryStyles.map((style, index) => {
+    const images = galleryShots(layout.id).map((shot) => ({
+      ...shot,
+      src: `./gallery/${GALLERY_REVISION}/images/${layout.id}-${style.id}-${shot.id}.png`,
+    }));
+    return {
+      id: `${layout.id}-${style.id}`,
+      number: `${layout.number}.${index + 1}`,
+      layout,
+      style,
+      imageNote: undefined as string | undefined,
+      images,
+      image: images[0].src,
+      plan: `./gallery/${PLAN_REVISION}/plans/${layout.id}.svg`,
+    };
+  }),
+);
+export const galleryImageCount = galleryConcepts.reduce(
+  (sum, concept) => sum + concept.images.length,
+  0,
 );
 export type GalleryConcept = (typeof galleryConcepts)[number];
