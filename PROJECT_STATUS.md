@@ -4,9 +4,21 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-009 complete and published** — only the right apartment remains among the starter apartment plans. The left starter and gallery entries are removed; 21.43 m² is «Кухня» and 13.55 m² is «Спальня». Existing right-plan edits survive the in-place update; the obsolete left-plan link resolves to the right plan. Local, CI and public acceptance passed. No active implementation work remains. Independent bathroom studies and loose objects are retained.
+**PLAN-010 implemented; publication pending** — reconcile the newer local Plan v3 export (15:35) with every retained scene. Keep the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Remove the eight now-absent loose objects, update the widened/moved upper-room nightstand and precise wall/opening coordinates. Correct source room-label anchors, bed orientation and door/frame representation. Preserve existing user edits with an anonymous, field-level source delta; refresh gallery assets and publish after acceptance. Catalog details and absent heights remain illustrative; no source files or original identifiers are published.
 
-Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Five starter arrangements remain: one apartment, three detached bathroom studies and eight loose objects. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+Acceptance: independent comparison of extracted geometry with the supplied file; regression tests for conversion, door/label geometry and saved-project migration; `npm run verify`; complete `npm run test:browser`; regenerated gallery provenance, visual review, final diff, CI deployment and public-source/gallery checks. No external blockers. Previous published revision: PLAN-009.
+
+Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+
+## PLAN-010 implementation and acceptance
+
+- New 15:35 export contains 70 walls, 12 openings, 27 room/service polygons and 73 items in four drawings. Eight loose objects are absent. Updated upper-room nightstand width (35.1199 → 50.238 cm) and centre, and all minor recalculations of wall junctions and three opening centres.
+- Importer handles four drawings, excluded left apartments, empty loose-object collections and reordered dictionaries/drawings. Original identifiers are held only in an ignored local registry; stable anonymous IDs preserve saved edits. Unknown/unassigned items fail before writing public geometry.
+- Independently compared 2160 numeric coordinates/dimensions against the actual supplied file, including all wall corners, opening centres/frame offsets, rooms and furniture. Maximum extraction rounding error: 4.9999756e-9 cm. All 70 walls / 27 rooms / 73 items accounted for once. Reordered import is identical.
+- Source room `pc` anchors now drive both 2D and 3D labels. Fixed short-end headboard orientation for both beds. Added static door leaves and 2D swing arcs, matching the supplied screenshot and orientation codes; inner balcony door is paired, outer balcony glazing remains fixed. Frame plane uses `pcb` while the wall cutout remains in the wall centre plane. Round furniture now projects its mesh silhouette instead of a rectangular bounding box.
+- An anonymous canonical delta updates untouched fields in PLAN-008/009 current and saved scenes, preserving edited transforms/materials/names, deleted objects and custom arrangements. Invalid combinations retain the complete edited root. An unchanged retired loose starter is removed; edited loose arrangements survive. A real previous canonical model upgrades exactly to the new complete model. Regression fixture is a compact anonymous subset of the actual previous canonical export.
+- Regenerated all 12 PNGs and four SVGs under `public/gallery/plan-010/`; removed previous gallery assets. Scene/image provenance passes. Existing setup/start/test/stop/reset/import instructions updated. No new dependencies; source file and source identifiers remain private.
+- Local `npm run verify` passed 48 tests, lint, typecheck and build. Complete final `npm run test:browser` passed: source/migration/door/label checks, legacy editor, 3D interactions, JSON, reset/recovery, touch and mobile widths. Inspected final 2D and 3D screenshots and mobile interface; reviewed source and migration diffs with `git diff --check`. Only CI deployment and public acceptance remain. Local evidence under ignored `.local/qa/plan-010/`.
 
 ## PLAN-009 implementation and acceptance
 
@@ -39,7 +51,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 
 ## Limits
 
-The file is authoritative for this revision and supersedes the earlier photographed passport. It does not prove real-world construction measurements. Furniture detail geometry, materials and missing heights are illustrative. Door opening direction codes are retained in anonymous source data; leaves/swing arcs are not visualized. Rooms, walls and furniture remain independent; moving walls does not regenerate floors or check collisions. No engineering networks, cloud sync or live regeneration of gallery images from visitor edits. Mobile QA uses Chromium touch emulation, not physical devices.
+The file is authoritative for this revision and supersedes the earlier photographed passport. It does not prove real-world construction measurements. Furniture detail geometry, materials and missing heights are illustrative. Door leaves use a static 45° angle with 90° arcs in 2D; frame profiles are illustrative. Full-height door/window objects hide with the cutaway walls. Rooms, walls and furniture remain independent; moving walls does not regenerate floors or check collisions. No engineering networks, cloud sync or live regeneration of gallery images from visitor edits. Mobile QA uses Chromium touch emulation, not physical devices.
 
 ## Publication
 

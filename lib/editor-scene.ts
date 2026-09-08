@@ -9,6 +9,7 @@ import {
   wallBlocks,
   wallBlockGeometry,
   sceneBounds,
+  roomLabelPosition,
 } from './editor-geometry';
 import type { SceneNode, EditorView, CameraState, Vec3 } from './editor-model';
 export type EditTool = 'orbit' | 'translate' | 'rotate';
@@ -219,8 +220,7 @@ export function createEditorScene(
       for (const node of nodes.filter(
         (n) => n.geometry.kind === 'floor' && n.visible,
       )) {
-        const box = new THREE.Box3().setFromObject(lookup.get(node.id)!);
-        const center = box.getCenter(new THREE.Vector3());
+        const [labelX, labelZ] = roomLabelPosition(node);
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d')!;
         const name = node.name.replace('Пол — ', '');
@@ -245,7 +245,7 @@ export function createEditorScene(
             sizeAttenuation: false,
           }),
         );
-        label.position.set(center.x, 0.9, center.z);
+        label.position.set(labelX, 0.9, labelZ);
         label.userData.labelAspect = canvas.width / canvas.height;
         const h =
           (22 * 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) /

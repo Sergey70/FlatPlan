@@ -9,6 +9,8 @@ import {
   type PlanLayout,
 } from './plan-data.ts';
 import { planFurniture } from './plan-furniture.ts';
+import { addPlanDoor } from './plan-openings.ts';
+import { refreshPlanGeometry } from './plan-refresh.ts';
 import {
   clone,
   defaultView,
@@ -43,6 +45,7 @@ export function createPlanScene(layout: PlanLayout): Arrangement {
         size: [maxX - minX, 0.04, maxZ - minZ],
         polygon: points,
         holes: [],
+        labelAnchor: metres(room.center),
       },
       'structure',
     );
@@ -119,9 +122,16 @@ export function createPlanScene(layout: PlanLayout): Arrangement {
         hole.center[1] / 100,
       ).applyMatrix4(inverse);
       opening.position = [p.x, hole.bottom / 100, 0];
+      const frame = new Vector3(
+        hole.frameCenter[0] / 100,
+        0,
+        hole.frameCenter[1] / 100,
+      ).applyMatrix4(inverse);
+      for (const child of opening.children) child.position[2] += frame.z;
       opening.children.forEach((child, i) => {
         child.id = `${opening.id}-part-${i + 1}`;
       });
+      addPlanDoor(opening, hole, frame.z);
       node.children.push(opening);
     }
     objects.push(node);
@@ -152,8 +162,19 @@ export function hasPlanSource(project: EditorProject): boolean {
   return project.sourceRevision === PLAN_REVISION;
 }
 export function applyPlanSource(project: EditorProject): EditorProject {
-  if (project.sourceRevision === 'plan-008')
-    return updatePlanSelection(project);
+  if (['plan-008', 'plan-009'].includes(project.sourceRevision ?? '')) {
+    const selected =
+      project.sourceRevision === 'plan-008'
+        ? updatePlanSelection(project)
+        : project;
+    const next = refreshPlanGeometry(
+      selected,
+      DEFAULT_PLAN_ID,
+      createPlanProject().scene,
+    );
+    next.sourceRevision = PLAN_REVISION;
+    return validateProject(next);
+  }
   const seed = createPlanProject();
   const reserved = new Set(seed.arrangements.map((a) => a.id));
   const ids = new Set(reserved);

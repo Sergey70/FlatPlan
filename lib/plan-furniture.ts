@@ -157,13 +157,26 @@ export function planFurniture(item: PlanItem, ceiling: number): SceneNode {
     }
   }
   if (/^bed_(single|double)$/.test(type)) {
-    add('Основание кровати', [1, 0.28, 1], [0, 0.18, 0]);
-    add('Матрас', [0.96, 0.24, 0.92], [0, 0.44, 0.025], 'white');
-    add('Покрывало', [0.98, 0.06, 0.7], [0, 0.59, 0.12], 'fabric');
-    add('Изголовье', [1, 1, 0.045], [0, 0.5, -0.4775], 'fabric');
+    function bedPart(
+      name: string,
+      size: Vec3,
+      position: Vec3,
+      material = 'wood',
+    ) {
+      position[2] *= -1;
+      if (type === 'bed_single') {
+        [position[0], position[2]] = [position[2], position[0]];
+        [size[0], size[2]] = [size[2], size[0]];
+      }
+      add(name, size, position, material);
+    }
+    bedPart('Основание кровати', [1, 0.28, 1], [0, 0.18, 0]);
+    bedPart('Матрас', [0.96, 0.24, 0.92], [0, 0.44, 0.025], 'white');
+    bedPart('Покрывало', [0.98, 0.06, 0.7], [0, 0.59, 0.12], 'fabric');
+    bedPart('Изголовье', [1, 1, 0.045], [0, 0.5, -0.4775], 'fabric');
     const pillows = type === 'bed_double' ? 2 : 1;
     for (let i = 0; i < pillows; i++)
-      add(
+      bedPart(
         'Подушка',
         [0.8 / pillows, 0.12, 0.19],
         [-0.4 + ((i + 0.5) * 0.8) / pillows, 0.62, -0.3],

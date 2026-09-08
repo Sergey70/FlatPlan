@@ -30,6 +30,8 @@ export interface Geometry {
   holes?: Point[][];
   openingType?: 'window' | 'door';
   wallProfile?: Point[];
+  labelAnchor?: Point;
+  doorSwing?: { hinge: 'start' | 'end' | 'both'; side: -1 | 1; offset: number };
 }
 export interface SceneNode {
   id: string;
@@ -316,6 +318,13 @@ function parseObjects(value: unknown): SceneNode[] {
       if (g.bottomRadius !== undefined)
         geometry.bottomRadius = number(g.bottomRadius, 0, 1);
       if (['floor', 'solid'].includes(kind)) {
+        if (g.labelAnchor !== undefined) {
+          if (!Array.isArray(g.labelAnchor) || g.labelAnchor.length !== 2)
+            fail('неверная точка подписи.');
+          geometry.labelAnchor = g.labelAnchor.map((n) =>
+            number(n, -200, 200),
+          ) as Point;
+        }
         geometry.polygon = polygon(g.polygon);
         if (!Array.isArray(g.holes) || g.holes.length > 30)
           fail('неверные отверстия контура.');
@@ -326,6 +335,19 @@ function parseObjects(value: unknown): SceneNode[] {
         if (g.openingType !== 'door' && g.openingType !== 'window')
           fail('неверный тип проёма.');
         geometry.openingType = g.openingType;
+        if (g.doorSwing !== undefined) {
+          const swing = record(g.doorSwing);
+          if (
+            !['start', 'end', 'both'].includes(swing.hinge as string) ||
+            (swing.side !== -1 && swing.side !== 1)
+          )
+            fail('неверное открывание двери.');
+          geometry.doorSwing = {
+            hinge: swing.hinge as 'start' | 'end' | 'both',
+            side: swing.side as -1 | 1,
+            offset: number(swing.offset, -2, 2),
+          };
+        }
       }
       if (typeof obj.color !== 'string' || !/^#[\da-f]{6}$/i.test(obj.color))
         fail('цвет должен быть в формате #RRGGBB.');

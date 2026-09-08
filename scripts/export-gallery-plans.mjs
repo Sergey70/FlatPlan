@@ -17,8 +17,9 @@ export function createGalleryPlan(id) {
   const scene = createPlanScene(layout);
   const parts = planDrawing(scene.objects, scene.view).map((part) => ({
     ...part,
-    feature:
-      findNode(scene.objects, part.id)?.geometry.openingType === 'window'
+    feature: part.strokeOnly
+      ? 'door-swing'
+      : findNode(scene.objects, part.id)?.geometry.openingType === 'window'
         ? 'window'
         : part.kind === 'wall'
           ? 'wall'
@@ -46,11 +47,14 @@ const escape = (s) =>
 const path = (p) => `M${p.map((x) => x.map(number).join(',')).join('L')}Z`;
 export function renderGalleryPlan(id) {
   const { layout, parts } = createGalleryPlan(id);
-  const width = layout.width / 100,
-    depth = layout.depth / 100,
-    size = Math.max(width, depth) + 0.65;
-  const x = (width - size) / 2,
-    z = (depth - size) / 2;
+  const points = parts.flatMap((p) => p.points);
+  const minX = Math.min(0, ...points.map((p) => p[0])),
+    maxX = Math.max(layout.width / 100, ...points.map((p) => p[0]));
+  const minZ = Math.min(0, ...points.map((p) => p[1])),
+    maxZ = Math.max(layout.depth / 100, ...points.map((p) => p[1]));
+  const size = Math.max(maxX - minX, maxZ - minZ) + 0.65;
+  const x = (minX + maxX - size) / 2,
+    z = (minZ + maxZ - size) / 2;
   const output = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="${x} ${z} ${size} ${size}" role="img" aria-labelledby="title desc">`,
     `<title id="title">${escape(layout.name)}</title><desc id="desc">Контуры стен, проёмы и предметы из файла .plan. Синим показаны оконные и французские проёмы. Мебель показана условно, с габаритами из файла.</desc>`,
@@ -68,7 +72,7 @@ export function renderGalleryPlan(id) {
               ? '#dfd4c3'
               : p.color;
     output.push(
-      `<path data-object="${p.id}" data-feature="${p.feature}" d="${[path(p.points), ...p.holes.map(path)].join(' ')}" fill="${color}" fill-rule="evenodd" stroke="#899393" stroke-width="${size * 0.0009}"/>`,
+      `<path data-object="${p.id}" data-feature="${p.feature}" d="${[p.strokeOnly ? path(p.points).slice(0, -1) : path(p.points), ...p.holes.map(path)].join(' ')}" fill="${p.strokeOnly ? 'none' : color}" fill-rule="evenodd" stroke="#899393" stroke-width="${size * 0.0009}"/>`,
     );
   }
   for (const room of layout.rooms.filter((r) => !r.micro))

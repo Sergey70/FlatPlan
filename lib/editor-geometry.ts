@@ -253,6 +253,39 @@ export interface DrawingPart {
   kind: string;
   category: SceneNode['category'];
   height: number;
+  strokeOnly?: boolean;
+}
+export function roomLabelPosition(node: SceneNode): Point {
+  const polygon = node.geometry.polygon ?? [[0, 0]];
+  const anchor = node.geometry.labelAnchor ?? [
+    (Math.min(...polygon.map((p) => p[0])) +
+      Math.max(...polygon.map((p) => p[0]))) /
+      2,
+    (Math.min(...polygon.map((p) => p[1])) +
+      Math.max(...polygon.map((p) => p[1]))) /
+      2,
+  ];
+  const world = new THREE.Vector3(anchor[0], 0, anchor[1]).applyMatrix4(
+    nodeMatrix(node),
+  );
+  return [world.x, world.z];
+}
+
+export function doorSwingArcs(node: SceneNode): Point[][] {
+  const swing = node.geometry.doorSwing;
+  if (!swing) return [];
+  const w = node.geometry.size[0],
+    pair = swing.hinge === 'both';
+  const radius = pair ? w / 2 : w;
+  return (pair ? [-1, 1] : [swing.hinge === 'start' ? -1 : 1]).map((end) =>
+    Array.from({ length: 25 }, (_, i) => {
+      const angle = (i * Math.PI) / 48;
+      return [
+        (end * w) / 2 - end * radius * Math.cos(angle),
+        swing.offset + swing.side * radius * Math.sin(angle),
+      ] as Point;
+    }),
+  );
 }
 function hull(points: Point[]): Point[] {
   const sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -350,16 +383,40 @@ export function planDrawing(
         const box = geo.boundingBox!;
         const points: Point[] = [];
         let height = -Infinity;
-        for (const x of [box.min.x, box.max.x])
-          for (const y of [box.min.y, box.max.y])
-            for (const z of [box.min.z, box.max.z]) {
-              const p = new THREE.Vector3(x, y, z).applyMatrix4(matrix);
-              points.push([p.x, p.z]);
-              height = Math.max(height, p.y);
-            }
+        function vertex(x: number, y: number, z: number) {
+          const p = new THREE.Vector3(x, y, z).applyMatrix4(matrix);
+          points.push([p.x, p.z]);
+          height = Math.max(height, p.y);
+        }
+        if (['cylinder', 'sphere'].includes(node.geometry.kind)) {
+          const vertices = geo.getAttribute('position');
+          for (let i = 0; i < vertices.count; i++)
+            vertex(vertices.getX(i), vertices.getY(i), vertices.getZ(i));
+        } else {
+          for (const x of [box.min.x, box.max.x])
+            for (const y of [box.min.y, box.max.y])
+              for (const z of [box.min.z, box.max.z]) vertex(x, y, z);
+        }
         add(hull(points), [], height);
         geo.dispose();
       }
+    }
+    for (const arc of doorSwingArcs(node)) {
+      parts.push({
+        id: node.id,
+        rootId,
+        points: project(arc),
+        holes: [],
+        color: '#667676',
+        kind: 'door-swing',
+        category: node.category,
+        height: new THREE.Vector3(
+          0,
+          node.geometry.size[1] + 0.2,
+          0,
+        ).applyMatrix4(matrix).y,
+        strokeOnly: true,
+      });
     }
     for (const child of node.children) walk(child, matrix, rootId);
   }

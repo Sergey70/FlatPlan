@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import previousPlan from './fixtures/plan-009.json' with { type: 'json' };
 import {
   createPlanProject,
   DEFAULT_PLAN_ID,
@@ -42,11 +43,30 @@ export async function checkSourcePlan(browser, url, out, h) {
   let current = await h.project(page);
   assert.equal(current.sourceRevision, PLAN_REVISION);
   assert.equal(current.activeArrangement, DEFAULT_PLAN_ID);
-  assert.equal(current.arrangements.length, 5);
+  assert.equal(current.arrangements.length, 4);
   sameGeometry(current.scene.objects, seed.scene.objects);
-  await page.screenshot({ path: path.join(out, 'plan-009-default-3d.png') });
+  await page.screenshot({ path: path.join(out, 'plan-010-default-3d.png') });
+  await h.call(page, 'configure_editor_view', { mode: '2d', labels: true });
+  assert.equal(
+    await page.locator('.ed-plan path[data-symbol="door-swing"]').count(),
+    8,
+  );
+  for (const room of planLayouts[0].rooms.filter((r) => !r.micro)) {
+    const label = page
+      .locator('.ed-plan text')
+      .filter({ hasText: new RegExp(`^${room.name}$`) });
+    assert.ok(
+      Math.abs(Number(await label.getAttribute('x')) - room.center[0] / 100) <
+        1e-8,
+    );
+    assert.ok(
+      Math.abs(Number(await label.getAttribute('y')) - room.center[1] / 100) <
+        1e-8,
+    );
+  }
+  await page.screenshot({ path: path.join(out, 'plan-010-source-2d.png') });
   await h.panel(page, 'Варианты');
-  assert.equal(await page.locator('.ed-variants article').count(), 5);
+  assert.equal(await page.locator('.ed-variants article').count(), 4);
   for (const arrangement of seed.arrangements) {
     await h.call(page, 'manage_editor_arrangement', {
       action: 'open',
@@ -61,7 +81,9 @@ export async function checkSourcePlan(browser, url, out, h) {
     for (const window of windows)
       assert.equal(
         await page
-          .locator(`.ed-plan path[data-object-id="${window.id}"]`)
+          .locator(
+            `.ed-plan path[data-object-id="${window.id}"]:not([data-symbol])`,
+          )
           .count(),
         1,
       );
@@ -124,6 +146,43 @@ export async function checkSourcePlan(browser, url, out, h) {
   assert.deepEqual(errors, []);
   await context.close();
 
+  // A real, anonymous old export exercises the new field-level migration in browser storage.
+  const oldContext = await browser.newContext({
+    viewport: { width: 1365, height: 960 },
+  });
+  await h.installTools(oldContext);
+  const old = structuredClone(previousPlan);
+  const oldItem = old.scene.objects.find((n) => n.id === 'plan-item-068');
+  oldItem.position[0] += 0.32;
+  await oldContext.addInitScript((value) => {
+    if (!localStorage.getItem('plan010-seeded')) {
+      localStorage.setItem('flatplan.editor.v1', value);
+      localStorage.setItem('plan010-seeded', 'yes');
+    }
+  }, JSON.stringify(old));
+  const oldPage = await oldContext.newPage();
+  await oldPage.goto(url);
+  for (let i = 0; i < 2; i++) {
+    await h.loaded(oldPage);
+    await h.saved(oldPage);
+    const upgraded = await h.project(oldPage);
+    assert.equal(upgraded.sourceRevision, PLAN_REVISION);
+    assert.equal(upgraded.arrangements.length, 4);
+    const item = upgraded.scene.objects.find((n) => n.id === oldItem.id);
+    assert.deepEqual(item.position, oldItem.position);
+    assert.ok(Math.abs(item.geometry.size[0] - 0.50238) < 1e-8);
+    const savedRight = upgraded.arrangements.find(
+      (a) => a.id === DEFAULT_PLAN_ID,
+    );
+    for (const node of savedRight.scene.objects)
+      sameGeometry(
+        node,
+        seed.scene.objects.find((n) => n.id === node.id),
+      );
+    if (i === 0) await oldPage.reload();
+  }
+  await oldContext.close();
+
   // Existing PLAN-008 projects update in place, including the retired left-plan deep link.
   for (const activeLeft of [false, true]) {
     const previous = structuredClone(seed);
@@ -177,7 +236,7 @@ export async function checkSourcePlan(browser, url, out, h) {
     const updated = await h.project(migratedPage);
     assert.equal(updated.sourceRevision, PLAN_REVISION);
     assert.equal(updated.activeArrangement, DEFAULT_PLAN_ID);
-    assert.equal(updated.arrangements.length, 5);
+    assert.equal(updated.arrangements.length, 4);
     assert.ok(!updated.arrangements.some((a) => a.id === left.id));
     sameGeometry(updated.scene.objects, expected.objects);
     await h.panel(migratedPage, 'Варианты');
@@ -200,7 +259,7 @@ export async function checkSourcePlan(browser, url, out, h) {
     assert.ok(!new URL(migratedPage.url()).searchParams.has('layout'));
     if (!activeLeft)
       await migratedPage.screenshot({
-        path: path.join(out, 'plan-009-labels-2d.png'),
+        path: path.join(out, 'plan-010-labels-2d.png'),
       });
     await migration.close();
   }
@@ -216,15 +275,15 @@ export async function checkSourcePlan(browser, url, out, h) {
   await h.loaded(phone);
   await h.saved(phone);
   await h.panel(phone, 'Варианты');
-  assert.equal(await phone.locator('.ed-variants article').count(), 5);
+  assert.equal(await phone.locator('.ed-variants article').count(), 4);
   for (const width of [360, 390, 768]) {
     await phone.setViewportSize({ width, height: 844 });
     await h.noOverflow(phone);
   }
   await phone.setViewportSize({ width: 390, height: 844 });
-  await phone.screenshot({ path: path.join(out, 'plan-009-mobile.png') });
+  await phone.screenshot({ path: path.join(out, 'plan-010-mobile.png') });
   await mobile.close();
   console.log(
-    'Source plan: five exact scenes, four windows per apartment, profiled wall editing, reload and mobile passed.',
+    'Source plan: four exact scenes, windows, door swings, source labels, PLAN-008/009 migration, editing, reload and mobile passed.',
   );
 }

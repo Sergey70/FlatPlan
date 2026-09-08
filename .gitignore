@@ -41,4 +41,5 @@ next-env.d.ts
 dist/
 .local/
 *.tsbuildinfo
+__pycache__/
 .DS_Store

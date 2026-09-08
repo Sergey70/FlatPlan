@@ -1,0 +1,115 @@
+{
+  "revision": "plan-010",
+  "sceneDecimalPlaces": 7,
+  "renderer": "FlatPlan Three.js; cutaway walls; no labels or grid",
+  "entries": [
+    {
+      "id": "plan-2-natural",
+      "layout": "plan-2",
+      "palette": "natural",
+      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
+      "imageSha256": "4a66e50b3244d84f3fc57ecd93faa7b89b65bb15ee7351ee24e97e4c2dbdf785",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "plan-2-warm",
+      "layout": "plan-2",
+      "palette": "warm",
+      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
+      "imageSha256": "fb72fd96db80eb5182c1ddba747177196e7770028cc954d6536bbd0f45548feb",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "plan-2-contrast",
+      "layout": "plan-2",
+      "palette": "contrast",
+      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
+      "imageSha256": "11acba2a5c15beba39f7df901a513a4457dc4fe73987e74854af5234b7a1062e",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-1-natural",
+      "layout": "bath-1",
+      "palette": "natural",
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "db98480008b13d7b557440bad4fd557dfee43b46082cd035c9119024860eea22",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-1-warm",
+      "layout": "bath-1",
+      "palette": "warm",
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "9e696ec9fa5b3de1adccbfd55c4e87ab6928caa0eab2aa8101840f209b840c94",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-1-contrast",
+      "layout": "bath-1",
+      "palette": "contrast",
+      "sceneSha256": "af61e8c0e99a2caa20e60e9cfc80eb72713800acc82cc8702058def24ba536a2",
+      "imageSha256": "95ff9e7360193a38a034216a2b9e9056dae670f0e1da0e66b588e8821607c808",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-2-natural",
+      "layout": "bath-2",
+      "palette": "natural",
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "9164a5cb1c3e1c333c6ed5985e1ec0910a1d666f5ba5463e7c43b2c232bfcf1b",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-2-warm",
+      "layout": "bath-2",
+      "palette": "warm",
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "051e94626024e32507438a20536d800355b390b03ba2b1dde2a682514b6aba3b",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-2-contrast",
+      "layout": "bath-2",
+      "palette": "contrast",
+      "sceneSha256": "32c9fe4bd95770e239227ad429c06cea29d16901b5662131a29549a60df6a809",
+      "imageSha256": "133e8ebf9298f9fb374a0b5a165113824549aa8f0386aa64170ad27a2bb4c524",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-3-natural",
+      "layout": "bath-3",
+      "palette": "natural",
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "cbac1475647245a421baa05f3784804ef42a662a441c3cc2a3b8283130f5e4dc",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-3-warm",
+      "layout": "bath-3",
+      "palette": "warm",
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "737ea1e4f27de51855c73f32dab5ced6d30be18ea7043b565189b9ffb294ae9e",
+      "width": 1470,
+      "height": 1205
+    },
+    {
+      "id": "bath-3-contrast",
+      "layout": "bath-3",
+      "palette": "contrast",
+      "sceneSha256": "d2a22905d55226f5cdbe0f7ce59e67b7fde7234957bc5e0a78aba28aaa4908dc",
+      "imageSha256": "bcf9c28fbeca882a236ca35a807714d79b94fa6f67f414716bd7ec9943887450",
+      "width": 1470,
+      "height": 1205
+    }
+  ]
+}

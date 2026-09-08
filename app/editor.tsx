@@ -92,6 +92,7 @@ import {
   resizeObject,
   planDrawing,
   nodeWorldMatrix,
+  roomLabelPosition,
 } from '@/lib/editor-geometry';
 import { Matrix4, Vector3 } from 'three';
 import { validateContours } from '@/lib/polygon-validation';
@@ -612,11 +613,15 @@ function Plan({
           <path
             key={`${part.id}-${index}`}
             data-object-id={part.id}
-            d={[polygonPath(part.points), ...part.holes.map(polygonPath)].join(
-              ' ',
-            )}
+            data-symbol={part.strokeOnly ? 'door-swing' : undefined}
+            d={[
+              part.strokeOnly
+                ? polygonPath(part.points).replace(/Z$/i, '')
+                : polygonPath(part.points),
+              ...part.holes.map(polygonPath),
+            ].join(' ')}
             fillRule="evenodd"
-            fill={part.color}
+            fill={part.strokeOnly ? 'none' : part.color}
             fillOpacity={part.kind === 'floor' ? 0.6 : 1}
             stroke={selectedIds.has(part.id) ? '#d6652e' : '#798585'}
             strokeWidth={selectedIds.has(part.id) ? 0.045 : 0.018}
@@ -635,10 +640,7 @@ function Plan({
             .map((n) => {
               const own = parts.find((p) => p.id === n.id);
               if (!own) return null;
-              const x =
-                  own.points.reduce((s, p) => s + p[0], 0) / own.points.length,
-                z =
-                  own.points.reduce((s, p) => s + p[1], 0) / own.points.length;
+              const [x, z] = roomLabelPosition(n);
               return (
                 <text
                   key={n.id}
@@ -713,7 +715,9 @@ export default function Editor() {
       return {
         project,
         upgraded,
-        selectionUpdated: saved?.sourceRevision === 'plan-008',
+        selectionUpdated: ['plan-008', 'plan-009'].includes(
+          saved?.sourceRevision ?? '',
+        ),
         error: null as string | null,
       };
     } catch (error) {
@@ -765,7 +769,7 @@ export default function Editor() {
     [notice, setNotice] = useState<string | null>(
       boot.upgraded
         ? boot.selectionUpdated
-          ? 'Оставлен правый план квартиры. 21,43 м² — кухня; 13,55 м² — спальня. Правки правого плана сохранены.'
+          ? 'План обновлён по новому файлу. Пользовательские изменения сохранены; исходную схему можно открыть кнопкой «Открыть исходный .plan».'
           : 'Открыт план из файла .plan. Предыдущая сцена сохранена в варианте «До обновления по файлу .plan».'
         : null,
     ),

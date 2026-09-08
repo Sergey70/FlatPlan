@@ -36,13 +36,13 @@ import { itemHeight, itemBottom } from '../lib/plan-furniture.ts';
 const close = (a: number, b: number, tolerance = 1e-6) =>
   assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 
-test('.plan selection retains only the right apartment, bathroom studies and loose items', () => {
+test('.plan selection retains only the right apartment, bathroom studies without deleted loose items', () => {
   const p = createPlanProject();
   assert.equal(p.activeArrangement, DEFAULT_PLAN_ID);
-  assert.equal(p.arrangements.length, 5);
+  assert.equal(p.arrangements.length, 4);
   assert.deepEqual(
     planLayouts.map((l) => l.id),
-    ['plan-2', 'bath-1', 'bath-2', 'bath-3', 'loose-items'],
+    ['plan-2', 'bath-1', 'bath-2', 'bath-3'],
   );
   const apartment = planLayouts[0];
   assert.equal(apartment.rooms.find((r) => r.area === 21.43)!.name, 'Кухня');
@@ -70,9 +70,8 @@ test('.plan selection retains only the right apartment, bathroom studies and loo
   );
   assert.equal(
     planLayouts.reduce((a, l) => a + l.items.length, 0),
-    81,
+    73,
   );
-  assert.equal(p.arrangements.at(-1)!.scene.objects.length, 8);
   assert.deepEqual(importProject(exportProject(p)), p);
 });
 
