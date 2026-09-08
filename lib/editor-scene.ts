@@ -1,9 +1,12 @@
+import { electricalNodes, kelvinColor } from './electrical';
+import type { LightSpec } from './renovation-types';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { finishGeometry, finishTexture } from './surface-finish';
 import { sunDirection } from './sunlight';
-import { defaultWalk } from './design-types';
+import { defaultWalk, defaultFinish } from './design-types';
+import { measuredRooms } from './room-surfaces';
 import type { Finish, WallFace } from './design-types';
 import {
   constrainedWalk,
@@ -20,6 +23,7 @@ import {
   wallBlockGeometry,
   sceneBounds,
   roomLabelPosition,
+  nodeWorldMatrix,
 } from './editor-geometry';
 import type { SceneNode, EditorView, CameraState, Vec3 } from './editor-model';
 export type EditTool = 'orbit' | 'translate' | 'rotate';
@@ -31,6 +35,13 @@ export interface EditorScene {
   viewpoint(kind: 'overview' | 'top' | 'living' | 'bedroom' | 'bathroom'): void;
   zoom(factor: number): void;
   snapshot(): Promise<Blob>;
+  renderImage(options: {
+    width: number;
+    height: number;
+    samples: number;
+    signal: AbortSignal;
+    progress: (done: number, total: number) => void;
+  }): Promise<Blob>;
   walkInput(forward: number, side: number, turn?: number): void;
   dispose(): void;
 }
@@ -44,7 +55,11 @@ interface Callbacks {
 export function createEditorScene(
   host: HTMLElement,
   callbacks: Callbacks,
-  renderOptions: { fov?: number; ceilingHeight?: number } = {},
+  renderOptions: {
+    fov?: number;
+    ceilingHeight?: number;
+    presentation?: boolean;
+  } = {},
 ): EditorScene {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eef1f3');
@@ -130,6 +145,18 @@ export function createEditorScene(
     scene.add(light);
     return light;
   });
+  let capturing = false;
+  let environmentMap: THREE.WebGLRenderTarget | null = null;
+  let environmentGenerator: THREE.PMREMGenerator | null = null;
+  let textureDone!: () => void;
+  const textureReady = new Promise<void>((resolve) => {
+    textureDone = resolve;
+  });
+  let textureFailure = false;
+  if (renderOptions.presentation) {
+    sun.shadow.radius = 2.5;
+    sun.shadow.normalBias = 0.012;
+  }
   let oak: THREE.Texture | null = null;
   const finishMaps = new Map<string, THREE.Texture>();
   let navigationShapes: ReturnType<typeof walkShapes> = [],
@@ -146,7 +173,16 @@ export function createEditorScene(
         finishMaps.set(key, finishTexture(f, oak, bump));
       return finishMaps.get(key)!;
     };
-    return new THREE.MeshStandardMaterial({
+    const FinishedMaterial = renderOptions.presentation
+      ? THREE.MeshPhysicalMaterial
+      : THREE.MeshStandardMaterial;
+    return new FinishedMaterial({
+      ...(renderOptions.presentation
+        ? {
+            clearcoat: ['tile', 'stone'].includes(f.kind) ? 0.16 : 0,
+            clearcoatRoughness: 0.3,
+          }
+        : {}),
       color: '#ffffff',
       map: texture(false),
       bumpMap: texture(true),
@@ -162,6 +198,7 @@ export function createEditorScene(
     (texture) => {
       if (disposed) {
         texture.dispose();
+        textureDone();
         return;
       }
       oak = texture;
@@ -169,18 +206,27 @@ export function createEditorScene(
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(0.5, 0.5);
       if (view) build();
+      textureDone();
     },
     undefined,
-    () =>
+    () => {
+      textureFailure = true;
+      textureDone();
       callbacks.error(
         'Текстура не загрузилась; цвета и редактирование доступны.',
-      ),
+      );
+    },
   );
   const selectionBox = new THREE.BoxHelper(new THREE.Object3D(), '#d96c31');
   selectionBox.visible = false;
   scene.add(selectionBox);
   function release(root: THREE.Object3D) {
     root.traverse((object) => {
+      if (
+        object instanceof THREE.PointLight ||
+        object instanceof THREE.SpotLight
+      )
+        object.shadow.dispose();
       if (object instanceof THREE.Sprite) {
         object.material.map?.dispose();
         object.material.dispose();
@@ -194,7 +240,7 @@ export function createEditorScene(
       }
     });
   }
-  function material(node: SceneNode) {
+  function material(node: SceneNode, fixture?: LightSpec) {
     const type = node.material;
     return new THREE.MeshStandardMaterial({
       color: nodeColor(node, view),
@@ -203,8 +249,22 @@ export function createEditorScene(
       transparent: type === 'glass',
       opacity: type === 'glass' ? 0.28 : 1,
       depthWrite: type !== 'glass',
-      emissive: type === 'light' ? '#ffd6ad' : '#000',
-      emissiveIntensity: type === 'light' ? (view.night ? 2 : 0.4) : 0,
+      emissive:
+        type === 'light'
+          ? fixture
+            ? kelvinColor(fixture.kelvin)
+            : '#ffd6ad'
+          : '#000',
+      emissiveIntensity:
+        type === 'light'
+          ? fixture
+            ? view.artificialLight
+              ? fixture.level * 2
+              : 0.1
+            : view.night
+              ? 2
+              : 0.4
+          : 0,
       map: type === 'wood' ? oak : null,
       side: node.geometry.kind === 'floor' ? THREE.DoubleSide : THREE.FrontSide,
     });
@@ -212,6 +272,9 @@ export function createEditorScene(
   function build() {
     cancelDrag();
     transform.detach();
+    scene.environment = null;
+    environmentMap?.dispose();
+    environmentMap = null;
     release(content);
     finishMaps.forEach((t) => t.dispose());
     finishMaps.clear();
@@ -219,7 +282,13 @@ export function createEditorScene(
     content = new THREE.Group();
     scene.add(content);
     lookup = new Map();
-    function visit(node: SceneNode, parent: THREE.Object3D, rootId: string) {
+    function visit(
+      node: SceneNode,
+      parent: THREE.Object3D,
+      rootId: string,
+      inheritedFixture?: LightSpec,
+    ) {
+      const fixture = node.electrical?.fixture ?? inheritedFixture;
       const object = new THREE.Group();
       object.position.set(...node.position);
       object.rotation.set(
@@ -233,12 +302,31 @@ export function createEditorScene(
         !(view.cutaway && node.cutaway && node.category === 'furniture');
       parent.add(object);
       lookup.set(node.id, object);
-      const m = material(node);
+      const m = material(node, fixture);
       let used = false,
         baseUsed = false;
       function mesh(geometry: THREE.BufferGeometry, position?: Vec3) {
         let materials: THREE.Material | THREE.Material[] = m;
-        if (node.finish || node.surfaces) {
+        const presentationFinish =
+          renderOptions.presentation &&
+          ['paint', 'wood', 'fabric', 'stone'].includes(node.material)
+            ? {
+                ...defaultFinish(
+                  node.material === 'wood'
+                    ? 'oak'
+                    : node.material === 'fabric'
+                      ? 'fabric'
+                      : node.material === 'stone'
+                        ? 'stone'
+                        : 'paint',
+                ),
+                color: nodeColor(node, view),
+                ...(node.material === 'wood' && node.geometry.kind !== 'floor'
+                  ? { joint: 0 }
+                  : {}),
+              }
+            : undefined;
+        if (node.finish || node.surfaces || presentationFinish) {
           object.updateWorldMatrix(true, false);
           const scale = new THREE.Vector3().setFromMatrixScale(
             object.matrixWorld,
@@ -251,12 +339,43 @@ export function createEditorScene(
           );
           materials = (['front', 'back', 'top', 'edge'] as WallFace[]).map(
             (face) => {
-              const f = node.surfaces?.[face] ?? node.finish;
+              const f =
+                node.surfaces?.[face] ?? node.finish ?? presentationFinish;
               if (!f) baseUsed = true;
               return f ? finishedMaterial(f) : m;
             },
           );
         } else baseUsed = true;
+        if (
+          renderOptions.presentation &&
+          (node.finish || presentationFinish) &&
+          !node.surfaces &&
+          Array.isArray(materials)
+        ) {
+          materials.forEach((material) => material.dispose());
+          materials = finishedMaterial(node.finish ?? presentationFinish!);
+          geometry.clearGroups();
+        } else if (renderOptions.presentation && geometry.groups.length) {
+          const groups: {
+            start: number;
+            count: number;
+            materialIndex?: number;
+          }[] = [];
+          for (const group of geometry.groups) {
+            const last = groups.at(-1);
+            if (
+              last &&
+              last.materialIndex === group.materialIndex &&
+              last.start + last.count === group.start
+            )
+              last.count += group.count;
+            else groups.push({ ...group });
+          }
+          geometry.clearGroups();
+          groups.forEach((group) =>
+            geometry.addGroup(group.start, group.count, group.materialIndex),
+          );
+        }
         const mesh = new THREE.Mesh(geometry, materials);
         if (position) mesh.position.set(...position);
         mesh.userData = { id: node.id, rootId };
@@ -276,17 +395,57 @@ export function createEditorScene(
       }
       if (!used || !baseUsed) m.dispose();
       for (const child of node.children) {
-        visit(child, object, rootId);
+        visit(child, object, rootId, fixture);
         if (view.cutaway && node.cutaway && child.geometry.kind === 'opening')
           lookup.get(child.id)!.visible = false;
       }
     }
     for (const node of nodes) visit(node, content, node.id);
+    if (view.artificialLight) {
+      for (const node of electricalNodes(nodes, true)) {
+        const f = node.electrical?.fixture;
+        if (!f || f.level <= 0 || f.lumens <= 0) continue;
+        const matrix = nodeWorldMatrix(nodes, node.id)!;
+        const light =
+          f.type === 'spot'
+            ? new THREE.SpotLight(
+                kelvinColor(f.kelvin),
+                1,
+                0,
+                THREE.MathUtils.degToRad(f.beam / 2),
+                0.5,
+                2,
+              )
+            : new THREE.PointLight(kelvinColor(f.kelvin), 1, 0, 2);
+        light.power = f.lumens * f.level;
+        light.position.copy(
+          new THREE.Vector3(...f.offset).applyMatrix4(matrix),
+        );
+        light.castShadow = true;
+        light.shadow.mapSize.set(
+          renderOptions.presentation ? 1024 : 512,
+          renderOptions.presentation ? 1024 : 512,
+        );
+        if (renderOptions.presentation) light.shadow.radius = 2;
+        light.shadow.camera.near = 0.02;
+        light.shadow.camera.far = 50;
+        light.shadow.normalBias = 0.008;
+        light.shadow.bias = -0.0001;
+        light.shadow.camera.updateProjectionMatrix();
+        content.add(light);
+        if (light instanceof THREE.SpotLight) {
+          light.target.position.copy(
+            new THREE.Vector3(...f.target).applyMatrix4(matrix),
+          );
+          content.add(light.target);
+        }
+      }
+    }
     // Optional render environment for eye-level gallery shots. Derive the
     // ceiling from the same room contours; do not add or edit scene objects.
     const ceilingHeight =
       renderOptions.ceilingHeight ??
-      (walking() || view.sunlight?.enabled
+      (walking() || view.sunlight?.enabled || view.artificialLight
         ? Math.max(
             2.4,
             ...nodes
@@ -294,7 +453,29 @@ export function createEditorScene(
               .map((n) => n.geometry.size[1] * n.scale[1]),
           )
         : undefined);
-    if (!view.cutaway && ceilingHeight !== undefined) {
+    if (renderOptions.presentation && !view.cutaway) {
+      for (const room of measuredRooms(nodes)) {
+        const geometry = createNodeGeometry(room.floor);
+        if (!geometry) continue;
+        const ceiling = new THREE.Mesh(
+          geometry,
+          new THREE.MeshStandardMaterial({
+            color: '#f4f2ed',
+            roughness: 1,
+            side: THREE.DoubleSide,
+          }),
+        );
+        ceiling.matrixAutoUpdate = false;
+        ceiling.matrix.copy(nodeWorldMatrix(nodes, room.id)!);
+        ceiling.matrix.elements[13] +=
+          (renderOptions.ceilingHeight ?? 2.7) +
+          room.floor.geometry.size[1] *
+            new THREE.Vector3().setFromMatrixColumn(ceiling.matrix, 1).length();
+        ceiling.castShadow = true;
+        ceiling.receiveShadow = true;
+        content.add(ceiling);
+      }
+    } else if (!view.cutaway && ceilingHeight !== undefined) {
       for (const node of nodes.filter(
         (n) => n.visible && n.category === 'structure' && n.geometry.polygon,
       )) {
@@ -314,7 +495,7 @@ export function createEditorScene(
         );
         ceiling.scale.set(...node.scale);
         ceiling.receiveShadow = true;
-        ceiling.castShadow = !!view.sunlight?.enabled;
+        ceiling.castShadow = !!view.sunlight?.enabled || !!view.artificialLight;
         content.add(ceiling);
       }
     }
@@ -374,7 +555,14 @@ export function createEditorScene(
     ambient.intensity = view.night ? 0.75 : 2.2;
     sun.intensity = view.night ? 0.35 : 3.5;
     fill.intensity = view.night ? 0.35 : 1.2;
-    lights.forEach((l) => (l.intensity = view.night ? 20 : 0));
+    lights.forEach(
+      (l) => (l.intensity = view.night && !view.artificialLight ? 20 : 0),
+    );
+    if (view.artificialLight && view.night) {
+      ambient.intensity = 0.06;
+      sun.intensity = 0;
+      fill.intensity = 0;
+    }
     scene.background = new THREE.Color(view.night ? '#263440' : '#eef1f3');
     (ground.material as THREE.MeshStandardMaterial).color.set(
       view.night ? '#35434e' : '#e9edef',
@@ -495,6 +683,7 @@ export function createEditorScene(
     emitCamera();
   }
   function resize() {
+    if (capturing) return;
     const { width, height } = host.getBoundingClientRect();
     if (!width || !height) return;
     camera.aspect = width / height;
@@ -750,7 +939,7 @@ export function createEditorScene(
         dirty = true;
       }
     }
-    if (dirty && host.offsetParent !== null && !document.hidden) {
+    if (!capturing && dirty && host.offsetParent !== null && !document.hidden) {
       renderer.render(scene, camera);
       dirty = false;
     }
@@ -767,6 +956,7 @@ export function createEditorScene(
         (
           [
             'palette',
+            'artificialLight',
             'night',
             'cutaway',
             'furniture',
@@ -884,6 +1074,153 @@ export function createEditorScene(
         ),
       );
     },
+    async renderImage(options) {
+      if (!renderOptions.presentation)
+        throw new Error('Откройте инструмент «Изображения».');
+      if (capturing) throw new Error('Изображение уже создаётся.');
+      const { width, height, samples, signal, progress } = options;
+      if (
+        ![width, height, samples].every(Number.isInteger) ||
+        width < 320 ||
+        height < 240 ||
+        width > 3840 ||
+        height > 2880 ||
+        width * height > 9000000 ||
+        samples < 1 ||
+        samples > 32
+      )
+        throw new Error('Неверные параметры изображения.');
+      signal.throwIfAborted();
+      await new Promise<void>((resolve, reject) => {
+        const aborted = () =>
+          reject(
+            new DOMException('Создание изображения отменено.', 'AbortError'),
+          );
+        signal.addEventListener('abort', aborted, { once: true });
+        void textureReady.then(() => {
+          signal.removeEventListener('abort', aborted);
+          resolve();
+        });
+      });
+      signal.throwIfAborted();
+      if (disposed) throw new Error('Просмотр закрыт.');
+      if (textureFailure)
+        throw new Error(
+          'Не удалось загрузить текстуру. Откройте изображения заново и повторите.',
+        );
+      if (renderer.getContext().isContextLost())
+        throw new Error(
+          'Браузер потерял 3D-контекст. Откройте изображения заново.',
+        );
+      capturing = true;
+      const previousPixelRatio = renderer.getPixelRatio(),
+        previousSize = renderer.getSize(new THREE.Vector2()),
+        previousAspect = camera.aspect,
+        previousOrbit = orbit.enabled,
+        previousSun = sun.position.clone();
+      const sources: {
+        light: THREE.PointLight | THREE.SpotLight;
+        position: THREE.Vector3;
+      }[] = [];
+      content.traverse((o) => {
+        if (o instanceof THREE.PointLight || o instanceof THREE.SpotLight)
+          sources.push({ light: o, position: o.position.clone() });
+      });
+      const output = document.createElement('canvas');
+      output.width = width;
+      output.height = height;
+      try {
+        orbit.enabled = false;
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        const context = output.getContext('2d');
+        if (!context) throw new Error('Не удалось подготовить изображение.');
+        environmentMap?.dispose();
+        scene.environment = null;
+        environmentGenerator ??= new THREE.PMREMGenerator(renderer);
+        // LDR cube capture bounds radiance before filtering. Direct HDR scene capture
+        // produced non-finite lower mip values on the supported SwiftShader backend.
+        const cubeTarget = new THREE.WebGLCubeRenderTarget(128, {
+          type: THREE.UnsignedByteType,
+        });
+        try {
+          const cubeCamera = new THREE.CubeCamera(0.03, 100, cubeTarget);
+          cubeCamera.position.copy(camera.position);
+          cubeCamera.update(renderer, scene);
+          environmentMap = environmentGenerator.fromCubemap(cubeTarget.texture);
+        } finally {
+          cubeTarget.dispose();
+        }
+        scene.environment = environmentMap.texture;
+        scene.environmentIntensity = 0.3;
+        for (let i = 0; i < samples; i++) {
+          signal.throwIfAborted();
+          if (disposed)
+            throw new DOMException('Просмотр закрыт.', 'AbortError');
+          const angle = i * 2.399963229728653,
+            radius = Math.sqrt((i + 0.5) / samples);
+          sun.position
+            .copy(previousSun)
+            .add(
+              new THREE.Vector3(
+                Math.cos(angle) * radius * 0.12,
+                0,
+                Math.sin(angle) * radius * 0.12,
+              ),
+            );
+          for (const source of sources)
+            source.light.position
+              .copy(source.position)
+              .add(
+                new THREE.Vector3(
+                  Math.cos(angle) * radius * 0.018,
+                  0,
+                  Math.sin(angle) * radius * 0.018,
+                ),
+              );
+          camera.setViewOffset(
+            width,
+            height,
+            Math.cos(angle) * radius * 0.45,
+            Math.sin(angle) * radius * 0.45,
+            width,
+            height,
+          );
+          renderer.render(scene, camera);
+          context.globalAlpha = 1 / (i + 1);
+          context.drawImage(canvas, 0, 0, width, height);
+          progress(i + 1, samples);
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        }
+        signal.throwIfAborted();
+        return await new Promise<Blob>((resolve, reject) =>
+          output.toBlob(
+            (blob) =>
+              blob
+                ? resolve(blob)
+                : reject(new Error('Не удалось сохранить PNG.')),
+            'image/png',
+          ),
+        );
+      } finally {
+        output.width = 1;
+        output.height = 1;
+        sun.position.copy(previousSun);
+        sources.forEach((s) => s.light.position.copy(s.position));
+        camera.clearViewOffset();
+        camera.aspect = previousAspect;
+        camera.updateProjectionMatrix();
+        if (!disposed) {
+          renderer.setPixelRatio(previousPixelRatio);
+          renderer.setSize(previousSize.x, previousSize.y, false);
+          orbit.enabled = previousOrbit;
+        }
+        capturing = false;
+        dirty = true;
+      }
+    },
     dispose() {
       disposed = true;
       cancelDrag();
@@ -915,6 +1252,9 @@ export function createEditorScene(
       canvas.removeEventListener('lostpointercapture', lost);
       canvas.removeEventListener('webglcontextlost', contextLost);
       canvas.removeEventListener('webglcontextrestored', contextRestored);
+      scene.environment = null;
+      environmentMap?.dispose();
+      environmentGenerator?.dispose();
       renderer.dispose();
       canvas.remove();
     },

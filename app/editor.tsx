@@ -1,3 +1,13 @@
+import { PresentationPanel } from './presentation-panel';
+import { DrawingsPanel } from './drawings-panel';
+import { ComparisonPanel } from './comparison-panel';
+import { SunStudyPanel } from './sun-study-panel';
+import { EstimatePanel } from './estimate-panel';
+import { ElectricalPanel } from './electrical-panel';
+import { ElectricalOverlay } from './electrical-overlay';
+import { addElectricalPoint } from '@/lib/electrical';
+import type { ElectricalKind } from '@/lib/renovation-types';
+import { MechanismControls, MechanismPanel } from './mechanism-panel';
 import { registerEditorTools } from '@/lib/editor-webmcp';
 import {
   useCallback,
@@ -473,6 +483,7 @@ function Plan({
   onMany,
   walkPick,
   onWalkPoint,
+  onPlacePoint,
 }: {
   project: EditorProject;
   selected: string | null;
@@ -494,6 +505,7 @@ function Plan({
   onMany: (ids: string[]) => void;
   walkPick: boolean;
   onWalkPoint: (point: Point) => void;
+  onPlacePoint: ((point: Point) => void) | null;
 }) {
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, [number, number]>());
@@ -604,15 +616,19 @@ function Plan({
       setOffset(null);
       return;
     }
+    const electrical = (e.target as Element)
+      .closest('[data-electrical-point]')
+      ?.getAttribute('data-electrical-point');
     const target = (e.target as Element).closest('[data-object-id]');
     const part = parts.find(
       (p) => p.id === target?.getAttribute('data-object-id'),
     );
-    const id = part ? (detail ? part.id : part.rootId) : null;
+    const id = electrical ?? (part ? (detail ? part.id : part.rootId) : null);
     const node = findNode(project.scene.objects, id);
     const moving =
       !measuring &&
       !walkPick &&
+      !onPlacePoint &&
       tool === 'translate' &&
       node &&
       !node.locked &&
@@ -730,6 +746,10 @@ function Plan({
       return;
     }
     if (!g.moved) {
+      if (onPlacePoint) {
+        onPlacePoint(worldPoint(e.clientX, e.clientY));
+        return;
+      }
       if (walkPick) {
         onWalkPoint(worldPoint(e.clientX, e.clientY));
         return;
@@ -816,6 +836,13 @@ function Plan({
             <title>{findNode(project.scene.objects, part.id)?.name}</title>
           </path>
         ))}
+        {view.electrical !== false && (
+          <ElectricalOverlay
+            nodes={project.scene.objects}
+            zoom={zoom}
+            selected={selected}
+          />
+        )}
         {view.labels &&
           project.scene.objects
             .filter((n) => n.geometry.kind === 'floor' && n.visible)
@@ -1029,11 +1056,25 @@ export default function Editor() {
         : null,
     ),
     [panel, setPanel] = useState<
-      'objects' | 'properties' | 'variants' | 'files' | 'checks'
+      'objects' | 'properties' | 'variants' | 'files' | 'checks' | 'renovation'
     >('objects');
+  const [renovationTool, setRenovationTool] = useState<
+    | 'mechanisms'
+    | 'electrical'
+    | 'estimate'
+    | 'sun-study'
+    | 'comparison'
+    | 'drawings'
+    | 'presentation'
+  >('mechanisms');
   const [multi, setMulti] = useState<string[]>([]),
     [marquee, setMarquee] = useState(false);
   const [walkPick, setWalkPick] = useState(false);
+  const [electricalPick, setElectricalPick] = useState<{
+    kind: ElectricalKind;
+    height: number;
+    group: string;
+  } | null>(null);
   const beforeWalk = useRef<Partial<EditorView> | null>(null);
   useEffect(() => {
     beforeWalk.current = null;
@@ -1102,8 +1143,23 @@ export default function Editor() {
     setMulti([]);
     setMarquee(false);
     setWalkPick(false);
+    setElectricalPick(null);
     setMeasureStart(null);
   }
+  if (
+    electricalPick &&
+    (view.mode !== '2d' ||
+      panel !== 'renovation' ||
+      renovationTool !== 'electrical')
+  )
+    setElectricalPick(null);
+  useEffect(() => {
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setElectricalPick(null);
+    };
+    window.addEventListener('keydown', cancel);
+    return () => window.removeEventListener('keydown', cancel);
+  }, []);
   if (view.mode === '3d' && measuring) {
     setMeasuring(false);
     setMeasureStart(null);
@@ -1150,6 +1206,7 @@ export default function Editor() {
     setMulti([]);
     setMarquee(false);
     setWalkPick(false);
+    setElectricalPick(null);
     beforeWalk.current = null;
   }, []);
   function resetUserData() {
@@ -1685,6 +1742,7 @@ export default function Editor() {
                 ['variants', 'Варианты', Palette],
                 ['files', 'Файл', FolderOpen],
                 ['checks', 'Проверка', ScanLine],
+                ['renovation', 'Ремонт', SlidersHorizontal],
               ] as const
             ).map(([id, name, Icon]) => (
               <button
@@ -1699,6 +1757,77 @@ export default function Editor() {
             ))}
           </nav>
           <div className="ed-panel">
+            {panel === 'renovation' && (
+              <>
+                <div className="ed-panel-title">
+                  <h2>Подготовка ремонта</h2>
+                </div>
+                <nav
+                  className="ed-renovation-tabs"
+                  aria-label="Инструменты ремонта"
+                >
+                  {(
+                    [
+                      ['mechanisms', 'Механизмы'],
+                      ['electrical', 'Электрика'],
+                      ['estimate', 'Смета'],
+                      ['sun-study', 'Солнце'],
+                      ['comparison', 'Сравнение'],
+                      ['drawings', 'Чертежи'],
+                      ['presentation', 'Изображения'],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <button
+                      key={id}
+                      aria-pressed={renovationTool === id}
+                      onClick={() => setRenovationTool(id)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+                {renovationTool === 'electrical' && (
+                  <ElectricalPanel
+                    project={project}
+                    onCommit={commit}
+                    onView={updateView}
+                    picking={!!electricalPick}
+                    onPick={(kind, height, group) => {
+                      setMeasuring(false);
+                      setMeasureStart(null);
+                      setWalkPick(false);
+                      setMarquee(false);
+                      setMulti([]);
+                      setTool('orbit');
+                      updateView({ mode: '2d' });
+                      setElectricalPick({ kind, height, group });
+                    }}
+                  />
+                )}
+                {renovationTool === 'mechanisms' && (
+                  <MechanismPanel project={project} onCommit={commit} />
+                )}
+                {renovationTool === 'sun-study' && (
+                  <SunStudyPanel
+                    project={project}
+                    onCommit={commit}
+                    onView={updateView}
+                  />
+                )}
+                {renovationTool === 'presentation' && (
+                  <PresentationPanel project={project} />
+                )}
+                {renovationTool === 'drawings' && (
+                  <DrawingsPanel project={project} />
+                )}
+                {renovationTool === 'comparison' && (
+                  <ComparisonPanel project={project} />
+                )}
+                {renovationTool === 'estimate' && (
+                  <EstimatePanel project={project} onCommit={commit} />
+                )}
+              </>
+            )}
             {panel === 'objects' && (
               <>
                 <div className="ed-panel-title">
@@ -2102,6 +2231,15 @@ export default function Editor() {
                       }
                     />
                   </fieldset>
+                  <details className="ed-design-details">
+                    <summary>Механизм предмета</summary>
+                    <MechanismControls
+                      key={node.id}
+                      project={project}
+                      node={node}
+                      onCommit={commit}
+                    />
+                  </details>
                   <p className="ed-hint">
                     Размеры — по осям объекта с учётом масштаба родителей,
                     координаты — относительно родителя. Цвет группы применяется
@@ -2973,7 +3111,7 @@ export default function Editor() {
               tool={tool}
               detail={detail}
               onSelect={
-                panel === 'checks'
+                panel === 'checks' || panel === 'renovation'
                   ? (id) => updateView({ selected: id })
                   : select
               }
@@ -2992,7 +3130,29 @@ export default function Editor() {
               onMany={selectMany}
               walkPick={walkPick}
               onWalkPoint={(point) => setWalking(true, point)}
+              onPlacePoint={
+                electricalPick
+                  ? (point) =>
+                      attempt(() => {
+                        commit(
+                          addElectricalPoint(
+                            project,
+                            electricalPick.kind,
+                            [point[0], electricalPick.height, point[1]],
+                            electricalPick.group,
+                          ),
+                        );
+                        setElectricalPick(null);
+                      })
+                  : null
+              }
             />
+          )}
+          {electricalPick && (
+            <output className="ed-placement-prompt">
+              Нажмите на плане, чтобы поставить точку.
+              <button onClick={() => setElectricalPick(null)}>Отмена</button>
+            </output>
           )}
           {!ready && !unavailable && view.mode === '3d' && (
             <output className="ed-loading">Загружаем 3D-модель…</output>

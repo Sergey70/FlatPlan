@@ -148,7 +148,10 @@ function triangulate(points: Point[], holes: Point[][] = []) {
   ).map((tri) => tri.map((i) => all[i]));
 }
 
-export function analysisFootprints(nodes: SceneNode[]): Footprint[] {
+export function analysisFootprints(
+  nodes: SceneNode[],
+  openings: 'sweep' | 'solids' = 'sweep',
+): Footprint[] {
   const result: Footprint[] = [];
   function walk(node: SceneNode, parent: Matrix4, owner: string) {
     if (!node.visible) return;
@@ -184,7 +187,7 @@ export function analysisFootprints(nodes: SceneNode[]): Footprint[] {
           );
       }
     } else if (g.kind === 'opening') {
-      if (g.openingType === 'door' || g.doorSwing) {
+      if (openings === 'sweep' && (g.openingType === 'door' || g.doorSwing)) {
         const [w, h, d] = g.size;
         add(
           [
@@ -211,7 +214,7 @@ export function analysisFootprints(nodes: SceneNode[]): Footprint[] {
           add([[(end * w) / 2, swing!.offset], ...arc], 0, h, 'door');
         });
       }
-      return; // Frames/door leaves are represented by wall voids and swept zones.
+      if (openings === 'sweep') return; // Full sweeps for planning; physical leaves for operating positions.
     } else if (g.kind !== 'floor' && g.kind !== 'group') {
       if (g.polygon) {
         for (const tri of triangulate(g.polygon, g.holes))

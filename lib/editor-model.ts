@@ -1,4 +1,13 @@
 import type {
+  Mechanism,
+  MechanismPreset,
+  ElectricalPoint,
+  LightingScene,
+  EstimateSettings,
+  WorkplaceStudy,
+  StudyFace,
+} from './renovation-types.ts';
+import type {
   Finish,
   WallFace,
   SnapSettings,
@@ -58,6 +67,9 @@ export interface SceneNode {
   children: SceneNode[];
   clearance?: { front: number; back: number };
   assembly?: boolean;
+  electrical?: ElectricalPoint;
+  mechanism?: Mechanism;
+  mechanismPreset?: MechanismPreset;
   finish?: Finish;
   surfaces?: Partial<Record<WallFace, Finish>>;
 }
@@ -80,12 +92,17 @@ export interface EditorView {
   snapping?: SnapSettings;
   walk?: WalkSettings;
   sunlight?: SunSettings;
+  electrical?: boolean;
+  artificialLight?: boolean;
 }
 export interface Arrangement {
   objects: SceneNode[];
   view: EditorView;
   measurements?: PlanMeasurement[];
   viewpoints?: SavedViewpoint[];
+  lightingScenes?: LightingScene[];
+  estimate?: EstimateSettings;
+  workplaceStudy?: WorkplaceStudy;
 }
 export interface PlanMeasurement {
   id: string;
@@ -342,6 +359,9 @@ function parseFinish(value: unknown): Finish {
 }
 function parseDesignView(v: Record<string, unknown>): Partial<EditorView> {
   const result: Partial<EditorView> = {};
+  if (v.electrical !== undefined) result.electrical = bool(v.electrical);
+  if (v.artificialLight !== undefined)
+    result.artificialLight = bool(v.artificialLight);
   if (v.snapping !== undefined) {
     const a = record(v.snapping);
     result.snapping = {
@@ -389,7 +409,8 @@ function parseDesignView(v: Record<string, unknown>): Partial<EditorView> {
 }
 function parseObjects(value: unknown): SceneNode[] {
   const ids = new Set<string>();
-  let count = 0;
+  let count = 0,
+    fixtureCount = 0;
   function walk(value: unknown, depth = 0, parentKind?: NodeKind): SceneNode[] {
     if (!Array.isArray(value) || depth > 10)
       fail('слишком глубокая иерархия объектов.');
@@ -489,6 +510,82 @@ function parseObjects(value: unknown): SceneNode[] {
         )
           fail('группа должна содержать мебель.');
       }
+      if (obj.electrical !== undefined) {
+        const e = record(obj.electrical);
+        if (
+          !['socket', 'switch', 'data', 'appliance', 'light'].includes(
+            e.kind as string,
+          ) ||
+          ['wall', 'floor', 'opening'].includes(kind)
+        )
+          fail('неверная электрическая точка.');
+        if (!Array.isArray(e.controls) || e.controls.length > 32)
+          fail('максимум 32 управляемых группы.');
+        node.electrical = {
+          kind: e.kind as ElectricalPoint['kind'],
+          group: text(e.group),
+          controls: [...new Set(e.controls.map((v) => text(v)))],
+        };
+        if (e.kind === 'light') {
+          if (++fixtureCount > 32)
+            fail('максимум 32 управляемых светильника в расстановке.');
+          const f = record(e.fixture);
+          if (f.type !== 'point' && f.type !== 'spot')
+            fail('неизвестный тип светильника.');
+          const offset = vec(f.offset, -10, 10),
+            target = vec(f.target, -10, 10);
+          if (Math.hypot(...offset.map((v, i) => v - target[i])) < 0.01)
+            fail('светильнику нужно направление.');
+          node.electrical.fixture = {
+            type: f.type,
+            lumens: number(f.lumens, 0, 20000),
+            kelvin: number(f.kelvin, 2200, 6500),
+            beam: number(f.beam, 10, 170),
+            level: number(f.level, 0, 1),
+            offset,
+            target,
+          };
+        } else if (e.fixture !== undefined)
+          fail('параметры света доступны только светильнику.');
+      }
+      if (obj.mechanism !== undefined) {
+        const m = record(obj.mechanism);
+        if (
+          !['hinge', 'slide'].includes(m.kind as string) ||
+          !['x', 'y', 'z'].includes(m.axis as string) ||
+          ['wall', 'floor', 'opening'].includes(kind)
+        )
+          fail('неверный механизм подвижной детали.');
+        const extent = number(
+          m.extent,
+          m.kind === 'hinge' ? -180 : -5,
+          m.kind === 'hinge' ? 180 : 5,
+        );
+        if (Math.abs(extent) < (m.kind === 'hinge' ? 1 : 0.01))
+          fail('ход механизма слишком мал.');
+        node.mechanism = {
+          kind: m.kind as Mechanism['kind'],
+          axis: m.axis as Mechanism['axis'],
+          pivot: vec(m.pivot, -20, 20),
+          extent,
+          progress: number(m.progress, 0, 1),
+        };
+      }
+      if (obj.mechanismPreset !== undefined) {
+        if (
+          ![
+            'door',
+            'cabinet',
+            'drawer',
+            'fridge',
+            'dishwasher',
+            'oven',
+            'sofa',
+          ].includes(obj.mechanismPreset as string)
+        )
+          fail('неизвестная схема механизма.');
+        node.mechanismPreset = obj.mechanismPreset as MechanismPreset;
+      }
       if (obj.finish !== undefined) node.finish = parseFinish(obj.finish);
       if (obj.surfaces !== undefined) {
         if (kind !== 'wall') fail('стороны отделки доступны только стене.');
@@ -579,6 +676,118 @@ function parseScene(input: unknown): Arrangement {
   }
   return {
     objects,
+    ...(obj.workplaceStudy === undefined
+      ? {}
+      : {
+          workplaceStudy: (() => {
+            const a = record(obj.workplaceStudy),
+              shades = record(a.shades);
+            const ids = (value: unknown, max: number) => {
+              if (!Array.isArray(value) || value.length > max)
+                fail(`максимум ${max} объектов в анализе солнца.`);
+              const result = value.map((v) => text(v, 150));
+              if (new Set(result).size !== result.length)
+                fail('объект повторяется в анализе солнца.');
+              return result;
+            };
+            if (!Array.isArray(a.targets) || a.targets.length > 8)
+              fail('максимум 8 поверхностей для анализа солнца.');
+            const seen = new Set<string>();
+            const targets = a.targets.map((value) => {
+              const t = record(value),
+                id = text(t.id, 150);
+              if (
+                seen.has(id) ||
+                !['top', 'front', 'back'].includes(t.face as string)
+              )
+                fail('неверная поверхность для анализа солнца.');
+              seen.add(id);
+              return { id, face: t.face as StudyFace };
+            });
+            const start = number(a.start, 0, 1439),
+              end = number(a.end, 1, 1440);
+            if (
+              !Number.isInteger(start) ||
+              !Number.isInteger(end) ||
+              start >= end ||
+              ![15, 30, 60].includes(a.step as number)
+            )
+              fail('неверный рабочий интервал или шаг расчёта.');
+            return {
+              targets,
+              rotateIds: ids(a.rotateIds, 32),
+              rotation: number(a.rotation, -180, 180),
+              start,
+              end,
+              step: a.step as WorkplaceStudy['step'],
+              ceilingHeight: number(a.ceilingHeight, 2, 6),
+              shades: {
+                windowIds: ids(shades.windowIds, 64),
+                roller: number(shades.roller, 0, 1),
+                slatWidth: number(shades.slatWidth, 0.01, 0.2),
+                slatPitch: number(shades.slatPitch, 0.01, 0.2),
+                slatAngle: number(shades.slatAngle, -90, 90),
+              },
+            };
+          })(),
+        }),
+    ...(obj.estimate === undefined
+      ? {}
+      : {
+          estimate: (() => {
+            const e = record(obj.estimate);
+            if (!Array.isArray(e.rates) || e.rates.length > 500)
+              fail('максимум 500 расценок.');
+            const keys = new Set<string>();
+            const rates = e.rates.map((value) => {
+              const r = record(value),
+                key = text(r.key, 300);
+              if (keys.has(key)) fail('повторяющаяся расценка.');
+              keys.add(key);
+              return {
+                key,
+                unit: text(r.unit, 20),
+                price: number(r.price, 0, 1000000000),
+                coverage: number(r.coverage, 0.0001, 100000),
+                pack: number(r.pack, 0, 100000),
+              };
+            });
+            return {
+              currency: text(e.currency, 12),
+              waste: number(e.waste, 0, 100),
+              rates,
+            };
+          })(),
+        }),
+    ...(obj.lightingScenes === undefined
+      ? {}
+      : {
+          lightingScenes: (() => {
+            if (
+              !Array.isArray(obj.lightingScenes) ||
+              obj.lightingScenes.length > 20
+            )
+              fail('максимум 20 сценариев освещения.');
+            const ids = new Set<string>();
+            return obj.lightingScenes.map((value) => {
+              const s = record(value),
+                id = text(s.id, 150);
+              if (ids.has(id)) fail('повторяющийся сценарий освещения.');
+              ids.add(id);
+              if (!Array.isArray(s.levels) || s.levels.length > 32)
+                fail('максимум 32 светильника в сценарии.');
+              const seen = new Set<string>();
+              const levels = s.levels.map((v) => {
+                const l = record(v),
+                  id = text(l.id, 150);
+                if (seen.has(id)) fail('светильник повторяется в сценарии.');
+                seen.add(id);
+                return { id, level: number(l.level, 0, 1) };
+              });
+              return { id, name: text(s.name), levels };
+            });
+          })(),
+        }),
     ...(measurements === undefined ? {} : { measurements }),
     ...(obj.viewpoints === undefined
       ? {}

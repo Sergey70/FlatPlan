@@ -53,29 +53,14 @@ export function walkStep(
   );
 }
 export function walkShapes(nodes: SceneNode[], eyeHeight = 1.6) {
-  // Analysis uses door sweep zones; walking instead collides with the rendered
-  // leaves/frames at their actual angle, without filling the wall's opening.
-  function openingParts(node: SceneNode, inside = false): SceneNode | null {
-    if (!node.visible) return null;
-    const opening = node.geometry.kind === 'opening';
-    if (inside && !opening) return node;
-    const children = node.children
-      .map((n) => openingParts(n, inside || opening))
-      .filter((n): n is SceneNode => !!n);
-    return children.length
-      ? { ...node, geometry: { kind: 'group', size: [1, 1, 1] }, children }
-      : null;
-  }
-  const frames = nodes
-    .map((n) => openingParts(n))
-    .filter((n): n is SceneNode => !!n);
-  return [...analysisFootprints(nodes), ...analysisFootprints(frames)].filter(
+  return analysisFootprints(nodes, 'solids').filter(
     (s) =>
       (s.kind === 'wall' || s.kind === 'furniture') &&
       s.maxY > 0.15 &&
       s.minY < eyeHeight + 0.15,
   );
 }
+
 export function canStand(shapes: Footprint[], point: Point, radius = 0.16) {
   const circle = Array.from(
     { length: 12 },

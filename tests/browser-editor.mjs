@@ -1,3 +1,22 @@
+import { checkPresentation } from './browser-presentation.mjs';
+import { checkDrawings } from './browser-drawings.mjs';
+import { checkComparison } from './browser-comparison.mjs';
+import { checkSunStudy } from './browser-sun-study.mjs';
+import { checkEstimate } from './browser-estimate.mjs';
+import { checkElectrical } from './browser-electrical.mjs';
+import {
+  installTools,
+  call,
+  project,
+  status,
+  loaded,
+  saved,
+  panel,
+  select,
+  editField,
+  noOverflow,
+} from './browser-helpers.mjs';
+import { checkRenovation } from './browser-renovation.mjs';
 import assert from 'node:assert/strict';
 import { checkGallery } from './browser-gallery.mjs';
 import { checkPlanTools } from './browser-plan-tools.mjs';
@@ -43,87 +62,6 @@ if (!external) {
 }
 let browser;
 const errors = [];
-async function installTools(context) {
-  await context.addInitScript(() => {
-    window.__flatplanTools = {};
-    Object.defineProperty(document, 'modelContext', {
-      configurable: true,
-      value: {
-        registerTool(tool, { signal }) {
-          window.__flatplanTools[tool.name] = tool;
-          signal.addEventListener('abort', () => {
-            if (window.__flatplanTools[tool.name] === tool)
-              delete window.__flatplanTools[tool.name];
-          });
-        },
-      },
-    });
-  });
-}
-async function call(page, name, args = {}) {
-  const result = await page.evaluate(
-    async ({ name, args }) => await window.__flatplanTools[name].execute(args),
-    { name, args },
-  );
-  await page.evaluate(
-    () =>
-      new Promise((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(resolve)),
-      ),
-  );
-  return result;
-}
-async function project(page) {
-  return JSON.parse((await call(page, 'export_editor_project')).json);
-}
-async function status(page) {
-  return await call(page, 'get_editor_project');
-}
-async function loaded(page) {
-  await page.waitForFunction(
-    () => window.__flatplanTools?.get_editor_project?.execute({}).status.ready,
-    undefined,
-    { timeout: 30000 },
-  );
-}
-async function saved(page) {
-  await page.waitForFunction(
-    () =>
-      window.__flatplanTools?.get_editor_project?.execute({}).status
-        .saveStatus === 'saved',
-    undefined,
-    { timeout: 15000 },
-  );
-}
-async function panel(page, name) {
-  await page
-    .locator('.ed-tabs')
-    .getByRole('button', { name, exact: true })
-    .click();
-}
-async function select(page, id) {
-  await panel(page, 'Объекты');
-  const search = page.getByRole('textbox', { name: 'Поиск объектов' });
-  await search.fill('');
-  await page
-    .locator(`.ed-tree-row[data-object-id="${id}"] .ed-tree-name`)
-    .click();
-}
-async function editField(page, label, value) {
-  const input = page.getByRole('textbox', { name: label, exact: true });
-  await input.fill(String(value));
-  await input.press('Tab');
-  await page.evaluate(
-    () => new Promise((resolve) => requestAnimationFrame(resolve)),
-  );
-}
-async function noOverflow(page) {
-  const sizes = await page.evaluate(() => ({
-    viewport: innerWidth,
-    document: document.documentElement.scrollWidth,
-  }));
-  assert.ok(sizes.document <= sizes.viewport, JSON.stringify(sizes));
-}
 try {
   const start = Date.now();
   for (;;) {
@@ -138,6 +76,87 @@ try {
   browser = await chromium.launch({
     headless: true,
     args: ['--enable-unsafe-swiftshader'],
+  });
+  await checkRenovation(browser, url, out, {
+    installTools,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    editField,
+    call,
+    noOverflow,
+  });
+  await checkElectrical(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    editField,
+    noOverflow,
+  });
+  await checkSunStudy(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    select,
+    editField,
+    noOverflow,
+  });
+  await checkPresentation(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    select,
+    editField,
+    noOverflow,
+  });
+  await checkDrawings(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    select,
+    editField,
+    noOverflow,
+  });
+  await checkComparison(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    select,
+    editField,
+    noOverflow,
+  });
+  await checkEstimate(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    editField,
+    noOverflow,
   });
   await checkDesign(browser, url, out, {
     installTools,
@@ -301,7 +320,9 @@ try {
   assert.equal(await cancelField.inputValue(), '3.125');
   await editField(page, 'X — вправо', 1.111);
   await editField(page, 'Поворот вокруг вертикали, °', 37);
-  let inspected = await call(page, 'get_editor_project', { objectId: sofa.id });
+  let inspected = await call(page, 'get_editor_project', {
+    objectId: sofa.id,
+  });
   assert.ok(Math.abs(inspected.dimensions[0] - 3.125) < 1e-5);
   assert.equal(inspected.node.position[0], 1.111);
   assert.equal(inspected.node.rotation[1], 37);
@@ -530,7 +551,10 @@ try {
   await panel(gp, 'Файл');
   const pngEvent = gp.waitForEvent('download');
   await gp
-    .getByRole('button', { name: 'Сохранить текущий 3D-вид PNG', exact: true })
+    .getByRole('button', {
+      name: 'Сохранить текущий 3D-вид PNG',
+      exact: true,
+    })
     .click();
   const png = await pngEvent;
   await png.saveAs(path.join(out, 'editor-snapshot.png'));
