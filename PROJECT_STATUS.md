@@ -4,7 +4,7 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-009 active** — retain only the right apartment, remove the left starter arrangement and gallery entries, name the 21.43 m² room «Кухня» and the 13.55 m² room «Спальня». Preserve the independent bathroom studies and loose objects, since the request distinguishes the two apartment drawings. Existing right-plan edits must survive this update in place; opening an obsolete left-plan link should resolve to the right plan. Acceptance: migration regressions, labels/areas and gallery exclusion, full verify/browser gates, publication and public checks. Last complete iteration: PLAN-008 below.
+**PLAN-009 complete and published** — only the right apartment remains among the starter apartment plans. The left starter and gallery entries are removed; 21.43 m² is «Кухня» and 13.55 m² is «Спальня». Existing right-plan edits survive the in-place update; the obsolete left-plan link resolves to the right plan. Local, CI and public acceptance passed. No active implementation work remains. Independent bathroom studies and loose objects are retained.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Five starter arrangements remain: one apartment, three detached bathroom studies and eight loose objects. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -15,7 +15,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 - Retired `?layout=plan-1` resolves to the right plan. Starter list, labels, source card and file/reset descriptions reflect the selection. Bathroom studies and loose objects remain independently available.
 - Gallery now has four schemes and 12 model renders, with no left-apartment card/filter/asset. Assets use `public/gallery/plan-009/` and retain scene/image provenance checks. Regenerated SVG labels explicitly identify «Кухня · 21,43 м²» and «Спальня · 13,55 м²».
 - Added migration regressions for current and saved right-plan edits, an active left plan, missing right starter and the 30-arrangement limit. Browser checks cover PLAN-008 storage upgrade, the old left link, requested labels and persistence after reload.
-- Local acceptance passed: `npm run verify` (**42 tests**, lint, TypeScript and production build) and the complete `npm run test:browser`. New migration/labels, all retained editor/JSON/reset/touch scenarios, 12 gallery images/four SVGs and 360/390/768 widths pass. The 2D screenshot confirms correct kitchen/bedroom placement; geometry and migration source diffs and `git diff --check` reviewed. Final build follows documentation updates. GitHub Actions deployment and public-site verification remain.
+- Local acceptance passed: `npm run verify` (**42 tests**, lint, TypeScript and production build) and the complete `npm run test:browser`. New migration/labels, all retained editor/JSON/reset/touch scenarios, 12 gallery images/four SVGs and 360/390/768 widths pass. The 2D screenshot confirms correct kitchen/bedroom placement; geometry and migration source diffs and `git diff --check` reviewed. Final build after documentation updates passed. GitHub Actions independently passed the full verification/browser gates and deployed successfully.
 
 ## Earlier PLAN-008 implementation
 
@@ -50,7 +50,7 @@ Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
 
 PLAN-008 published application: `12082659873f04a70495d109aa65a96e7b0c863f`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34227401936.
 
-PLAN-009 publication pending.
+PLAN-009 published application: `599e9b0877cdea091c8e3134b4bcc3f95f070f90`. Successful run: https://github.com/Sergey70/FlatPlan/actions/runs/34230731759. Public acceptance reran `checkSourcePlan` and `checkGallery` in isolated Chromium contexts: five current starter scenes, requested kitchen/bedroom labels, editing/reload, both PLAN-008 migration cases, retired left link, mobile widths and all 12 gallery images/four diagrams passed. All **27 public production files** returned HTTP 200 and matched the final `dist/` byte-for-byte. Evidence remains ignored under `.local/qa/plan-009-public/` and `.local/qa/plan-009-public-assets.json`. The completion-record commit changes documentation only.
 
 The complete `FLATPLAN_QA_URL=https://sergey70.github.io/FlatPlan/ npm run test:browser` passed against the public site in isolated contexts: gallery, six source arrangements, exact source geometry, existing editor manipulation, JSON, old-project backup/reload, reset/recovery and desktop/mobile touch scenarios. All **31 public production files** returned HTTP 200 and matched verified `dist/` byte-for-byte, including 15 PNGs and five SVGs. Evidence: ignored `.local/qa/plan-008-public-assets.json` and browser screenshots. Source is the deployed application plus this completion record; working tree is clean after the record commit. Workflow `.github/workflows/pages.yml` continues to gate deployment with unit/static/build and complete browser checks.
 
