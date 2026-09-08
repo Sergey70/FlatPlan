@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="-1.3718844999999997 -0.3250000000000002 10.102898 10.102898" role="img" aria-labelledby="title desc">
-<title id="title">План 2 — кухня-гостиная и две комнаты</title><desc id="desc">Контуры стен, проёмы и предметы из файла .plan. Синим показаны оконные и французские проёмы. Мебель показана условно, с габаритами из файла.</desc>
+<title id="title">Квартира — кухня и две комнаты</title><desc id="desc">Контуры стен, проёмы и предметы из файла .plan. Синим показаны оконные и французские проёмы. Мебель показана условно, с габаритами из файла.</desc>
 <rect x="-1.3718844999999997" y="-0.3250000000000002" width="10.102898" height="10.102898" fill="#faf8f4"/>
 <path data-object="plan-floor-room-006" data-feature="detail" d="M0.366429,6.532095L0.366429,6.279297L0.117229,6.279296L0.121241,6.532097Z" fill="#d4d0c7" fill-rule="evenodd" stroke="#899393" stroke-width="0.0090926082"/>
 <path data-object="plan-floor-room-027" data-feature="detail" d="M4.665223,6.554877L4.6652,6.305994L4.415627,6.305992L4.415628,6.554891Z" fill="#d4d0c7" fill-rule="evenodd" stroke="#899393" stroke-width="0.0090926082"/>
@@ -341,5 +341,5 @@
 <text x="0.7081108097000001" y="1.5071400656" text-anchor="middle" font-family="Arial,sans-serif" font-size="0.212160858" fill="#34434d" stroke="white" stroke-width="0.040411592" paint-order="stroke">Лоджия · 3,32 м²</text>
 <text x="2.3960243324999997" y="4.486641992" text-anchor="middle" font-family="Arial,sans-serif" font-size="0.212160858" fill="#34434d" stroke="white" stroke-width="0.040411592" paint-order="stroke">Спальня · 13,55 м²</text>
 <text x="6.1331778858999995" y="8.4167575479" text-anchor="middle" font-family="Arial,sans-serif" font-size="0.212160858" fill="#34434d" stroke="white" stroke-width="0.040411592" paint-order="stroke">Санузел · 3,72 м²</text>
-<text x="3.4853183077" y="6.9665601818" text-anchor="middle" font-family="Arial,sans-serif" font-size="0.212160858" fill="#34434d" stroke="white" stroke-width="0.040411592" paint-order="stroke">Кухня-гостиная · 21,43 м²</text>
+<text x="3.4853183077" y="6.9665601818" text-anchor="middle" font-family="Arial,sans-serif" font-size="0.212160858" fill="#34434d" stroke="white" stroke-width="0.040411592" paint-order="stroke">Кухня · 21,43 м²</text>
 </svg>

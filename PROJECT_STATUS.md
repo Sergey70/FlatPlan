@@ -4,11 +4,20 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-008 complete and published** — replaced the preliminary passport model with the user's supplied Plan v3 file and updated the gallery. Local verification, GitHub Actions deployment and the complete public-site browser acceptance passed. No active implementation work remains.
+**PLAN-009 active** — retain only the right apartment, remove the left starter arrangement and gallery entries, name the 21.43 m² room «Кухня» and the 13.55 m² room «Спальня». Preserve the independent bathroom studies and loose objects, since the request distinguishes the two apartment drawings. Existing right-plan edits must survive this update in place; opening an obsolete left-plan link should resolve to the right plan. Acceptance: migration regressions, labels/areas and gallery exclusion, full verify/browser gates, publication and public checks. Last complete iteration: PLAN-008 below.
 
-Default: right-hand apartment (Plan 2, bathtub). Six editable arrangements: both apartments, three detached bathroom studies and eight loose objects. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Five starter arrangements remain: one apartment, three detached bathroom studies and eight loose objects. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
-## Implemented
+## PLAN-009 implementation and acceptance
+
+- Removed the left apartment from active source data and conversion output after assigning all objects, so its furniture cannot become loose sample items. Retained 70 wall segments, 12 openings and 81 items. Comparison against the preceding source confirmed identical retained geometry; only the removed drawing and requested names changed.
+- Added an in-place PLAN-008 → PLAN-009 migration. It removes the retired starter (including source copies), renames kitchen/bedroom by stable room IDs in current/saved scenes, preserves geometry, furniture, view and custom arrangement edits, and retains existing arrangement IDs. If the left starter was active, it opens the saved right scene; if that scene was removed, it restores only the right starter. No complete scene reset or unnecessary extra backup.
+- Retired `?layout=plan-1` resolves to the right plan. Starter list, labels, source card and file/reset descriptions reflect the selection. Bathroom studies and loose objects remain independently available.
+- Gallery now has four schemes and 12 model renders, with no left-apartment card/filter/asset. Assets use `public/gallery/plan-009/` and retain scene/image provenance checks. Regenerated SVG labels explicitly identify «Кухня · 21,43 м²» and «Спальня · 13,55 м²».
+- Added migration regressions for current and saved right-plan edits, an active left plan, missing right starter and the 30-arrangement limit. Browser checks cover PLAN-008 storage upgrade, the old left link, requested labels and persistence after reload.
+- Local acceptance passed: `npm run verify` (**42 tests**, lint, TypeScript and production build) and the complete `npm run test:browser`. New migration/labels, all retained editor/JSON/reset/touch scenarios, 12 gallery images/four SVGs and 360/390/768 widths pass. The 2D screenshot confirms correct kitchen/bedroom placement; geometry and migration source diffs and `git diff --check` reviewed. Final build follows documentation updates. GitHub Actions deployment and public-site verification remain.
+
+## Earlier PLAN-008 implementation
 
 - `scripts/import-plan-source.py` extracts all 106 wall segments, 20 openings, 37 room/service polygons and 122 items once into `lib/plan-source.json`. Units are centimetres; coordinates normalize per drawing, then convert to metres.
 - `lib/plan-project.ts` builds scenes preserving wall centrelines and mitred profiles, wall thickness/height, opening spans and sill levels, room polygons, item positions/dimensions/angles/mirrors and recorded vertical levels. All walls are 2.70 m. Each apartment contains four window/French openings; the previously inferred fifth window is removed.
@@ -19,7 +28,7 @@ Default: right-hand apartment (Plan 2, bathtub). Six editable arrangements: both
 - Gallery now shows 15 renders of these five actual layouts with three editor palettes, plus five deterministic SVGs. Old 12 AI concept images and three obsolete diagrams are removed from current assets. PNG exports are checked against canonical geometry; the manifest checks image hashes and numerically normalized scene hashes across platforms.
 - README, PLAN_ASSUMPTIONS and GALLERY_ASSETS document current source, migration, editing, local setup/start/test/stop, regeneration and limitations. Historical passport assumptions remain explicitly marked as history. No new dependencies.
 
-## Verification
+## Earlier PLAN-008 verification
 
 - Independent comparison against the original local file checked **3011 numeric values**, with maximum extraction rounding error **4.99998e-9 cm**; every wall, polygon and item accounted for exactly once.
 - Final `npm run verify` passed **40 tests**, lint, TypeScript and production build after manifest/documentation updates. Six new source tests cover every wall corner/centreline/opening/sill, all item dimensions/transforms, all room areas, profiled wall resizing/JSON and safe migration. GitHub Actions independently passed the same gate on Linux.
@@ -40,6 +49,8 @@ Default deep link: https://sergey70.github.io/FlatPlan/?layout=plan-2
 Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
 
 PLAN-008 published application: `12082659873f04a70495d109aa65a96e7b0c863f`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34227401936.
+
+PLAN-009 publication pending.
 
 The complete `FLATPLAN_QA_URL=https://sergey70.github.io/FlatPlan/ npm run test:browser` passed against the public site in isolated contexts: gallery, six source arrangements, exact source geometry, existing editor manipulation, JSON, old-project backup/reload, reset/recovery and desktop/mobile touch scenarios. All **31 public production files** returned HTTP 200 and matched verified `dist/` byte-for-byte, including 15 PNGs and five SVGs. Evidence: ignored `.local/qa/plan-008-public-assets.json` and browser screenshots. Source is the deployed application plus this completion record; working tree is clean after the record commit. Workflow `.github/workflows/pages.yml` continues to gate deployment with unit/static/build and complete browser checks.
 

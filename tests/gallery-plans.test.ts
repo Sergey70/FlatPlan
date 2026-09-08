@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createPlanScene, planLayouts } from '../lib/plan-project.ts';
+import {
+  createPlanScene,
+  planLayouts,
+  PLAN_REVISION,
+} from '../lib/plan-project.ts';
 import { planDrawing } from '../lib/editor-geometry.ts';
 import {
   createGalleryPlan,
@@ -10,7 +14,8 @@ import {
 } from '../scripts/export-gallery-plans.mjs';
 
 test('gallery preserves every source layout, wall profile, object and window footprint', () => {
-  assert.equal(GALLERY_PLAN_LAYOUTS.length, 5);
+  assert.equal(GALLERY_PLAN_LAYOUTS.length, 4);
+  assert.ok(!GALLERY_PLAN_LAYOUTS.includes('plan-1'));
   for (const id of GALLERY_PLAN_LAYOUTS) {
     const layout = planLayouts.find((l) => l.id === id)!;
     const expected = createPlanScene(layout),
@@ -38,7 +43,10 @@ test('apartment and bathroom schemes remain independent and exported SVGs are de
     assert.equal(svg, renderGalleryPlan(id));
     assert.equal(
       readFileSync(
-        new URL(`../public/gallery/plan-008/plans/${id}.svg`, import.meta.url),
+        new URL(
+          `../public/gallery/${PLAN_REVISION}/plans/${id}.svg`,
+          import.meta.url,
+        ),
         'utf8',
       ),
       svg,
@@ -47,9 +55,12 @@ test('apartment and bathroom schemes remain independent and exported SVGs are de
     assert.doesNotMatch(svg, /NaN|undefined/);
   }
   assert.throws(() => createGalleryPlan('unknown'), /Unknown layout/);
-  const a = createGalleryPlan('plan-1'),
+  assert.throws(() => createGalleryPlan('plan-1'), /Unknown layout/);
+  assert.match(renderGalleryPlan('plan-2'), /Кухня · 21,43 м²/);
+  assert.match(renderGalleryPlan('plan-2'), /Спальня · 13,55 м²/);
+  const a = createGalleryPlan('bath-1'),
     b = createGalleryPlan('plan-2');
-  assert.equal(a.objects.filter((n) => n.geometry.kind === 'wall').length, 36);
+  assert.equal(a.objects.filter((n) => n.geometry.kind === 'wall').length, 10);
   assert.equal(b.objects.filter((n) => n.geometry.kind === 'wall').length, 37);
   assert.notDeepEqual(a.objects, b.objects);
 });

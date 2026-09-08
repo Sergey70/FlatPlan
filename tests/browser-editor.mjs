@@ -833,7 +833,7 @@ try {
   for (const old of [legacy, previous]) {
     delete old.sourceRevision;
     old.arrangements = old.arrangements.filter(
-      (a) => !a.id.startsWith(PLAN_REVISION),
+      (a) => !a.id.startsWith('plan-008-'),
     );
   }
   for (const previousProject of [legacy, previous]) {

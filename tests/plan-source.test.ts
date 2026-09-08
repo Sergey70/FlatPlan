@@ -8,6 +8,8 @@ import {
   applyPlanSource,
   hasPlanSource,
   DEFAULT_PLAN_ID,
+  PLAN_REVISION,
+  planArrangementId,
 } from '../lib/plan-project.ts';
 import { createInitialProject as legacyProject } from '../lib/editor-seed.ts';
 import {
@@ -34,10 +36,18 @@ import { itemHeight, itemBottom } from '../lib/plan-furniture.ts';
 const close = (a: number, b: number, tolerance = 1e-6) =>
   assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 
-test('.plan import preserves all five drawings plus loose items and opens the right apartment', () => {
+test('.plan selection retains only the right apartment, bathroom studies and loose items', () => {
   const p = createPlanProject();
   assert.equal(p.activeArrangement, DEFAULT_PLAN_ID);
-  assert.equal(p.arrangements.length, 6);
+  assert.equal(p.arrangements.length, 5);
+  assert.deepEqual(
+    planLayouts.map((l) => l.id),
+    ['plan-2', 'bath-1', 'bath-2', 'bath-3', 'loose-items'],
+  );
+  const apartment = planLayouts[0];
+  assert.equal(apartment.rooms.find((r) => r.area === 21.43)!.name, 'Кухня');
+  assert.equal(apartment.rooms.find((r) => r.area === 13.55)!.name, 'Спальня');
+  assert.ok(!JSON.stringify(p).includes('Кухня-гостиная'));
   assert.equal(
     p.scene.objects.filter((n) => n.geometry.kind === 'wall').length,
     37,
@@ -56,14 +66,96 @@ test('.plan import preserves all five drawings plus loose items and opens the ri
   );
   assert.equal(
     planLayouts.reduce((a, l) => a + l.walls.length, 0),
-    106,
+    70,
   );
   assert.equal(
     planLayouts.reduce((a, l) => a + l.items.length, 0),
-    122,
+    81,
   );
   assert.equal(p.arrangements.at(-1)!.scene.objects.length, 8);
   assert.deepEqual(importProject(exportProject(p)), p);
+});
+
+test('PLAN-009 removes the retired starter and renames rooms without resetting right-plan edits', () => {
+  const old = createPlanProject();
+  old.sourceRevision = 'plan-008';
+  old.name = 'Мои правки';
+  const right = old.arrangements.find((a) => a.id === DEFAULT_PLAN_ID)!;
+  right.name = 'План 2 — кухня-гостиная и две комнаты';
+  const kitchen = planLayouts[0].rooms.find((r) => r.area === 21.43)!;
+  const kitchenId = `plan-floor-${kitchen.id}`;
+  findNode(old.scene.objects, kitchenId)!.name = 'Пол — Кухня-гостиная';
+  findNode(right.scene.objects, kitchenId)!.name = 'Пол — Кухня-гостиная';
+  old.scene.objects.find((n) => n.geometry.kind === 'wall')!.geometry.size[1] =
+    2.95;
+  old.scene.view.palette = 'contrast';
+  right.scene.objects.find((n) => n.category === 'furniture')!.position[0] +=
+    0.24;
+  old.arrangements.push({
+    id: planArrangementId('plan-1'),
+    name: 'Левый план',
+    scene: clone(right.scene),
+  });
+  const custom = { ...clone(right), id: 'my-layout', name: 'Мой вариант' };
+  old.arrangements.push(custom);
+  const before = clone(old);
+  const updated = applyPlanSource(old);
+  assert.deepEqual(old, before);
+  assert.equal(updated.sourceRevision, PLAN_REVISION);
+  assert.equal(updated.name, old.name);
+  assert.equal(updated.activeArrangement, DEFAULT_PLAN_ID);
+  assert.ok(
+    !updated.arrangements.some((a) => a.id === planArrangementId('plan-1')),
+  );
+  assert.equal(updated.arrangements.length, old.arrangements.length - 1);
+  const expected = clone(old.scene);
+  findNode(expected.objects, kitchenId)!.name = 'Пол — Кухня';
+  assert.deepEqual(updated.scene, expected);
+  const expectedRight = clone(right);
+  expectedRight.name = planLayouts[0].name;
+  findNode(expectedRight.scene.objects, kitchenId)!.name = 'Пол — Кухня';
+  assert.deepEqual(
+    updated.arrangements.find((a) => a.id === DEFAULT_PLAN_ID),
+    expectedRight,
+  );
+  const expectedCustom = clone(custom);
+  findNode(expectedCustom.scene.objects, kitchenId)!.name = 'Пол — Кухня';
+  assert.deepEqual(
+    updated.arrangements.find((a) => a.id === custom.id),
+    expectedCustom,
+  );
+  assert.ok(hasPlanSource(importProject(exportProject(updated))));
+});
+
+test('active left starter switches to the saved right scene even at the arrangement limit', () => {
+  const old = createPlanProject();
+  old.sourceRevision = 'plan-008';
+  const right = old.arrangements.find((a) => a.id === DEFAULT_PLAN_ID)!;
+  right.scene.view.palette = 'warm';
+  right.scene.objects.find((n) => n.category === 'furniture')!.position[2] +=
+    0.31;
+  old.arrangements.push({
+    id: planArrangementId('plan-1'),
+    name: 'Левый план',
+    scene: clone(old.scene),
+  });
+  old.activeArrangement = planArrangementId('plan-1');
+  while (old.arrangements.length < 30)
+    old.arrangements.push({
+      ...clone(right),
+      id: `saved-${old.arrangements.length}`,
+    });
+  const updated = applyPlanSource(old);
+  assert.equal(updated.arrangements.length, 29);
+  assert.equal(updated.activeArrangement, DEFAULT_PLAN_ID);
+  assert.deepEqual(updated.scene, right.scene);
+  const missing = clone(old);
+  missing.arrangements = missing.arrangements.filter(
+    (a) => a.id !== DEFAULT_PLAN_ID,
+  );
+  const restored = applyPlanSource(missing);
+  assert.equal(restored.arrangements.length, 29);
+  assert.deepEqual(restored.scene, createPlanProject().scene);
 });
 test('every wall centreline, mitred corner, opening span and sill matches source coordinates', () => {
   for (const layout of planLayouts) {

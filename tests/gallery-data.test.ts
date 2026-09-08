@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { gallerySceneKey } from '../scripts/gallery-scene-key.mjs';
-import { createPlanProject, PLAN_REVISION } from '../lib/plan-project.ts';
+import {
+  createPlanProject,
+  PLAN_REVISION,
+  planArrangementId,
+} from '../lib/plan-project.ts';
 import {
   galleryConcepts,
   galleryLayouts,
@@ -11,8 +15,8 @@ import {
 } from '../lib/gallery-data.ts';
 
 test('gallery offers every layout/style pair with a decodable PNG and its matching standalone plan', () => {
-  assert.equal(galleryConcepts.length, 15);
-  assert.equal(new Set(galleryConcepts.map((concept) => concept.id)).size, 15);
+  assert.equal(galleryConcepts.length, 12);
+  assert.equal(new Set(galleryConcepts.map((concept) => concept.id)).size, 12);
   for (const layout of galleryLayouts) {
     const concepts = galleryConcepts.filter(
       (concept) => concept.layout.id === layout.id,
@@ -50,7 +54,10 @@ test('gallery offers every layout/style pair with a decodable PNG and its matchi
 test('gallery images and their source scenes match the render manifest', () => {
   const manifest = JSON.parse(
     readFileSync(
-      new URL('../public/gallery/plan-008/manifest.json', import.meta.url),
+      new URL(
+        `../public/gallery/${PLAN_REVISION}/manifest.json`,
+        import.meta.url,
+      ),
       'utf8',
     ),
   );
@@ -65,7 +72,7 @@ test('gallery images and their source scenes match the render manifest', () => {
   );
   for (const entry of manifest.entries) {
     const scene = seed.arrangements.find(
-      (a) => a.id === `${PLAN_REVISION}-${entry.layout}`,
+      (a) => a.id === planArrangementId(entry.layout),
     )!.scene;
     assert.equal(
       entry.sceneSha256,
@@ -74,7 +81,7 @@ test('gallery images and their source scenes match the render manifest', () => {
     );
     const image = readFileSync(
       new URL(
-        `../public/gallery/plan-008/images/${entry.id}.png`,
+        `../public/gallery/${PLAN_REVISION}/images/${entry.id}.png`,
         import.meta.url,
       ),
     );

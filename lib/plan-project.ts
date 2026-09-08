@@ -5,6 +5,7 @@ import {
   planSource,
   PLAN_REVISION,
   DEFAULT_PLAN_ID,
+  planArrangementId,
   type PlanLayout,
 } from './plan-data.ts';
 import { planFurniture } from './plan-furniture.ts';
@@ -17,7 +18,12 @@ import {
   type Arrangement,
 } from './editor-model.ts';
 import type { Point } from './apartment.ts';
-export { planLayouts, PLAN_REVISION, DEFAULT_PLAN_ID } from './plan-data.ts';
+export {
+  planLayouts,
+  PLAN_REVISION,
+  DEFAULT_PLAN_ID,
+  planArrangementId,
+} from './plan-data.ts';
 const metres = (p: Point): Point => [p[0] / 100, p[1] / 100];
 
 export function createPlanScene(layout: PlanLayout): Arrangement {
@@ -127,7 +133,7 @@ export function createPlanScene(layout: PlanLayout): Arrangement {
 }
 export function createPlanProject(): EditorProject {
   const arrangements = planLayouts.map((layout) => ({
-    id: `${PLAN_REVISION}-${layout.id}`,
+    id: planArrangementId(layout.id),
     name: layout.name,
     scene: createPlanScene(layout),
   }));
@@ -146,6 +152,8 @@ export function hasPlanSource(project: EditorProject): boolean {
   return project.sourceRevision === PLAN_REVISION;
 }
 export function applyPlanSource(project: EditorProject): EditorProject {
+  if (project.sourceRevision === 'plan-008')
+    return updatePlanSelection(project);
   const seed = createPlanProject();
   const reserved = new Set(seed.arrangements.map((a) => a.id));
   const ids = new Set(reserved);
@@ -178,9 +186,47 @@ export function applyPlanSource(project: EditorProject): EditorProject {
 }
 export function sourceLayout(project: EditorProject): PlanLayout | undefined {
   return planLayouts.find(
-    (l) => project.activeArrangement === `${PLAN_REVISION}-${l.id}`,
+    (l) => project.activeArrangement === planArrangementId(l.id),
   );
 }
 export function defaultPlanName() {
   return planLayouts.find((l) => l.id === planSource.defaultLayout)!.name;
+}
+
+/** PLAN-009 changes selection and room names, never rebuilding an edited right-hand scene. */
+function updatePlanSelection(project: EditorProject): EditorProject {
+  const next = clone(project);
+  const isLeft = (id: string | null) =>
+    !!id && /^(?:previous-)*plan-008-plan-1$/.test(id);
+  next.arrangements = next.arrangements.filter((a) => !isLeft(a.id));
+  const layout = planLayouts.find((l) => l.id === 'plan-2')!;
+  function renameRooms(scene: Arrangement) {
+    for (const room of layout.rooms.filter(
+      (r) => r.area === 21.43 || r.area === 13.55,
+    )) {
+      const node = scene.objects.find((n) => n.id === `plan-floor-${room.id}`);
+      if (node) node.name = `Пол — ${room.name}`;
+    }
+  }
+  for (const arrangement of next.arrangements) {
+    renameRooms(arrangement.scene);
+    if (
+      arrangement.id === DEFAULT_PLAN_ID &&
+      arrangement.name === 'План 2 — кухня-гостиная и две комнаты'
+    )
+      arrangement.name = layout.name;
+  }
+  if (isLeft(next.activeArrangement)) {
+    let right = next.arrangements.find((a) => a.id === DEFAULT_PLAN_ID);
+    if (!right) {
+      right = createPlanProject().arrangements.find(
+        (a) => a.id === DEFAULT_PLAN_ID,
+      )!;
+      next.arrangements.push(right);
+    }
+    next.scene = clone(right.scene);
+    next.activeArrangement = right.id;
+  } else renameRooms(next.scene);
+  next.sourceRevision = PLAN_REVISION;
+  return validateProject(next);
 }

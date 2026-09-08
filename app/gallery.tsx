@@ -228,7 +228,7 @@ export default function Gallery() {
               <span>
                 {featured.number} / {featured.style.name}
               </span>
-              <span>План 2 из файла .plan</span>
+              <span>План квартиры из файла .plan</span>
             </figcaption>
           </figure>
         </section>
@@ -243,8 +243,8 @@ export default function Gallery() {
           </div>
           <div>
             <p>
-              Два плана квартиры и три отдельных варианта санузла. В каждой
-              схеме сохранены координаты стен, проёмов и предметов из файла.
+              План квартиры и три отдельных варианта санузла. В каждой схеме
+              сохранены координаты стен, проёмов и предметов из файла.
             </p>
             <p className="gallery-muted">
               Рендеры и схемы построены по одной модели. В файле нет готовых

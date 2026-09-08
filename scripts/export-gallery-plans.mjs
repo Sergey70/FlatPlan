@@ -1,17 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createPlanScene, planLayouts } from '../lib/plan-project.ts';
+import {
+  createPlanScene,
+  planLayouts,
+  PLAN_REVISION,
+} from '../lib/plan-project.ts';
 import { planDrawing } from '../lib/editor-geometry.ts';
 import { findNode } from '../lib/editor-model.ts';
 
-export const GALLERY_PLAN_LAYOUTS = [
-  'plan-2',
-  'plan-1',
-  'bath-1',
-  'bath-2',
-  'bath-3',
-];
+export const GALLERY_PLAN_LAYOUTS = ['plan-2', 'bath-1', 'bath-2', 'bath-3'];
 export function createGalleryPlan(id) {
   const layout = planLayouts.find((l) => l.id === id);
   if (!layout || !GALLERY_PLAN_LAYOUTS.includes(id))
@@ -84,9 +82,9 @@ if (
   process.argv[1] &&
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
-  const target = resolve('public/gallery/plan-008/plans');
+  const target = resolve(`public/gallery/${PLAN_REVISION}/plans`);
   mkdirSync(target, { recursive: true });
   for (const id of GALLERY_PLAN_LAYOUTS)
     writeFileSync(resolve(target, `${id}.svg`), renderGalleryPlan(id));
-  console.log('Exported five exact .plan diagrams.');
+  console.log('Exported four exact .plan diagrams.');
 }

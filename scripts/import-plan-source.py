@@ -16,10 +16,10 @@ rooms = list(raw['rooms2'].values())
 items = list(raw['items'].values())
 assigned = set()
 layouts = []
-names = ['План 1 — кухня и спальня', 'План 2 — кухня-гостиная и две комнаты',
+names = ['План 1 — кухня и спальня', 'Квартира — кухня и две комнаты',
          'Санузел — вариант 1', 'Санузел — вариант 2', 'Санузел — вариант 3']
 room_names = {1: {2.86:'Лоджия',14.65:'Комната 1',3.58:'Санузел',11.74:'Спальня',27.22:'Кухня-гостиная'},
-              2: {3.33:'Гардеробная',14.91:'Комната 1',3.32:'Лоджия',13.55:'Спальня',3.72:'Санузел',21.43:'Кухня-гостиная'}}
+              2: {3.33:'Гардеробная',14.91:'Комната 1',3.32:'Лоджия',13.55:'Спальня',3.72:'Санузел',21.43:'Кухня'}}
 def n(value):
     assert isinstance(value,(int,float)) and math.isfinite(value)
     return round(value, 8)
@@ -68,10 +68,13 @@ layouts.append(dict(id='loose-items',name='Предметы вне контур�
     width=n(max(t['pc']['x']+t['width'] for _,t in unused)-x0),
     depth=n(max(t['pc']['y']+t['height'] for _,t in unused)-z0),
     items=[extract_item(t,i,loose_point) for i,t in unused]))
-result=dict(version=1,units='cm',defaultLayout='plan-2',layouts=layouts)
 assert sum(len(l['walls']) for l in layouts)==106
 assert sum(len(l['items']) for l in layouts)==122
 assert sum(len(w['holes']) for l in layouts for w in l['walls'])==20
+# User selected only the right apartment. Remove the left drawing after assigning
+# all items, so its furniture cannot accidentally become loose sample objects.
+layouts=[layout for layout in layouts if layout['id'] != 'plan-1']
+result=dict(version=1,units='cm',defaultLayout='plan-2',layouts=layouts)
 target=ROOT/'lib'/'plan-source.json'
 target.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-print(f'Wrote anonymous geometry: {len(layouts)} arrangements, 106 walls, 20 openings, 122 items')
+print(f'Wrote selected geometry: {len(layouts)} arrangements, 70 walls, 12 openings, 81 items')

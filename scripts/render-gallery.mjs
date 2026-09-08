@@ -9,9 +9,10 @@ import {
   createPlanProject,
   PLAN_REVISION,
   planLayouts,
+  planArrangementId,
 } from '../lib/plan-project.ts';
 
-const output = resolve('public/gallery/plan-008');
+const output = resolve(`public/gallery/${PLAN_REVISION}`);
 const url = process.env.FLATPLAN_RENDER_URL || 'http://127.0.0.1:4189/';
 let server, browser;
 try {
@@ -80,10 +81,10 @@ try {
       target: [x, 0.35, z],
     };
     await page.evaluate(
-      ({ id, palette, revision, camera }) => {
+      ({ id, palette, camera }) => {
         window.__tools.manage_editor_arrangement.execute({
           action: 'open',
-          id: `${revision}-${id}`,
+          id,
         });
         window.__tools.configure_editor_view.execute({
           mode: '3d',
@@ -98,9 +99,8 @@ try {
         });
       },
       {
-        id: concept.layout.id,
+        id: planArrangementId(concept.layout.id),
         palette: concept.style.id,
-        revision: PLAN_REVISION,
         camera,
       },
     );

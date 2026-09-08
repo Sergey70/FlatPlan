@@ -1,5 +1,5 @@
 {
-  "revision": "plan-008",
+  "revision": "plan-009",
   "sceneDecimalPlaces": 7,
   "renderer": "FlatPlan Three.js; cutaway walls; no labels or grid",
   "entries": [
@@ -7,7 +7,7 @@
       "id": "plan-2-natural",
       "layout": "plan-2",
       "palette": "natural",
-      "sceneSha256": "1a86c6dc5e990bf3026a4e27df58cb9ac2e2bfd1715bf214f83652dc0274851e",
+      "sceneSha256": "2aedd4acbf3f435c0285cb2840cc7987551991fafeef71d8ca044faaef18aa37",
       "imageSha256": "c0f756688585a70841c403e3e00b9ada4ba1543dad164adcb330bcbf78143757",
       "width": 1470,
       "height": 1205
@@ -16,7 +16,7 @@
       "id": "plan-2-warm",
       "layout": "plan-2",
       "palette": "warm",
-      "sceneSha256": "1a86c6dc5e990bf3026a4e27df58cb9ac2e2bfd1715bf214f83652dc0274851e",
+      "sceneSha256": "2aedd4acbf3f435c0285cb2840cc7987551991fafeef71d8ca044faaef18aa37",
       "imageSha256": "2944b0726513c780aade1ff2dbcd90b6252895a83d94b96f8af8b09be88359df",
       "width": 1470,
       "height": 1205
@@ -25,35 +25,8 @@
       "id": "plan-2-contrast",
       "layout": "plan-2",
       "palette": "contrast",
-      "sceneSha256": "1a86c6dc5e990bf3026a4e27df58cb9ac2e2bfd1715bf214f83652dc0274851e",
+      "sceneSha256": "2aedd4acbf3f435c0285cb2840cc7987551991fafeef71d8ca044faaef18aa37",
       "imageSha256": "bf8af37b063fba1965afaf5e5b109e0848e1a6a7fbc7016ec4ac1be4d42eac6e",
-      "width": 1470,
-      "height": 1205
-    },
-    {
-      "id": "plan-1-natural",
-      "layout": "plan-1",
-      "palette": "natural",
-      "sceneSha256": "d26817e3a3b74b78956906735e554f5e506296e45409a18de4b61e33ae980777",
-      "imageSha256": "e85ffb35c36c39b193d7e7b1a711ba7c94cc5e345c890a822ad46c1899a34af7",
-      "width": 1470,
-      "height": 1205
-    },
-    {
-      "id": "plan-1-warm",
-      "layout": "plan-1",
-      "palette": "warm",
-      "sceneSha256": "d26817e3a3b74b78956906735e554f5e506296e45409a18de4b61e33ae980777",
-      "imageSha256": "84136fc9de5317c0bf999c18511fe1fc55751d7e49fc7f000b04e88a46f2e021",
-      "width": 1470,
-      "height": 1205
-    },
-    {
-      "id": "plan-1-contrast",
-      "layout": "plan-1",
-      "palette": "contrast",
-      "sceneSha256": "d26817e3a3b74b78956906735e554f5e506296e45409a18de4b61e33ae980777",
-      "imageSha256": "a3a0aada39e5c451938ca8725b636dc8a0924490ee92e30d0a25db7291966b07",
       "width": 1470,
       "height": 1205
     },

@@ -1,10 +1,8 @@
 import { palettes, type PaletteId } from './apartment.ts';
-import { planLayouts } from './plan-data.ts';
+import { planLayouts, PLAN_REVISION } from './plan-data.ts';
 const descriptions: Record<string, string> = {
-  'plan-1':
-    'Левый план из файла: кухня-гостиная, спальня, верхняя комната, лоджия и санузел с душевой кабиной.',
   'plan-2':
-    'Правый план из файла: кухня-гостиная внизу, спальня у верхнего левого окна, верхняя комната, гардеробная, лоджия и санузел с ванной.',
+    'Кухня 21,43 м² внизу, спальня 13,55 м² у верхнего левого окна, комната 14,91 м², гардеробная, лоджия и санузел с ванной.',
   'bath-1':
     'Первый отдельный вариант санузла: ванна вдоль правой стены и оборудование слева.',
   'bath-2':
@@ -12,34 +10,25 @@ const descriptions: Record<string, string> = {
   'bath-3':
     'Третий отдельный вариант санузла: ванна справа и компактная расстановка оборудования слева.',
 };
-export const galleryLayouts = [
-  'plan-2',
-  'plan-1',
-  'bath-1',
-  'bath-2',
-  'bath-3',
-].map((id, index) => {
-  const layout = planLayouts.find((l) => l.id === id)!;
-  return {
-    id,
-    number: String(index + 1).padStart(2, '0'),
-    name: layout.name,
-    short:
-      id === 'plan-1'
-        ? 'План 1'
-        : id === 'plan-2'
-          ? 'План 2'
-          : `Санузел ${id.slice(-1)}`,
-    description: descriptions[id],
-    detail: descriptions[id],
-    benefit: id.startsWith('plan')
-      ? 'Четыре оконных и французских проёма'
-      : 'Самостоятельная схема санузла',
-    tradeoff:
-      'Положение и размеры объектов соответствуют файлу .plan. Детали мебели и материалы показаны условно.',
-    walls: `${layout.walls.length} стеновых отрезков · высота 2,70 м`,
-  };
-});
+export const galleryLayouts = ['plan-2', 'bath-1', 'bath-2', 'bath-3'].map(
+  (id, index) => {
+    const layout = planLayouts.find((l) => l.id === id)!;
+    return {
+      id,
+      number: String(index + 1).padStart(2, '0'),
+      name: layout.name,
+      short: id === 'plan-2' ? 'Квартира' : `Санузел ${id.slice(-1)}`,
+      description: descriptions[id],
+      detail: descriptions[id],
+      benefit: id.startsWith('plan')
+        ? 'Четыре оконных и французских проёма'
+        : 'Самостоятельная схема санузла',
+      tradeoff:
+        'Положение и размеры объектов соответствуют файлу .plan. Детали мебели и материалы показаны условно.',
+      walls: `${layout.walls.length} стеновых отрезков · высота 2,70 м`,
+    };
+  },
+);
 const styleInfo: Record<
   PaletteId,
   { name: string; mood: string; description: string }
@@ -84,8 +73,8 @@ export const galleryConcepts = galleryLayouts.flatMap((layout) =>
     layout,
     style,
     imageNote: undefined as string | undefined,
-    image: `./gallery/plan-008/images/${layout.id}-${style.id}.png`,
-    plan: `./gallery/plan-008/plans/${layout.id}.svg`,
+    image: `./gallery/${PLAN_REVISION}/images/${layout.id}-${style.id}.png`,
+    plan: `./gallery/${PLAN_REVISION}/plans/${layout.id}.svg`,
   })),
 );
 export type GalleryConcept = (typeof galleryConcepts)[number];

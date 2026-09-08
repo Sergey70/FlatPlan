@@ -45,7 +45,7 @@ import {
   applyPlanSource,
   hasPlanSource,
   planLayouts,
-  PLAN_REVISION,
+  planArrangementId,
   sourceLayout,
 } from '@/lib/plan-project';
 import {
@@ -700,12 +700,12 @@ export default function Editor() {
         (l) =>
           l.id === requested ||
           (l.id === 'plan-2' &&
-            ['separate-kitchen', 'kitchen-by-bathroom'].includes(
+            ['separate-kitchen', 'kitchen-by-bathroom', 'plan-1'].includes(
               requested ?? '',
             )),
       );
       if (layout) {
-        const id = `${PLAN_REVISION}-${layout.id}`;
+        const id = planArrangementId(layout.id);
         if (!project.arrangements.some((a) => a.id === id))
           project = applyPlanSource(project);
         project = loadArrangement(project, id);
@@ -713,12 +713,14 @@ export default function Editor() {
       return {
         project,
         upgraded,
+        selectionUpdated: saved?.sourceRevision === 'plan-008',
         error: null as string | null,
       };
     } catch (error) {
       return {
         project: restored ?? createInitialProject(),
         upgraded: false,
+        selectionUpdated: false,
         error: `${restored ? 'Не удалось открыть новый план' : 'Не удалось восстановить проект'}: ${(error as Error).message}`,
       };
     }
@@ -729,6 +731,7 @@ export default function Editor() {
       [
         'separate-kitchen',
         'kitchen-by-bathroom',
+        'plan-1',
         ...planLayouts.map((l) => l.id),
       ].includes(url.searchParams.get('layout') ?? '')
     ) {
@@ -761,7 +764,9 @@ export default function Editor() {
   const [error, setError] = useState<string | null>(boot.error),
     [notice, setNotice] = useState<string | null>(
       boot.upgraded
-        ? 'Открыт план из файла .plan. Предыдущая сцена сохранена в варианте «До обновления по файлу .plan».'
+        ? boot.selectionUpdated
+          ? 'Оставлен правый план квартиры. 21,43 м² — кухня; 13,55 м² — спальня. Правки правого плана сохранены.'
+          : 'Открыт план из файла .plan. Предыдущая сцена сохранена в варианте «До обновления по файлу .plan».'
         : null,
     ),
     [panel, setPanel] = useState<
@@ -1209,8 +1214,8 @@ export default function Editor() {
                     {sourceLayout(project)?.name ?? 'Планировка из файла .plan'}
                   </strong>
                   <p>
-                    Два плана квартиры и три варианта санузла. Размеры,
-                    положение стен и проёмов перенесены из файла.
+                    Кухня — 21,43 м², спальня — 13,55 м². Размеры, положение
+                    стен и проёмов перенесены из файла.
                   </p>
                   <button
                     className="ed-full"
@@ -1779,7 +1784,7 @@ export default function Editor() {
                   <Palette size={22} aria-hidden="true" />
                   <span>
                     <strong>Галерея интерьеров ↗</strong>
-                    <small>15 визуализаций · 5 планировок</small>
+                    <small>12 визуализаций · квартира и санузлы</small>
                   </span>
                 </a>
                 <p className="ed-hint">
@@ -2056,7 +2061,7 @@ export default function Editor() {
                 <details>
                   <summary>Новый проект по файлу .plan</summary>
                   <p className="ed-hint">
-                    Откроет правый план с ванной и все варианты из файла.
+                    Откроет план квартиры с ванной и отдельные схемы санузла.
                     Сначала скачайте свой проект; сброс можно отменить.
                   </p>
                   <button
@@ -2108,8 +2113,8 @@ export default function Editor() {
                 <div className="ed-reference">
                   <h3>Основа — файл .plan</h3>
                   <p>
-                    Высота стен в исходном файле — 2,70 м. В каждом плане
-                    квартиры четыре оконных и французских проёма.
+                    Высота стен в исходном файле — 2,70 м. В плане квартиры
+                    четыре оконных и французских проёма.
                   </p>
                   <p>
                     Геометрия соответствует файлу; форма деталей мебели и
