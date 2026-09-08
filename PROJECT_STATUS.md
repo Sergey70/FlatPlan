@@ -4,9 +4,9 @@ Updated: 2026-09-08.
 
 ## Objective and current phase
 
-Active iteration: **DATA-007**, a manual permanent reset of saved editor data. Add an explicit confirmation in File, remove only FlatPlan's storage entry, restore the initial project, and clear undo/redo and pending imports. Cancellation or storage deletion failure must preserve the current project. Other open tabs must not silently restore the old save. Acceptance: focused storage tests, `npm run verify`, desktop/mobile browser reset scenarios and existing browser suite, followed by GitHub Pages deployment verification. No new dependencies; actual visitor data is not touched during isolated QA. Commits and pushes are explicitly authorized.
+No active implementation iteration. Last completed and published iteration: **DATA-007**, manual permanent reset of saved editor data. Explicit confirmation in File removes only FlatPlan's storage entry, restores the initial project, and clears undo/redo and pending imports. Cancellation and storage deletion failure preserve the current project; other tabs pause instead of silently restoring an old save. Focused tests, `npm run verify`, complete local and public desktop/mobile browser suites, GitHub Actions deployment and public asset comparison all passed. No new dependencies; actual visitor data was not touched during isolated QA. Commits and pushes are explicitly authorized.
 
-Last published iteration: **GALLERY-006**, formal gallery introduction, application `8c4df68c3ffa39cbd6ae25d3d6bbd310d9277b4c`; deployment succeeded in https://github.com/Sergey70/FlatPlan/actions/runs/34166338337. Its post-publication browser check was blocked by a tool usage limit. Earlier GALLERY-005 supplied the concept gallery, PLAN-004 corrected the kitchen, UI-003 fixed switches, PLAN-002 supplied the partition proposal, and EDITOR-001 the editor.
+Previously published: **GALLERY-006**, formal gallery introduction, application `8c4df68c3ffa39cbd6ae25d3d6bbd310d9277b4c`; deployment succeeded in https://github.com/Sergey70/FlatPlan/actions/runs/34166338337. Its immediate post-publication browser check was blocked by a tool usage limit; the full public gallery scenario now passes with DATA-007. Earlier GALLERY-005 supplied the concept gallery, PLAN-004 corrected the kitchen, UI-003 fixed switches, PLAN-002 supplied the partition proposal, and EDITOR-001 the editor.
 
 ## Completed iteration: GALLERY-005
 
@@ -34,7 +34,7 @@ Acceptance: `npm run verify`, `npm run test:browser` including gallery filters/d
 
 ## Verification
 
-- DATA-007: focused storage deletion regression passed, followed by `npm run verify` (**34 tests**, lint, TypeScript and production build) and the complete `npm run test:browser` suite. New browser coverage verifies cancellation, denied deletion, corrupted save reset, exact initial geometry/arrangements, cleared undo/redo and pending import, persistence after reload, unrelated-key preservation, other-tab unload protection, empty-storage recovery, mobile confirmation and failed autosave after successful deletion. Desktop/360 px confirmation screenshots visually inspected; no overflow or page errors. Existing gallery, editor, geometry manipulation, JSON, upgrade and touch scenarios passed. Final diff reviewed. Publication and public-site verification are next.
+- DATA-007: focused storage deletion regression passed, followed by `npm run verify` (**34 tests**, lint, TypeScript and production build) and the complete `npm run test:browser` suite. New browser coverage verifies cancellation, denied deletion, corrupted save reset, exact initial geometry/arrangements, cleared undo/redo and pending import, persistence after reload, unrelated-key preservation, other-tab unload protection, empty-storage recovery, mobile confirmation and failed autosave after successful deletion. Desktop/360 px confirmation screenshots visually inspected; no overflow or page errors. Existing gallery, editor, geometry manipulation, JSON, upgrade and touch scenarios passed. Final diff reviewed. The complete browser suite also passed against the public URL using `FLATPLAN_QA_URL=https://sergey70.github.io/FlatPlan/ npm run test:browser` in isolated contexts. All 12 public HTML/JS/CSS/SVG files returned HTTP 200 and matched the final production build byte-for-byte; unchanged gallery PNGs decoded in the browser suite.
 
 - GALLERY-005: `npm run verify` passed all **33 tests**, lint, TypeScript and production build. Four gallery checks cover all 12 asset/layout pairs, exact preservation of five windows and original structures, the intended wall differences and deterministic SVG exports.
 - `npm run test:browser` passed gallery and the entire existing editor suite against the production build: 12 image decodes, three diagrams, both filters, detail/compare/clear, two-selection limit, keyboard Escape/focus restoration, 360/390/768 widths, mobile dialogs, byte-for-byte storage preservation and reload. Existing desktop/touch editing, JSON transfer, 3D manipulation, save recovery and both old-project upgrades still pass; no page errors.
@@ -60,6 +60,7 @@ Repository: https://github.com/Sergey70/FlatPlan (public).
 Live URL: https://sergey70.github.io/FlatPlan/.
 New-layout URL: https://sergey70.github.io/FlatPlan/?layout=kitchen-by-bathroom.
 Gallery URL: https://sergey70.github.io/FlatPlan/?view=gallery.
+DATA-007 published application: `7adbca220b225b9da8140669acb1d55d7dfe1c9b`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34220689856. Complete public editor/gallery/reset desktop/mobile browser acceptance passed; reset confirmation screenshots remain ignored under `.local/qa/reset-confirm-desktop.png` and `.local/qa/reset-confirm-mobile.png`. Twelve public text/vector assets matched the local build. Local working source is the deployed application plus this completion record.
 GALLERY-005 published application: `2fdc2106454cb6b0dee684bea5cf039d97443384`, successful build/browser/deployment run https://github.com/Sergey70/FlatPlan/actions/runs/34165933124. Fresh public gallery contexts passed the full gallery scenario: 12 image decodes, three diagrams, layout/style filters, detail and two-concept comparison, keyboard focus, mobile widths and byte-identical editor storage after reload. Fresh public desktop/mobile editors loaded 222 elements, two arrangements and three removable walls; WebGL and 2D worked, and the new gallery link opened a separate tab without changing the saved project. All 25 public production files returned HTTP 200 and matched the final build byte-for-byte. No page/asset errors. Screenshots and hash results remain ignored under `.local/qa/`.
 Source: `.github/workflows/pages.yml`; full unit/static/build and browser acceptance gate deployment.
 
@@ -67,7 +68,7 @@ Published PLAN-004 application: `b7512105cd6d16af11a37b84ff827aa21f46b6a6`, succ
 
 ## Next
 
-Publish DATA-007 through the existing GitHub Pages workflow and verify the public reset flow in isolated browser contexts. Afterwards wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied.
+Wait for measured drawings and preferred concepts. Existing walls, kitchen, furniture and materials can be refined in the editor; gallery concepts are not automatically applied. No required work remains for DATA-007.
 
 ## GALLERY-006 follow-up
 
