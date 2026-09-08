@@ -1,3 +1,11 @@
+import type {
+  Finish,
+  WallFace,
+  SnapSettings,
+  WalkSettings,
+  SunSettings,
+  SavedViewpoint,
+} from './design-types.ts';
 import { validateContours } from './polygon-validation.ts';
 import type { PaletteId, Point } from './apartment.ts';
 
@@ -49,6 +57,9 @@ export interface SceneNode {
   cutaway: boolean;
   children: SceneNode[];
   clearance?: { front: number; back: number };
+  assembly?: boolean;
+  finish?: Finish;
+  surfaces?: Partial<Record<WallFace, Finish>>;
 }
 export interface CameraState {
   position: Vec3;
@@ -66,11 +77,15 @@ export interface EditorView {
   grid: boolean;
   camera: CameraState | null;
   selected: string | null;
+  snapping?: SnapSettings;
+  walk?: WalkSettings;
+  sunlight?: SunSettings;
 }
 export interface Arrangement {
   objects: SceneNode[];
   view: EditorView;
   measurements?: PlanMeasurement[];
+  viewpoints?: SavedViewpoint[];
 }
 export interface PlanMeasurement {
   id: string;
@@ -192,7 +207,15 @@ export function paintNode(
   for (const { node: part } of flattenNodes([node])) {
     part.color = color;
     delete part.role;
-    if (material) part.material = material;
+    if (material) {
+      part.material = material;
+      delete part.finish;
+      delete part.surfaces;
+    } else {
+      if (part.finish) part.finish.color = color;
+      for (const surface of Object.values(part.surfaces ?? {}))
+        surface.color = color;
+    }
   }
 }
 export function saveArrangement(
@@ -297,6 +320,73 @@ function polygon(value: unknown): Point[] {
     return [number(point[0], -100, 100), number(point[1], -100, 100)];
   });
 }
+function parseFinish(value: unknown): Finish {
+  const f = record(value);
+  if (!['paint', 'oak', 'tile', 'fabric', 'stone'].includes(f.kind as string))
+    fail('неизвестная отделка.');
+  const color = (v: unknown) => {
+    if (typeof v !== 'string' || !/^#[\da-f]{6}$/i.test(v))
+      fail('неверный цвет отделки.');
+    return v;
+  };
+  return {
+    kind: f.kind as Finish['kind'],
+    color: color(f.color),
+    angle: number(f.angle, -3600, 3600),
+    width: number(f.width, 0.02, 10),
+    height: number(f.height, 0.02, 10),
+    joint: number(f.joint, 0, 0.03),
+    jointColor: color(f.jointColor),
+    roughness: number(f.roughness, 0, 1),
+  };
+}
+function parseDesignView(v: Record<string, unknown>): Partial<EditorView> {
+  const result: Partial<EditorView> = {};
+  if (v.snapping !== undefined) {
+    const a = record(v.snapping);
+    result.snapping = {
+      enabled: bool(a.enabled),
+      grid: bool(a.grid),
+      objects: bool(a.objects),
+      step: number(a.step, 0.001, 1),
+      gap: number(a.gap, 0, 2),
+    };
+  }
+  if (v.walk !== undefined) {
+    const a = record(v.walk);
+    result.walk = {
+      enabled: bool(a.enabled),
+      eyeHeight: number(a.eyeHeight, 0.6, 2.2),
+      speed: number(a.speed, 0.2, 4),
+    };
+  }
+  if (v.sunlight !== undefined) {
+    const a = record(v.sunlight);
+    if (a.mode !== 'location' && a.mode !== 'manual')
+      fail('неверный режим солнца.');
+    if (
+      typeof a.date !== 'string' ||
+      !/^20\d{2}-\d{2}-\d{2}$/.test(a.date) ||
+      !Number.isFinite(Date.parse(a.date)) ||
+      new Date(a.date).toISOString().slice(0, 10) !== a.date
+    )
+      fail('неверная дата солнца.');
+    result.sunlight = {
+      enabled: bool(a.enabled),
+      mode: a.mode,
+      city: text(a.city),
+      latitude: number(a.latitude, -89.9, 89.9),
+      longitude: number(a.longitude, -180, 180),
+      utcOffset: number(a.utcOffset, -14, 14),
+      north: number(a.north, -360, 360),
+      date: a.date,
+      minutes: number(a.minutes, 0, 1439),
+      azimuth: number(a.azimuth, 0, 360),
+      elevation: number(a.elevation, -90, 90),
+    };
+  }
+  return result;
+}
 function parseObjects(value: unknown): SceneNode[] {
   const ids = new Set<string>();
   let count = 0;
@@ -391,6 +481,25 @@ function parseObjects(value: unknown): SceneNode[] {
       )
         fail('цилиндр не может иметь два нулевых радиуса.');
       if (obj.role !== undefined) node.role = obj.role as StyleRole;
+      if (obj.assembly !== undefined) {
+        node.assembly = bool(obj.assembly);
+        if (
+          node.assembly &&
+          (kind !== 'group' || node.category !== 'furniture')
+        )
+          fail('группа должна содержать мебель.');
+      }
+      if (obj.finish !== undefined) node.finish = parseFinish(obj.finish);
+      if (obj.surfaces !== undefined) {
+        if (kind !== 'wall') fail('стороны отделки доступны только стене.');
+        const sides = record(obj.surfaces);
+        node.surfaces = {};
+        for (const key of Object.keys(sides)) {
+          if (!['front', 'back', 'top', 'edge'].includes(key))
+            fail('неизвестная сторона стены.');
+          node.surfaces[key as WallFace] = parseFinish(sides[key]);
+        }
+      }
       if (obj.clearance !== undefined) {
         const c = record(obj.clearance);
         node.clearance = {
@@ -471,6 +580,27 @@ function parseScene(input: unknown): Arrangement {
   return {
     objects,
     ...(measurements === undefined ? {} : { measurements }),
+    ...(obj.viewpoints === undefined
+      ? {}
+      : {
+          viewpoints: (() => {
+            if (!Array.isArray(obj.viewpoints) || obj.viewpoints.length > 30)
+              fail('максимум 30 точек обзора.');
+            const ids = new Set<string>();
+            return obj.viewpoints.map((value) => {
+              const p = record(value),
+                id = text(p.id, 150),
+                c = record(p.camera);
+              if (ids.has(id)) fail('повторяющийся ракурс.');
+              ids.add(id);
+              const position = vec(c.position, -500, 500),
+                target = vec(c.target, -200, 200);
+              if (Math.hypot(...position.map((v, i) => v - target[i])) < 0.1)
+                fail('ракурс не имеет направления.');
+              return { id, name: text(p.name), camera: { position, target } };
+            });
+          })(),
+        }),
     view: {
       mode: v.mode,
       planZoom: number(v.planZoom, 0.5, 3),
@@ -493,6 +623,7 @@ function parseScene(input: unknown): Arrangement {
       grid: bool(v.grid),
       camera,
       selected,
+      ...parseDesignView(v),
     },
   };
 }

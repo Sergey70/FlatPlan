@@ -176,7 +176,12 @@ export function analysisFootprints(nodes: SceneNode[]): Footprint[] {
             [x - w / 2, z + d / 2],
           ],
         ))
-          add(tri, y - h / 2, y + h / 2, 'wall');
+          add(
+            tri,
+            b.profile ? y : y - h / 2,
+            b.profile ? y + h : y + h / 2,
+            'wall',
+          );
       }
     } else if (g.kind === 'opening') {
       if (g.openingType === 'door' || g.doorSwing) {
@@ -385,6 +390,38 @@ export function selectedDistances(
     const d = nearestBetween(
       own,
       shapes.filter((s) => s.kind === kind && !ownerIds.has(s.owner)),
+    );
+    return d
+      ? [
+          {
+            from: d.from,
+            to: d.to,
+            distance: d.distance,
+            label: `${kind === 'wall' ? 'До стены' : 'До мебели'}: ${centimetres(d.distance)}`,
+          },
+        ]
+      : [];
+  });
+}
+/** Live distances use the same height-aware solids as the check panel. */
+export function movingDistances(
+  shapes: Footprint[],
+  nodeIds: Set<string>,
+  delta: Point,
+): DistanceLine[] {
+  const own = shapes
+    .filter(
+      (s) => nodeIds.has(s.nodeId) && ['furniture', 'wall'].includes(s.kind),
+    )
+    .map((s) => ({
+      ...s,
+      points: s.points.map((p) => [p[0] + delta[0], p[1] + delta[1]] as Point),
+    }));
+  const owners = new Set(own.map((s) => s.owner));
+  return (['wall', 'furniture'] as const).flatMap((kind) => {
+    const d = nearestBetween(
+      own,
+      shapes.filter((s) => s.kind === kind && !owners.has(s.owner)),
     );
     return d
       ? [

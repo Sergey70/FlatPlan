@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { checkGallery } from './browser-gallery.mjs';
 import { checkPlanTools } from './browser-plan-tools.mjs';
+import { checkDesign } from './browser-design.mjs';
 import { checkSourcePlan, sameGeometry } from './browser-source-plan.mjs';
 import { createInitialProject as createLegacyProject } from '../lib/editor-seed.ts';
 import {
@@ -137,6 +138,17 @@ try {
   browser = await chromium.launch({
     headless: true,
     args: ['--enable-unsafe-swiftshader'],
+  });
+  await checkDesign(browser, url, out, {
+    installTools,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    editField,
+    call,
+    noOverflow,
   });
   await checkPlanTools(browser, url, out, {
     installTools,

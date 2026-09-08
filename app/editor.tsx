@@ -40,6 +40,22 @@ import {
   Ruler,
   ScanLine,
 } from 'lucide-react';
+import { FinishPanel } from './finish-panel';
+import { EnvironmentPanel, WalkPad } from './environment-panel';
+import {
+  startWalk,
+  canStand,
+  insideRooms,
+  walkShapes,
+} from '@/lib/walkthrough';
+import { ArrangementPanel } from './arrangement-panel';
+import { defaultSnap, defaultWalk } from '@/lib/design-types';
+import {
+  snapTargets,
+  snapTranslation,
+  translateMany,
+  type Guide,
+} from '@/lib/arrangement-tools';
 import { FurnitureCatalog } from './furniture-catalog';
 import { PlanOverlays } from './plan-overlays';
 import {
@@ -51,6 +67,7 @@ import {
   analysisFootprints,
   analyzePlan,
   selectedDistances,
+  movingDistances,
   dimensionOutline,
   frontDirection,
   centimetres,
@@ -335,12 +352,16 @@ function ObjectTree({
   onSelect,
   onToggle,
   filter,
+  multi,
+  onMulti,
 }: {
   nodes: SceneNode[];
   selected: string | null;
   onSelect: (id: string) => void;
   onToggle: (id: string) => void;
   filter: string;
+  multi: string[];
+  onMulti: (id: string) => void;
 }) {
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   function matches(node: SceneNode): boolean {
@@ -357,6 +378,15 @@ function ObjectTree({
           data-object-id={node.id}
           style={{ paddingLeft: Math.min(depth, 4) * 14 + 2 }}
         >
+          {depth === 0 && node.category === 'furniture' && (
+            <input
+              type="checkbox"
+              className="ed-multi-check"
+              aria-label={`Выбрать вместе: ${node.name}`}
+              checked={multi.includes(node.id)}
+              onChange={() => onMulti(node.id)}
+            />
+          )}
           <button
             className="ed-tree-expand"
             aria-label={`${open.has(node.id) ? 'Свернуть' : 'Развернуть'} ${node.name}`}
@@ -437,6 +467,12 @@ function Plan({
   issues,
   showChecks,
   dimensions,
+  multi,
+  marquee,
+  onMulti,
+  onMany,
+  walkPick,
+  onWalkPoint,
 }: {
   project: EditorProject;
   selected: string | null;
@@ -452,11 +488,17 @@ function Plan({
   issues: PlanIssue[];
   showChecks: boolean;
   dimensions: DistanceLine[];
+  multi: string[];
+  marquee: boolean;
+  onMulti: (id: string) => void;
+  onMany: (ids: string[]) => void;
+  walkPick: boolean;
+  onWalkPoint: (point: Point) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, [number, number]>());
   type Gesture = {
-    type: 'move' | 'pan' | 'pinch';
+    type: 'move' | 'pan' | 'pinch' | 'marquee';
     start: [number, number];
     units: number;
     offset: [number, number];
@@ -466,8 +508,34 @@ function Plan({
     position: Vec3;
     inverse: Matrix4;
     moved: boolean;
+    additive?: boolean;
   };
   const gesture = useRef<Gesture | null>(null);
+  const [guides, setGuides] = useState<Guide[]>([]),
+    [rectangle, setRectangle] = useState<{ from: Point; to: Point } | null>(
+      null,
+    );
+  const targets = useMemo(
+    () =>
+      snapTargets(
+        project.scene.objects.filter(
+          (n) => project.scene.view.furniture || n.category !== 'furniture',
+        ),
+      ),
+    [project.scene.objects, project.scene.view.furniture],
+  );
+  const dragShapes = useMemo(
+    () =>
+      tool === 'translate' ? analysisFootprints(project.scene.objects) : [],
+    [project.scene.objects, tool],
+  );
+  function worldPoint(x: number, y: number): Point {
+    const p = new DOMPoint(x, y).matrixTransform(
+      svg.current!.getScreenCTM()!.inverse(),
+    );
+    return [p.x, p.y];
+  }
+
   const [offset, setOffset] = useState<{
     id: string;
     dx: number;
@@ -490,13 +558,13 @@ function Plan({
   const selectedIds = useMemo(
     () =>
       new Set(
-        selected
-          ? flattenNodes(
-              [findNode(project.scene.objects, selected)!].filter(Boolean),
-            ).map((x) => x.node.id)
-          : [],
+        (multi.length ? multi : selected ? [selected] : []).flatMap((id) =>
+          flattenNodes(
+            [findNode(project.scene.objects, id)!].filter(Boolean),
+          ).map((x) => x.node.id),
+        ),
       ),
-    [project.scene.objects, selected],
+    [project.scene.objects, selected, multi],
   );
   function position(e: React.PointerEvent): [number, number] {
     return [e.clientX, e.clientY];
@@ -513,6 +581,8 @@ function Plan({
     pointers.current.set(e.pointerId, position(e));
     e.currentTarget.setPointerCapture(e.pointerId);
     if (pointers.current.size === 2) {
+      setRectangle(null);
+      setGuides([]);
       setOffset(null); // A second finger always cancels an unfinished object move.
       const [a, b] = [...pointers.current.values()];
       gesture.current = {
@@ -542,13 +612,15 @@ function Plan({
     const node = findNode(project.scene.objects, id);
     const moving =
       !measuring &&
+      !walkPick &&
       tool === 'translate' &&
       node &&
       !node.locked &&
       node.geometry.kind !== 'opening';
     const parent = moving ? findParent(project.scene.objects, node.id) : null;
     gesture.current = {
-      type: moving ? 'move' : 'pan',
+      type: marquee ? 'marquee' : moving ? 'move' : 'pan',
+      additive: e.shiftKey,
       start: position(e),
       units: scale(),
       offset: [...view.planOffset],
@@ -561,7 +633,10 @@ function Plan({
         : new Matrix4(),
       moved: false,
     };
-    if (moving) onSelect(id);
+    if (marquee) {
+      const p = worldPoint(e.clientX, e.clientY);
+      setRectangle({ from: p, to: p });
+    } else if (moving && id && !multi.includes(id) && !e.shiftKey) onSelect(id);
   }
   function move(e: React.PointerEvent) {
     if (!pointers.current.has(e.pointerId)) return;
@@ -601,9 +676,28 @@ function Plan({
     if (Math.hypot(e.clientX - g.start[0], e.clientY - g.start[1]) > 5)
       g.moved = true;
     if (!g.moved) return;
+    if (g.type === 'marquee') {
+      setRectangle({
+        from: worldPoint(...g.start),
+        to: worldPoint(e.clientX, e.clientY),
+      });
+      return;
+    }
     if (g.type === 'pan')
       onView({ planOffset: panOffset(g.offset[0] - dx, g.offset[1] - dz) });
-    else if (g.id) setOffset({ id: g.id, dx, dz });
+    else if (g.id) {
+      const ids = multi.includes(g.id) ? multi : [g.id];
+      const snapped = snapTranslation(
+        targets,
+        ids,
+        [dx, dz],
+        view.snapping ?? defaultSnap,
+        Math.min(0.18, scale() * 10),
+        e.altKey,
+      );
+      setOffset({ id: g.id, dx: snapped.delta[0], dz: snapped.delta[1] });
+      setGuides(snapped.guides);
+    }
   }
   function stop(e: React.PointerEvent, apply: boolean) {
     if (!pointers.current.has(e.pointerId)) return;
@@ -611,8 +705,39 @@ function Plan({
     const g = gesture.current;
     gesture.current = null;
     setOffset(null);
+    setGuides([]);
+    setRectangle(null);
     if (!g || !apply || g.type === 'pinch') return;
+    if (g.type === 'marquee') {
+      if (g.moved) {
+        const from = worldPoint(...g.start),
+          to = worldPoint(e.clientX, e.clientY);
+        const ids = targets
+          .filter(
+            (t) =>
+              !t.wall &&
+              t.points.every(
+                (p) =>
+                  p[0] >= Math.min(from[0], to[0]) &&
+                  p[0] <= Math.max(from[0], to[0]) &&
+                  p[1] >= Math.min(from[1], to[1]) &&
+                  p[1] <= Math.max(from[1], to[1]),
+              ),
+          )
+          .map((t) => t.id);
+        onMany(g.additive ? [...new Set([...multi, ...ids])] : ids);
+      }
+      return;
+    }
     if (!g.moved) {
+      if (walkPick) {
+        onWalkPoint(worldPoint(e.clientX, e.clientY));
+        return;
+      }
+      if (g.additive && g.id) {
+        onMulti(g.id);
+        return;
+      }
       if (measuring) {
         const matrix = svg.current!.getScreenCTM();
         if (matrix) {
@@ -630,11 +755,18 @@ function Plan({
       return;
     }
     if (g.type === 'move' && g.id) {
-      const delta = new Vector3(
-        (e.clientX - g.start[0]) * g.units,
-        0,
-        (e.clientY - g.start[1]) * g.units,
+      const snapped = snapTranslation(
+        targets,
+        multi.includes(g.id) ? multi : [g.id],
+        [
+          (e.clientX - g.start[0]) * g.units,
+          (e.clientY - g.start[1]) * g.units,
+        ],
+        view.snapping ?? defaultSnap,
+        Math.min(0.18, scale() * 10),
+        e.altKey,
       );
+      const delta = new Vector3(snapped.delta[0], 0, snapped.delta[1]);
       const origin = new Vector3().applyMatrix4(g.inverse);
       delta.applyMatrix4(g.inverse).sub(origin);
       onMove(
@@ -708,6 +840,57 @@ function Plan({
                 </text>
               );
             })}
+        {rectangle && (
+          <rect
+            data-marquee="true"
+            x={Math.min(rectangle.from[0], rectangle.to[0])}
+            y={Math.min(rectangle.from[1], rectangle.to[1])}
+            width={Math.abs(rectangle.to[0] - rectangle.from[0])}
+            height={Math.abs(rectangle.to[1] - rectangle.from[1])}
+            fill="#d96c3120"
+            stroke="#d96c31"
+            strokeWidth=".025"
+            pointerEvents="none"
+          />
+        )}
+        {guides.map((g, i) => (
+          <g key={i} data-snap-guide="true" pointerEvents="none">
+            <line
+              x1={g.from[0]}
+              y1={g.from[1]}
+              x2={g.to[0]}
+              y2={g.to[1]}
+              stroke="#b45227"
+              strokeWidth=".025"
+              strokeDasharray=".05 .03"
+            />
+            <text
+              x={(g.from[0] + g.to[0]) / 2}
+              y={(g.from[1] + g.to[1]) / 2 - 0.1}
+              fontSize=".16"
+              fill="#a74520"
+              stroke="white"
+              strokeWidth=".04"
+              paintOrder="stroke"
+            >
+              {g.label}
+            </text>
+          </g>
+        ))}
+        {offset && (
+          <PlanOverlays
+            dimensions={movingDistances(dragShapes, selectedIds, [
+              offset.dx,
+              offset.dz,
+            ])}
+            measurements={[]}
+            draft={null}
+            shapes={[]}
+            issues={[]}
+            showChecks={false}
+            zoom={zoom}
+          />
+        )}
         {!offset && (
           <PlanOverlays
             dimensions={dimensions}
@@ -720,6 +903,17 @@ function Plan({
           />
         )}
       </svg>
+      {view.sunlight && (
+        <div
+          className="ed-plan-compass"
+          aria-label={`Север: ${view.sunlight.north} градусов`}
+        >
+          <span style={{ transform: `rotate(${view.sunlight.north}deg)` }}>
+            ↑
+          </span>
+          Север
+        </div>
+      )}
       <div className="ed-plan-zoom">
         <IconButton
           label="Приблизить план"
@@ -837,6 +1031,17 @@ export default function Editor() {
     [panel, setPanel] = useState<
       'objects' | 'properties' | 'variants' | 'files' | 'checks'
     >('objects');
+  const [multi, setMulti] = useState<string[]>([]),
+    [marquee, setMarquee] = useState(false);
+  const [walkPick, setWalkPick] = useState(false);
+  const beforeWalk = useRef<Partial<EditorView> | null>(null);
+  useEffect(() => {
+    beforeWalk.current = null;
+  }, [project.activeArrangement]);
+  const multiRef = useRef(multi);
+  useLayoutEffect(() => {
+    multiRef.current = multi;
+  }, [multi]);
   const [tool, setTool] = useState<EditTool>('orbit'),
     [detail, setDetail] = useState(false),
     [filter, setFilter] = useState(''),
@@ -894,6 +1099,9 @@ export default function Editor() {
   );
   if (measuredArrangement !== project.activeArrangement) {
     setMeasuredArrangement(project.activeArrangement);
+    setMulti([]);
+    setMarquee(false);
+    setWalkPick(false);
     setMeasureStart(null);
   }
   if (view.mode === '3d' && measuring) {
@@ -939,6 +1147,10 @@ export default function Editor() {
     setShowDimensions(false);
     setShowGaps(false);
     setGapCm(80);
+    setMulti([]);
+    setMarquee(false);
+    setWalkPick(false);
+    beforeWalk.current = null;
   }, []);
   function resetUserData() {
     try {
@@ -958,7 +1170,13 @@ export default function Editor() {
         ...old.present,
         scene: {
           ...old.present.scene,
-          view: { ...old.present.scene.view, ...patch },
+          view: {
+            ...old.present.scene.view,
+            ...patch,
+            ...(patch.mode === '2d' && old.present.scene.view.walk?.enabled
+              ? { walk: { ...old.present.scene.view.walk, enabled: false } }
+              : {}),
+          },
         },
       };
       projectRef.current = next;
@@ -971,6 +1189,7 @@ export default function Editor() {
         typeof id === 'string' && findNode(projectRef.current.scene.objects, id)
           ? id
           : null;
+      setMulti([]);
       updateView({ selected: validId });
       if (validId) setPanel('properties');
     },
@@ -979,8 +1198,23 @@ export default function Editor() {
   const change = useCallback(
     (id: string, position: Vec3, rotation?: Vec3) => {
       try {
+        const current = projectRef.current,
+          selectedNode = findNode(current.scene.objects, id)!;
+        if (
+          multiRef.current.length > 1 &&
+          multiRef.current.includes(id) &&
+          !rotation
+        ) {
+          commit(
+            translateMany(current, multiRef.current, [
+              position[0] - selectedNode.position[0],
+              position[2] - selectedNode.position[2],
+            ]),
+          );
+          return;
+        }
         commit(
-          editNode(projectRef.current, id, (node) => {
+          editNode(current, id, (node) => {
             if (node.locked) throw new Error('Объект закреплён.');
             node.position = position;
             if (rotation) node.rotation = rotation;
@@ -1091,8 +1325,12 @@ export default function Editor() {
     controller.current?.update(project.scene.objects, view);
   }, [project.scene.objects, view]);
   useEffect(() => {
-    controller.current?.select(selected, tool, detail);
-  }, [selected, tool, detail, project.scene.objects]);
+    controller.current?.select(
+      selected,
+      multi.length > 1 ? 'orbit' : tool,
+      detail,
+    );
+  }, [selected, tool, detail, multi, project.scene.objects]);
   useEffect(() => {
     if (cameraEmitted.current !== view.camera)
       controller.current?.camera(view.camera);
@@ -1112,8 +1350,18 @@ export default function Editor() {
       if (e.key === 'Escape') {
         setTool('orbit');
         setAdd(false);
+        setMarquee(false);
+        setMulti([]);
         setMeasuring(false);
         setMeasureStart(null);
+        setWalkPick(false);
+        if (projectRef.current.scene.view.walk?.enabled) {
+          updateView({
+            ...(beforeWalk.current ?? { camera: null, cutaway: true }),
+            walk: { ...projectRef.current.scene.view.walk!, enabled: false },
+          });
+          beforeWalk.current = null;
+        }
       }
       if (e.key === 'Delete' && projectRef.current.scene.view.selected) {
         const id = projectRef.current.scene.view.selected!;
@@ -1124,7 +1372,7 @@ export default function Editor() {
     };
     window.addEventListener('keydown', keyboard);
     return () => window.removeEventListener('keydown', keyboard);
-  }, [commit]);
+  }, [commit, updateView]);
   const statusRef = useRef({ ready, unavailable, saveStatus, storagePaused });
   useLayoutEffect(() => {
     statusRef.current = { ready, unavailable, saveStatus, storagePaused };
@@ -1142,6 +1390,76 @@ export default function Editor() {
       }),
     [commit, updateView, saveNow],
   );
+  function selectMany(ids: string[]) {
+    const valid = ids.filter((id) =>
+      projectRef.current.scene.objects.some(
+        (n) => n.id === id && n.category === 'furniture',
+      ),
+    );
+    setMulti(valid);
+    updateView({ selected: valid[0] ?? null });
+  }
+  function toggleMulti(id: string) {
+    const current = multi.length
+      ? multi
+      : project.scene.objects.some(
+            (n) => n.id === selected && n.category === 'furniture',
+          )
+        ? [selected!]
+        : [];
+    selectMany(
+      current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
+    );
+  }
+  function setWalking(enabled: boolean, point?: Point) {
+    attempt(() => {
+      const current = projectRef.current.scene.view,
+        walk = current.walk ?? defaultWalk;
+      if (enabled) {
+        if (
+          point &&
+          (!insideRooms(project.scene.objects, point) ||
+            !canStand(walkShapes(project.scene.objects, walk.eyeHeight), point))
+        )
+          throw new Error(
+            'Здесь препятствие или место вне комнаты. Выберите свободную точку на полу.',
+          );
+        const camera = startWalk(
+          project.scene.objects,
+          walk.eyeHeight,
+          point ??
+            (current.camera
+              ? [current.camera.position[0], current.camera.position[2]]
+              : undefined),
+        );
+        if (!current.walk?.enabled)
+          beforeWalk.current = {
+            camera: clone(current.camera),
+            cutaway: current.cutaway,
+            labels: current.labels,
+          };
+        updateView({
+          mode: '3d',
+          camera,
+          cutaway: false,
+          labels: false,
+          walk: { ...walk, enabled: true },
+        });
+        setTool('orbit');
+        setMeasuring(false);
+        setMeasureStart(null);
+        setMarquee(false);
+        setMulti([]);
+        setWalkPick(false);
+      } else {
+        updateView({
+          ...(beforeWalk.current ?? { camera: null, cutaway: true }),
+          walk: { ...walk, enabled: false },
+        });
+        beforeWalk.current = null;
+      }
+    });
+  }
   function patchNode(edit: (node: SceneNode) => void) {
     if (node) attempt(() => commit(editNode(project, node.id, edit)));
   }
@@ -1236,6 +1554,7 @@ export default function Editor() {
     setPanel('checks');
     setShowChecks(true);
     setShowDimensions(true);
+    setMarquee(false);
     updateView({ mode: '2d', furniture: true });
   }
   function opening(type: 'door' | 'window') {
@@ -1536,7 +1855,27 @@ export default function Editor() {
                     onClose={() => setAdd(false)}
                   />
                 )}
+                <details className="ed-arrange-details">
+                  <summary>Расстановка, привязки и группы</summary>
+                  <ArrangementPanel
+                    project={project}
+                    ids={multi.length ? multi : selected ? [selected] : []}
+                    marquee={marquee}
+                    onMarquee={(v) => {
+                      setMarquee(v);
+                      setMeasuring(false);
+                      setTool(v ? 'orbit' : 'translate');
+                      updateView({ mode: '2d' });
+                    }}
+                    onCommit={commit}
+                    onSelection={selectMany}
+                    onSnap={(snapping) => updateView({ snapping })}
+                    onError={setError}
+                  />
+                </details>
                 <ObjectTree
+                  multi={multi}
+                  onMulti={toggleMulti}
                   nodes={project.scene.objects}
                   selected={selected}
                   onSelect={select}
@@ -1743,6 +2082,25 @@ export default function Editor() {
                         ))}
                       </select>
                     </label>
+                    <FinishPanel
+                      key={node.id}
+                      node={node}
+                      onChange={(finish, face) =>
+                        patchNode((n) => {
+                          if (face === 'all') {
+                            for (const { node: part } of flattenNodes([n])) {
+                              if (finish) part.finish = clone(finish);
+                              else delete part.finish;
+                              delete part.surfaces;
+                            }
+                          } else {
+                            n.surfaces ??= {};
+                            if (finish) n.surfaces[face] = clone(finish);
+                            else delete n.surfaces[face];
+                          }
+                        })
+                      }
+                    />
                   </fieldset>
                   <p className="ed-hint">
                     Размеры — по осям объекта с учётом масштаба родителей,
@@ -2027,7 +2385,12 @@ export default function Editor() {
                       key={id}
                       disabled={unavailable}
                       onClick={() => {
-                        updateView({ mode: '3d' });
+                        updateView({
+                          mode: '3d',
+                          ...(view.walk?.enabled
+                            ? { walk: { ...view.walk, enabled: false } }
+                            : {}),
+                        });
                         controller.current?.viewpoint(id);
                       }}
                     >
@@ -2035,6 +2398,23 @@ export default function Editor() {
                     </button>
                   ))}
                 </div>
+                <EnvironmentPanel
+                  project={project}
+                  unavailable={unavailable || !ready}
+                  onView={updateView}
+                  onCommit={commit}
+                  onWalk={setWalking}
+                  onError={setError}
+                  onPick={() => {
+                    if (view.walk?.enabled) setWalking(false);
+                    updateView({ mode: '2d' });
+                    setWalkPick(true);
+                    setMeasuring(false);
+                    setMeasureStart(null);
+                    setMarquee(false);
+                    setTool('orbit');
+                  }}
+                />
                 <h3>Сохранённые расстановки</h3>
                 <p className="ed-hint">
                   Вариант хранит все стены, предметы, цвета и ракурс. Текущие
@@ -2558,6 +2938,7 @@ export default function Editor() {
                   openChecks();
                   setTool('orbit');
                   setMeasuring(!measuring);
+                  setMarquee(false);
                   setMeasureStart(null);
                 }}
               >
@@ -2605,29 +2986,47 @@ export default function Editor() {
               issues={issues}
               showChecks={showChecks}
               dimensions={dimensionLines}
+              multi={multi}
+              marquee={marquee}
+              onMulti={toggleMulti}
+              onMany={selectMany}
+              walkPick={walkPick}
+              onWalkPoint={(point) => setWalking(true, point)}
             />
           )}
           {!ready && !unavailable && view.mode === '3d' && (
             <output className="ed-loading">Загружаем 3D-модель…</output>
           )}
+          {view.mode === '3d' && view.walk?.enabled && (
+            <WalkPad
+              onInput={(f, s, t) => controller.current?.walkInput(f, s, t)}
+              onExit={() => setWalking(false)}
+            />
+          )}
           <div className="ed-viewer-bottom">
             <div>
               <strong>{node?.name ?? project.name}</strong>
               <span>
-                {measuring
-                  ? 'Две точки — размер · Escape — завершить'
-                  : tool === 'orbit'
-                    ? view.mode === '2d'
-                      ? 'Тяните план · два пальца — масштаб'
-                      : 'Один палец — вращение · два — масштаб'
-                    : tool === 'translate'
-                      ? view.mode === '2d'
-                        ? 'Перетаскивайте выбранный объект'
-                        : 'Тяните за цветные оси выбранного объекта'
-                      : 'Тяните за зелёное кольцо · шаг 5°'}
+                {view.mode === '3d' && view.walk?.enabled
+                  ? 'WASD — шаги · тяните вид для осмотра · Escape — завершить'
+                  : walkPick
+                    ? 'Нажмите на свободное место на полу · Escape — отменить'
+                    : marquee
+                      ? 'Обведите мебель рамкой · Shift — добавить к выделению'
+                      : measuring
+                        ? 'Две точки — размер · Escape — завершить'
+                        : tool === 'orbit'
+                          ? view.mode === '2d'
+                            ? 'Тяните план · два пальца — масштаб'
+                            : 'Один палец — вращение · два — масштаб'
+                          : tool === 'translate'
+                            ? view.mode === '2d'
+                              ? 'Перетаскивайте выбранный объект'
+                              : 'Тяните за цветные оси выбранного объекта'
+                            : 'Тяните за зелёное кольцо · шаг 5°'}
               </span>
             </div>
-            {view.mode === '3d' && (
+            {view.mode === '3d' && !view.walk?.enabled && (
               <div className="ed-camera-buttons">
                 <IconButton
                   label="Приблизить"

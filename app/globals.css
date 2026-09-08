@@ -1745,3 +1745,178 @@ button svg {
 .ed-gallery-link:hover {
   background: #f4e8db;
 }
+/* Detailed arrangement, finish and environment controls share the editor's form scale. */
+.ed-design-details,
+.ed-arrange-details {
+  margin: 16px 0;
+  border: 1px solid #dce3e3;
+  border-radius: 10px;
+  background: #fff;
+}
+.ed-design-details > summary,
+.ed-arrange-details > summary {
+  padding: 13px 12px;
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 13px;
+}
+.ed-design-panel,
+.ed-design-section {
+  padding: 0 12px 12px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.ed-design-panel .ed-field,
+.ed-design-section .ed-field {
+  margin: 0;
+}
+.ed-design-section > h3,
+.ed-design-section > h4 {
+  margin: 8px 0 0;
+}
+.ed-design-field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: #526267;
+  min-width: 0;
+}
+.ed-design-field input,
+.ed-design-field select,
+.ed-design-panel input,
+.ed-design-section input,
+.ed-design-section select {
+  min-width: 0;
+  max-width: 100%;
+}
+.ed-design-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ed-app .ed-design-check input[type='checkbox'],
+.ed-app .ed-tree-row > input[type='checkbox'] {
+  appearance: auto;
+  accent-color: #c66a39;
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 17px;
+}
+.ed-app .ed-design-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ed-app .ed-design-actions > button {
+  flex: 1 1 95px;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.3;
+  min-height: 36px;
+  padding: 7px 8px;
+}
+.ed-app .ed-design-panel button,
+.ed-app .ed-design-section > button {
+  white-space: normal;
+  min-height: 36px;
+  line-height: 1.35;
+}
+.ed-saved-view {
+  display: flex;
+  gap: 5px;
+  min-width: 0;
+}
+.ed-app .ed-saved-view > button:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+  justify-content: flex-start;
+}
+.ed-app .ed-saved-view > button:last-child {
+  flex: 0 0 36px;
+  font-size: 21px;
+}
+.ed-app .ed-sun-slider {
+  width: 100%;
+  accent-color: #c66a39;
+  padding: 0;
+  border: 0;
+  height: 28px;
+}
+.ed-sun-result {
+  font-size: 12px;
+  background: #f6f0e8;
+  border-radius: 7px;
+  padding: 10px;
+  line-height: 1.6;
+}
+.ed-walk-controls {
+  position: absolute;
+  z-index: 4;
+  right: 20px;
+  bottom: 90px;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+.ed-walk-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  gap: 5px;
+  padding: 7px;
+  border-radius: 12px;
+  background: #ffffffc9;
+  box-shadow: 0 4px 24px #253b4426;
+}
+.ed-app .ed-walk-pad button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 23px;
+  touch-action: none;
+  user-select: none;
+}
+.ed-app .ed-walk-pad button:active {
+  background: #e7b58c;
+}
+.ed-app .ed-walk-controls > button {
+  background: #fffffff0;
+  font-size: 12px;
+}
+.ed-plan-compass {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #364f57;
+  font-size: 11px;
+  pointer-events: none;
+  background: #ffffffc9;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.ed-plan-compass span {
+  display: block;
+  font-size: 30px;
+  line-height: 34px;
+}
+@media (max-width: 700px) {
+  .ed-walk-controls {
+    right: 10px;
+    bottom: 95px;
+  }
+  .ed-design-panel,
+  .ed-design-section {
+    padding: 0 10px 10px;
+  }
+}

@@ -1,6 +1,16 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { finishGeometry, finishTexture } from './surface-finish';
+import { sunDirection } from './sunlight';
+import { defaultWalk } from './design-types';
+import type { Finish, WallFace } from './design-types';
+import {
+  constrainedWalk,
+  lookCamera,
+  viewAngles,
+  walkShapes,
+} from './walkthrough';
 import { createTapTracker } from './tap-tracker';
 import { fitCamera } from './camera-fit';
 import {
@@ -21,6 +31,7 @@ export interface EditorScene {
   viewpoint(kind: 'overview' | 'top' | 'living' | 'bedroom' | 'bathroom'): void;
   zoom(factor: number): void;
   snapshot(): Promise<Blob>;
+  walkInput(forward: number, side: number, turn?: number): void;
   dispose(): void;
 }
 interface Callbacks {
@@ -120,6 +131,32 @@ export function createEditorScene(
     return light;
   });
   let oak: THREE.Texture | null = null;
+  const finishMaps = new Map<string, THREE.Texture>();
+  let navigationShapes: ReturnType<typeof walkShapes> = [],
+    previousFrame = 0,
+    lastCameraEmit = 0;
+  const walkKeys = new Set<string>();
+  let pad = { forward: 0, side: 0, turn: 0 },
+    lookPointer: { id: number; x: number; y: number } | null = null;
+  const walking = () => view?.mode === '3d' && view.walk?.enabled === true;
+  function finishedMaterial(f: Finish) {
+    const texture = (bump: boolean) => {
+      const key = JSON.stringify(f) + bump;
+      if (!finishMaps.has(key))
+        finishMaps.set(key, finishTexture(f, oak, bump));
+      return finishMaps.get(key)!;
+    };
+    return new THREE.MeshStandardMaterial({
+      color: '#ffffff',
+      map: texture(false),
+      bumpMap: texture(true),
+      bumpScale:
+        f.kind === 'tile' ? 0.002 : f.kind === 'paint' ? 0.0006 : 0.0015,
+      roughness: f.roughness,
+      side: THREE.DoubleSide,
+    });
+  }
+
   new THREE.TextureLoader().load(
     `${import.meta.env.BASE_URL}textures/oak.jpg`,
     (texture) => {
@@ -176,6 +213,8 @@ export function createEditorScene(
     cancelDrag();
     transform.detach();
     release(content);
+    finishMaps.forEach((t) => t.dispose());
+    finishMaps.clear();
     scene.remove(content);
     content = new THREE.Group();
     scene.add(content);
@@ -195,13 +234,35 @@ export function createEditorScene(
       parent.add(object);
       lookup.set(node.id, object);
       const m = material(node);
-      let used = false;
+      let used = false,
+        baseUsed = false;
       function mesh(geometry: THREE.BufferGeometry, position?: Vec3) {
-        const mesh = new THREE.Mesh(geometry, m);
+        let materials: THREE.Material | THREE.Material[] = m;
+        if (node.finish || node.surfaces) {
+          object.updateWorldMatrix(true, false);
+          const scale = new THREE.Vector3().setFromMatrixScale(
+            object.matrixWorld,
+          );
+          geometry = finishGeometry(
+            geometry,
+            node,
+            scale,
+            new THREE.Vector3(...(position ?? [0, 0, 0])),
+          );
+          materials = (['front', 'back', 'top', 'edge'] as WallFace[]).map(
+            (face) => {
+              const f = node.surfaces?.[face] ?? node.finish;
+              if (!f) baseUsed = true;
+              return f ? finishedMaterial(f) : m;
+            },
+          );
+        } else baseUsed = true;
+        const mesh = new THREE.Mesh(geometry, materials);
         if (position) mesh.position.set(...position);
         mesh.userData = { id: node.id, rootId };
         mesh.castShadow =
-          node.material !== 'glass' && node.geometry.kind !== 'floor';
+          (!!node.finish || node.material !== 'glass') &&
+          node.geometry.kind !== 'floor';
         mesh.receiveShadow = true;
         object.add(mesh);
         used = true;
@@ -213,7 +274,7 @@ export function createEditorScene(
         const geometry = createNodeGeometry(node);
         if (geometry) mesh(geometry);
       }
-      if (!used) m.dispose();
+      if (!used || !baseUsed) m.dispose();
       for (const child of node.children) {
         visit(child, object, rootId);
         if (view.cutaway && node.cutaway && child.geometry.kind === 'opening')
@@ -223,7 +284,17 @@ export function createEditorScene(
     for (const node of nodes) visit(node, content, node.id);
     // Optional render environment for eye-level gallery shots. Derive the
     // ceiling from the same room contours; do not add or edit scene objects.
-    if (!view.cutaway && renderOptions.ceilingHeight !== undefined) {
+    const ceilingHeight =
+      renderOptions.ceilingHeight ??
+      (walking() || view.sunlight?.enabled
+        ? Math.max(
+            2.4,
+            ...nodes
+              .filter((n) => n.geometry.kind === 'wall')
+              .map((n) => n.geometry.size[1] * n.scale[1]),
+          )
+        : undefined);
+    if (!view.cutaway && ceilingHeight !== undefined) {
       for (const node of nodes.filter(
         (n) => n.visible && n.category === 'structure' && n.geometry.polygon,
       )) {
@@ -237,16 +308,13 @@ export function createEditorScene(
             side: THREE.DoubleSide,
           }),
         );
-        ceiling.position.set(
-          node.position[0],
-          renderOptions.ceilingHeight,
-          node.position[2],
-        );
+        ceiling.position.set(node.position[0], ceilingHeight, node.position[2]);
         ceiling.rotation.set(
           ...(node.rotation.map(THREE.MathUtils.degToRad) as Vec3),
         );
         ceiling.scale.set(...node.scale);
         ceiling.receiveShadow = true;
+        ceiling.castShadow = !!view.sunlight?.enabled;
         content.add(ceiling);
       }
     }
@@ -291,6 +359,17 @@ export function createEditorScene(
         content.add(label);
       }
     }
+    updateLighting();
+    navigationShapes = walking() ? walkShapes(nodes, view.walk?.eyeHeight) : [];
+    orbit.enabled = !walking();
+    if (walking()) {
+      transform.detach();
+      selectionBox.visible = false;
+    }
+    select(selected, tool, detail);
+    dirty = true;
+  }
+  function updateLighting() {
     grid.visible = view.grid && !view.night;
     ambient.intensity = view.night ? 0.75 : 2.2;
     sun.intensity = view.night ? 0.35 : 3.5;
@@ -300,7 +379,42 @@ export function createEditorScene(
     (ground.material as THREE.MeshStandardMaterial).color.set(
       view.night ? '#35434e' : '#e9edef',
     );
-    select(selected, tool, detail);
+    if (view.sunlight?.enabled) {
+      const light = sunDirection(view.sunlight),
+        box = sceneBounds(nodes),
+        centre = box.getCenter(new THREE.Vector3());
+      sun.target.position.copy(centre);
+      sun.position
+        .copy(centre)
+        .addScaledVector(new THREE.Vector3(...light.direction), 24);
+      const span = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) + 3;
+      Object.assign(sun.shadow.camera, {
+        left: -span,
+        right: span,
+        top: span,
+        bottom: -span,
+        near: 0.1,
+        far: 60,
+      });
+      sun.shadow.camera.updateProjectionMatrix();
+      sun.intensity = light.elevation > 0 ? 3.8 : 0;
+      sun.color.set(light.elevation < 15 ? '#ffc48b' : '#fff6e5');
+      ambient.intensity = light.elevation > 0 ? 0.65 : 0.15;
+      fill.intensity = light.elevation > 0 ? 0.2 : 0.05;
+    } else {
+      sun.position.set(-3, 12, 8);
+      sun.target.position.set(3.5, 0, 4.5);
+      sun.color.set('#fff4df');
+      Object.assign(sun.shadow.camera, {
+        left: -13,
+        right: 13,
+        top: 13,
+        bottom: -13,
+        near: 0.5,
+        far: 40,
+      });
+      sun.shadow.camera.updateProjectionMatrix();
+    }
     dirty = true;
   }
   function select(id: string | null, nextTool: EditTool, nextDetail: boolean) {
@@ -309,7 +423,7 @@ export function createEditorScene(
     detail = nextDetail;
     cancelDrag();
     transform.detach();
-    const object = id ? lookup.get(id) : null;
+    const object = !walking() && id ? lookup.get(id) : null;
     selectionBox.visible = !!object;
     if (object) {
       object.updateWorldMatrix(true, true);
@@ -357,7 +471,8 @@ export function createEditorScene(
     restoring = true;
     camera.position.set(...state.position);
     orbit.target.set(...state.target);
-    orbit.update();
+    if (walking()) camera.lookAt(orbit.target);
+    else orbit.update();
     restoring = false;
     initialized = true;
     dirty = true;
@@ -404,7 +519,7 @@ export function createEditorScene(
   }
   orbit.addEventListener('change', onOrbit);
   transform.addEventListener('dragging-changed', (event) => {
-    orbit.enabled = !event.value;
+    orbit.enabled = !walking() && !event.value;
     dirty = true;
   });
   transform.addEventListener('mouseDown', () => {
@@ -436,10 +551,21 @@ export function createEditorScene(
       transform.reset();
       transform.pointerUp(null);
     }
-    orbit.enabled = true;
+    orbit.enabled = !walking();
     dirty = true;
   }
   function down(event: PointerEvent) {
+    if (walking()) {
+      if (!lookPointer && event.button === 0) {
+        lookPointer = {
+          id: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+        };
+        canvas.setPointerCapture(event.pointerId);
+      }
+      return;
+    }
     pointers.add(event.pointerId);
     taps.down(event.pointerId, event.clientX, event.clientY, event.button);
     wasDragging = false;
@@ -448,11 +574,31 @@ export function createEditorScene(
       transform.enabled = false;
     }
   }
-  function markMove() {
+  function markMove(event: PointerEvent) {
+    if (walking() && lookPointer?.id === event.pointerId) {
+      const current = {
+          position: camera.position.toArray(),
+          target: orbit.target.toArray(),
+        },
+        angles = viewAngles(current);
+      const next = lookCamera(
+        current.position,
+        angles.yaw + (event.clientX - lookPointer.x) * 0.004,
+        angles.pitch - (event.clientY - lookPointer.y) * 0.004,
+      );
+      lookPointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      setCamera(next);
+      emitCamera();
+      return;
+    }
     if (transform.dragging) wasDragging = true;
   }
   const ray = new THREE.Raycaster();
   function up(event: PointerEvent) {
+    if (walking()) {
+      if (lookPointer?.id === event.pointerId) lookPointer = null;
+      return;
+    }
     const tapped = taps.up(event.pointerId, event.clientX, event.clientY);
     pointers.delete(event.pointerId);
     if (!pointers.size) transform.enabled = true;
@@ -486,6 +632,7 @@ export function createEditorScene(
     else callbacks.select(null);
   }
   function cancel(event: PointerEvent) {
+    if (lookPointer?.id === event.pointerId) lookPointer = null;
     taps.cancel(event.pointerId);
     pointers.delete(event.pointerId);
     cancelDrag();
@@ -512,9 +659,97 @@ export function createEditorScene(
   canvas.addEventListener('lostpointercapture', lost);
   canvas.addEventListener('webglcontextlost', contextLost);
   canvas.addEventListener('webglcontextrestored', contextRestored);
-  function animate() {
+  function walkKey(event: KeyboardEvent) {
+    if (event.type === 'keyup' && walkKeys.delete(event.code)) {
+      emitCamera();
+      return;
+    }
+    if (
+      !walking() ||
+      (event.target as HTMLElement)?.closest(
+        'input,textarea,select,[contenteditable=true]',
+      )
+    )
+      return;
+    if (
+      [
+        'KeyW',
+        'KeyA',
+        'KeyS',
+        'KeyD',
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+      ].includes(event.code)
+    ) {
+      event.preventDefault();
+      if (event.type === 'keydown') walkKeys.add(event.code);
+      else {
+        walkKeys.delete(event.code);
+        emitCamera();
+      }
+    }
+  }
+  function clearWalk() {
+    walkKeys.clear();
+    pad = { forward: 0, side: 0, turn: 0 };
+    lookPointer = null;
+  }
+  function focusField(event: FocusEvent) {
+    if (
+      (event.target as HTMLElement)?.closest(
+        'input,textarea,select,[contenteditable=true]',
+      )
+    )
+      clearWalk();
+  }
+  window.addEventListener('keydown', walkKey);
+  window.addEventListener('keyup', walkKey);
+  window.addEventListener('blur', clearWalk);
+  document.addEventListener('visibilitychange', clearWalk);
+  document.addEventListener('focusin', focusField);
+  function animate(now = performance.now()) {
     if (disposed) return;
     frame = requestAnimationFrame(animate);
+    const dt = Math.min(0.05, (now - previousFrame) / 1000);
+    previousFrame = now;
+    if (walking() && !document.hidden && host.offsetParent !== null) {
+      const forward =
+        pad.forward +
+        Number(walkKeys.has('KeyW') || walkKeys.has('ArrowUp')) -
+        Number(walkKeys.has('KeyS') || walkKeys.has('ArrowDown'));
+      const side =
+        pad.side + Number(walkKeys.has('KeyD')) - Number(walkKeys.has('KeyA'));
+      const turn =
+        pad.turn +
+        Number(walkKeys.has('ArrowRight')) -
+        Number(walkKeys.has('ArrowLeft'));
+      if (forward || side || turn) {
+        let current = {
+          position: camera.position.toArray(),
+          target: orbit.target.toArray(),
+        };
+        if (turn) {
+          const { yaw, pitch } = viewAngles(current);
+          current = lookCamera(current.position, yaw + turn * dt * 1.4, pitch);
+        }
+        const next = constrainedWalk(
+          nodes,
+          navigationShapes,
+          current,
+          forward,
+          side,
+          dt * (view.walk?.speed ?? defaultWalk.speed),
+        );
+        setCamera(next);
+        if (now - lastCameraEmit > 100) {
+          emitCamera();
+          lastCameraEmit = now;
+        }
+        dirty = true;
+      }
+    }
     if (dirty && host.offsetParent !== null && !document.hidden) {
       renderer.render(scene, camera);
       dirty = false;
@@ -528,6 +763,7 @@ export function createEditorScene(
       const rebuild =
         nodes !== nextNodes ||
         !view ||
+        view.sunlight?.enabled !== nextView.sunlight?.enabled ||
         (
           [
             'palette',
@@ -536,20 +772,38 @@ export function createEditorScene(
             'furniture',
             'grid',
             'labels',
+            'walk',
+            'mode',
           ] as const
         ).some((k) => view[k] !== nextView[k]);
+      const lightingChanged =
+        !view ||
+        ['sunlight', 'night', 'grid'].some(
+          (k) =>
+            view[k as keyof EditorView] !== nextView[k as keyof EditorView],
+        );
       const selectionChanged = selected !== nextView.selected;
       selected = nextView.selected;
+      const wasWalking = walking();
       nodes = nextNodes;
       view = nextView;
+      if (wasWalking && !walking()) clearWalk();
+      orbit.enabled = !walking();
       if (rebuild) build();
-      else if (selectionChanged) select(selected, tool, detail);
+      else {
+        if (lightingChanged) updateLighting();
+        if (selectionChanged) select(selected, tool, detail);
+      }
       if (!initialized) {
         resize();
         setCamera(view.camera);
       }
     },
     select,
+    walkInput(forward, side, turn = 0) {
+      pad = { forward, side, turn };
+      if (!forward && !side && !turn) emitCamera();
+    },
     camera: setCamera,
     focus,
     viewpoint(kind) {
@@ -640,6 +894,13 @@ export function createEditorScene(
       orbit.dispose();
       release(content);
       oak?.dispose();
+      finishMaps.forEach((t) => t.dispose());
+      finishMaps.clear();
+      window.removeEventListener('keydown', walkKey);
+      window.removeEventListener('keyup', walkKey);
+      window.removeEventListener('blur', clearWalk);
+      document.removeEventListener('visibilitychange', clearWalk);
+      document.removeEventListener('focusin', focusField);
       ground.geometry.dispose();
       (ground.material as THREE.Material).dispose();
       grid.geometry.dispose();
