@@ -4,7 +4,7 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**GALLERY-013 implemented and verified locally; publication pending.** The gallery now shows photorealistic finished interiors generated with built-in imagegen. Source geometry remains PLAN-011. No blockers.
+**GALLERY-013 complete and published.** The gallery shows photorealistic finished interiors generated with built-in imagegen. Source geometry remains PLAN-011. No active implementation or blockers.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -16,7 +16,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 - Reviewed every generated image and both apartment/bathroom contact sheets. Checked room silhouettes, opening positions, fixture/furniture arrangement and consistency of materials across viewpoints. Refined the second bathroom's towel warmer and matched first/third bathroom vanity fronts/basins between views. Finished joinery, detailed products, decor, lighting and exterior scenery remain illustrative.
 - Local acceptance passes: four focused gallery tests; `npm run verify` (52 tests, lint, TypeScript and production build); complete `npm run test:browser`. Gallery checks decode all 30 finished interiors and 42 model references, exercise every source toggle, selected full-image links, keyboard/wrap navigation, independent comparison, load failure/retry/model fallback, 360/390/768 layouts and byte-for-byte storage preservation/reload. All retained source, editor, reset/recovery, import, touch and migration scenarios pass. Desktop/mobile screenshots and final code diff reviewed. Evidence under ignored `.local/qa/gallery-013/` and `.local/qa/`.
 - README and GALLERY_ASSETS document viewing, source comparison, actual imagegen workflow, provenance recording, setup/start/test/stop and troubleshooting. Previous published asset URLs are retained. Original `.plan`, project identifiers and personal saves are excluded from the new public metadata/assets.
-- Next: publish the verified build through the existing Pages workflow, then verify public source/gallery behavior and every published asset against the final build.
+- Publication: application commit `657f54ec7bd95fdc17946610f4011c0d2e8ad64e`; [GitHub Actions run 34255551230](https://github.com/Sergey70/FlatPlan/actions/runs/34255551230) passed verification, full browser acceptance and Pages deployment. Public source/gallery scenarios passed, including every finished image/model toggle and desktop/mobile/storage checks. All 107 production files returned HTTP 200 and matched the final build byte-for-byte. Evidence: ignored `.local/qa/gallery-013-public/` and `.local/qa/gallery-013/public-assets.json`. Public gallery: https://sergey70.github.io/FlatPlan/?view=gallery.
 
 ## GALLERY-012 implementation and acceptance
 
