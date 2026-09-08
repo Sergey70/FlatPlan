@@ -4,9 +4,9 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-011 implemented; publication pending** — correct the kitchen triple sofa's backwards semantic mesh. Its source centre, footprint and angle are correct; the source wall attachment places its rear edge against the partition, while the placeholder backrest is on the opposite side. Flip only the triple-sofa backrest and seat offsets. Keep recorded transforms and all other furniture unchanged; migrate untouched saved part offsets with the existing field-delta mechanism and regenerate gallery assets.
+**PLAN-011 complete and published** — corrected the kitchen triple sofa's backwards semantic mesh. Its recorded centre, footprint and angle remain unchanged. The backrest now meets the partition and seats face the kitchen/TV. Exactly four part offsets were corrected in the source model and untouched saved parts; user edits and other objects are preserved. Gallery assets are updated. No active implementation work remains.
 
-Acceptance: regression against the source rear attachment and front-facing seats; prove other objects and the sofa root transform unchanged; saved PLAN-010 and older migration preserves user edits; `npm run verify`, browser source/migration checks, visual review, CI and public publication checks. No blockers.
+Acceptance completed: source rear-wall attachment regression; exact preservation of other geometry and root transforms; old/current saved-project migration and reload; 50 tests, lint, TypeScript and build; full browser suite locally and in GitHub Actions; visual and diff review; public source/gallery acceptance; all 27 deployed files byte-identical to the final build. No blockers.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -16,7 +16,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 - Exactly four source part offsets change: backrest and three seats. The sofa root, arms/base, every other object and the original anonymous geometry are unchanged. A whole-project comparison proves only those four offsets in the current/saved scenes plus sourceRevision differ. An actual PLAN-010 canonical project upgrades exactly to the corrected model.
 - Reused the field-level delta migration for PLAN-010 → PLAN-011 and chained it after PLAN-008/009 updates. Root movement, rotation, scaling, part colours and manually edited offsets survive. Stable node/arrangement IDs and 30-variant handling remain unchanged; no new dependencies.
 - Added a compact anonymous old-sofa fixture and regressions for source rear attachment, inward-facing seats, exact root/other-object preservation, edited current/saved scenes, old revisions and JSON reload. Browser acceptance also upgrades a PLAN-010 sofa project, compares every scene to the corrected seed and reloads it.
-- Regenerated the gallery under `public/gallery/plan-011/` and visually inspected the apartment render. `npm run verify` passes 50 tests, lint, TypeScript and build. Complete `npm run test:browser` passed, including new PLAN-010 sofa migration/reload and all retained editor, JSON, reset and desktop/mobile scenarios. Source/migration diff and `git diff --check` reviewed; only CI/public publication remains. Local evidence is ignored under `.local/qa/plan-011/`.
+- Regenerated the gallery under `public/gallery/plan-011/` and visually inspected the apartment render. `npm run verify` passes 50 tests, lint, TypeScript and build. Complete `npm run test:browser` passed, including new PLAN-010 sofa migration/reload and all retained editor, JSON, reset and desktop/mobile scenarios. Source/migration diff and `git diff --check` reviewed; CI build/browser/deployment and public source/gallery acceptance all passed. All 27 production files matched the final build byte-for-byte. Local evidence is ignored under `.local/qa/plan-011/`.
 
 ## PLAN-010 implementation and acceptance
 
@@ -67,6 +67,8 @@ Repository: https://github.com/Sergey70/FlatPlan
 Editor: https://sergey70.github.io/FlatPlan/
 Default deep link: https://sergey70.github.io/FlatPlan/?layout=plan-2
 Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
+
+PLAN-011 published application: `13273e90ad309131d9984cd9185dce286f79089b`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34239615579. Public source/gallery checks include a PLAN-010 sofa fixture upgraded in current/saved scenes and verified again after reload, along with retained source/editor/gallery scenarios. All 27 public files return HTTP 200 and match `dist/` byte-for-byte. Evidence remains ignored under `.local/qa/plan-011/` and `.local/qa/plan-011-public/`. The completion record changes documentation only.
 
 PLAN-010 final published application: `d25ce808819a1ffb9ab65a66ddfedaad00d7d44e`. Successful final build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34237733570. Repeated public source/gallery acceptance additionally verifies canonical-source reopening and exact retention of the previous scene and all saved variants. All 27 final production files return HTTP 200 and match `dist/` byte-for-byte. Evidence is in the same ignored PLAN-010 QA locations. The final completion record changes documentation only.
 
