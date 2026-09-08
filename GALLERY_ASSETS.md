@@ -1,20 +1,28 @@
-# Происхождение изображений галереи
+# Изображения галереи — PLAN-008
 
-Коллекция создана встроенным `image_gen` 7–8 сентября 2026 года по опубликованной базовой модели FlatPlan. Из 19 генераций и корректировок выбраны 12 концепций. PNG скопированы без изменения пикселей. Иллюстрации осмотрены; характерные отклонения геометрии отмечены в интерфейсе.
+Коллекция содержит 15 PNG: пять чертежей из предоставленного `.plan` × три палитры редактора (`natural`, `warm`, `contrast`). Это изображения Three.js-сцен FlatPlan, полученные встроенным экспортом PNG. Старые иллюстрации по фотографии техпаспорта исключены из актуальной публикации.
 
-Полные запросы генерации и локальные пути к референсам сохранены только в игнорируемой папке `.local/imagegen/`. Исходная фотография техпаспорта и локальные скриншоты не публикуются.
+Данные: `lib/plan-source.json`. Построение сцены: `lib/plan-project.ts` и `lib/plan-furniture.ts`. Положение камеры фиксируется генератором относительно габаритов каждого плана. Включён срез стен, мебель видна, подписи и сетка скрыты. Потолочные светильники скрываются в режиме среза.
 
-| Концепция | Изображение | Размер |
-| --- | --- | --- |
-| closed-scandi | [PNG](public/gallery/images/closed-scandi.png) | 1547 × 1017 |
-| closed-warm | [PNG](public/gallery/images/closed-warm.png) | 1448 × 1086 |
-| closed-classic | [PNG](public/gallery/images/closed-classic.png) | 1448 × 1086 |
-| closed-loft | [PNG](public/gallery/images/closed-loft.png) | 1448 × 1086 |
-| glass-scandi | [PNG](public/gallery/images/glass-scandi.png) | 1536 × 1024 |
-| glass-warm | [PNG](public/gallery/images/glass-warm.png) | 1536 × 1024 |
-| glass-classic | [PNG](public/gallery/images/glass-classic.png) | 1536 × 1024 |
-| glass-loft | [PNG](public/gallery/images/glass-loft.png) | 1536 × 1024 |
-| open-scandi | [PNG](public/gallery/images/open-scandi.png) | 1536 × 1024 |
-| open-warm | [PNG](public/gallery/images/open-warm.png) | 1536 × 1024 |
-| open-classic | [PNG](public/gallery/images/open-classic.png) | 1536 × 1024 |
-| open-loft | [PNG](public/gallery/images/open-loft.png) | 1536 × 1024 |
+Файлы: `public/gallery/plan-008/images/<план>-<палитра>.png` (1470 × 1205). Соответствующие схемы: `public/gallery/plan-008/plans/<план>.svg` (1000 × 1000).
+
+`manifest.json` связывает каждое изображение с SHA-256 исходной сцены, палитрой, размером и SHA-256 PNG. Перед экспортом генератор сравнивает сцену в браузере с канонической моделью; допускается только числовая погрешность 1e-8. Для переносимости контрольной суммы между процессорами числа сериализуются с семью десятичными знаками. Тесты обнаруживают устаревшие изображения при изменении модели.
+
+## Воспроизведение
+
+```sh
+cd /Users/belanovich-sy/Documents/github/flat_plan
+npm ci
+npx playwright install chromium
+node scripts/export-gallery-plans.mjs
+npm run build
+node scripts/render-gallery.mjs
+npm run verify
+npm run test:browser
+```
+
+Генератор запускает локальный preview на порту 4189 и закрывает его после завершения. Для уже запущенной сборки можно задать `FLATPLAN_RENDER_URL`. Версии Chromium/GPU могут влиять на пиксели, поэтому для новой генерации обновляется манифест.
+
+Габариты и расположение предметов соответствуют числовым данным. Мебель, сантехника и техника представлены условными моделями: в исходном файле нет готовых детальных 3D-мешей. Материалы и освещение иллюстративные; это не фотографии и не автоматически обновляемые изображения личной сцены посетителя.
+
+Исходный `.plan`, номер проекта и содержимое пользовательских сохранений не входят в галерею. Текстура дерева описана в README.

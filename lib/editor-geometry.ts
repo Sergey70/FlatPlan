@@ -73,22 +73,77 @@ export interface WallBlock {
   position: Vec3;
   size: Vec3;
   planVisible: boolean;
+  profile?: Point[];
+}
+/** Profiles are proportional to the centreline length/thickness, preserving mitres when resized. */
+export function wallProfile(node: SceneNode): Point[] {
+  const [w, , d] = node.geometry.size;
+  return (
+    node.geometry.wallProfile ?? [
+      [-0.5, -0.5],
+      [0.5, -0.5],
+      [0.5, 0.5],
+      [-0.5, 0.5],
+    ]
+  ).map(([x, z]) => [x * w, z * d]);
+}
+function clipWall(profile: Point[], from: number, to: number): Point[] {
+  let result = profile;
+  for (const [limit, side] of [
+    [from, 1],
+    [to, -1],
+  ]) {
+    const input = result;
+    result = [];
+    input.forEach((b, i) => {
+      const a = input[(i + input.length - 1) % input.length];
+      const aIn = side * (a[0] - limit) >= -1e-10;
+      const bIn = side * (b[0] - limit) >= -1e-10;
+      if (aIn !== bIn) {
+        const t = (limit - a[0]) / (b[0] - a[0]);
+        result.push([limit, a[1] + t * (b[1] - a[1])]);
+      }
+      if (bIn) result.push(b);
+    });
+  }
+  return result.filter((p, i, all) => {
+    const next = all[(i + 1) % all.length];
+    return Math.hypot(p[0] - next[0], p[1] - next[1]) > 1e-9;
+  });
+}
+export function wallBlockGeometry(block: WallBlock): THREE.BufferGeometry {
+  if (!block.profile) return new THREE.BoxGeometry(...block.size);
+  const geo = new THREE.ExtrudeGeometry(planShape(block.profile), {
+    depth: block.size[1],
+    bevelEnabled: false,
+  });
+  geo.rotateX(-Math.PI / 2);
+  return geo;
 }
 export function wallBlocks(node: SceneNode, cutaway = false): WallBlock[] {
   const [width, fullHeight, depth] = node.geometry.size,
-    blocks: WallBlock[] = [];
+    blocks: WallBlock[] = [],
+    profile = node.geometry.wallProfile ? wallProfile(node) : null;
+  const minX = profile ? Math.min(...profile.map((p) => p[0])) : -width / 2;
+  const maxX = profile ? Math.max(...profile.map((p) => p[0])) : width / 2;
   const height =
     cutaway && node.cutaway ? Math.min(0.24, fullHeight) : fullHeight;
   function add(from: number, to: number, bottom: number, top: number) {
     top = Math.min(top, height);
-    if (to - from > 0.00001 && top - bottom > 0.00001)
+    if (to - from > 0.00001 && top - bottom > 0.00001) {
+      const clipped = profile ? clipWall(profile, from, to) : null;
+      if (clipped && clipped.length < 3) return;
       blocks.push({
-        position: [(from + to) / 2, (bottom + top) / 2, 0],
+        position: clipped
+          ? [0, bottom, 0]
+          : [(from + to) / 2, (bottom + top) / 2, 0],
         size: [to - from, top - bottom, depth],
         planVisible: bottom < 0.001,
+        ...(clipped ? { profile: clipped } : {}),
       });
+    }
   }
-  let cursor = -width / 2;
+  let cursor = minX;
   for (const o of node.children
     .filter((n) => n.visible && n.geometry.kind === 'opening')
     .sort((a, b) => a.position[0] - b.position[0])) {
@@ -101,7 +156,7 @@ export function wallBlocks(node: SceneNode, cutaway = false): WallBlock[] {
     add(left, right, o.position[1] + h, fullHeight);
     cursor = right;
   }
-  add(cursor, width / 2, 0, fullHeight);
+  add(cursor, maxX, 0, fullHeight);
   return blocks;
 }
 export function localBounds(node: SceneNode): THREE.Box3 {
@@ -112,6 +167,11 @@ export function localBounds(node: SceneNode): THREE.Box3 {
       new THREE.Vector3(-w / 2, 0, -d / 2),
       new THREE.Vector3(w / 2, h, d / 2),
     );
+    if (node.geometry.kind === 'wall' && node.geometry.wallProfile)
+      for (const [x, z] of wallProfile(node)) {
+        bounds.expandByPoint(new THREE.Vector3(x, 0, z));
+        bounds.expandByPoint(new THREE.Vector3(x, h, z));
+      }
   } else {
     const g = createNodeGeometry(node);
     if (g) {
@@ -131,6 +191,8 @@ export function localBounds(node: SceneNode): THREE.Box3 {
   return bounds;
 }
 export function nodeDimensions(node: SceneNode): Vec3 {
+  if (node.geometry.kind === 'wall')
+    return node.geometry.size.map((n, i) => n * node.scale[i]) as Vec3;
   return localBounds(node)
     .getSize(new THREE.Vector3())
     .multiply(new THREE.Vector3(...node.scale))
@@ -250,7 +312,7 @@ export function planDrawing(
           [w, , d] = block.size;
         add(
           project(
-            [
+            block.profile ?? [
               [x - w / 2, z - d / 2],
               [x + w / 2, z - d / 2],
               [x + w / 2, z + d / 2],

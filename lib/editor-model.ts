@@ -29,6 +29,7 @@ export interface Geometry {
   polygon?: Point[];
   holes?: Point[][];
   openingType?: 'window' | 'door';
+  wallProfile?: Point[];
 }
 export interface SceneNode {
   id: string;
@@ -79,6 +80,7 @@ export interface EditorProject {
   scene: Arrangement;
   arrangements: SavedArrangement[];
   activeArrangement: string | null;
+  sourceRevision?: string;
 }
 export const STORAGE_KEY = 'flatplan.editor.v1';
 export const MAX_FILE_BYTES = 8_000_000;
@@ -304,6 +306,10 @@ function parseObjects(value: unknown): SceneNode[] {
       if (kind === 'opening' && parentKind !== 'wall')
         fail('проём должен находиться внутри стены.');
       const geometry: Geometry = { kind, size: vec(g.size, 0.001, 200) };
+      if (kind === 'wall' && g.wallProfile !== undefined) {
+        geometry.wallProfile = polygon(g.wallProfile);
+        validateContours(geometry.wallProfile);
+      }
       if (g.radius !== undefined) geometry.radius = number(g.radius, 0, 20);
       if (g.topRadius !== undefined)
         geometry.topRadius = number(g.topRadius, 0, 1);
@@ -456,6 +462,9 @@ export function validateProject(input: unknown): EditorProject {
     scene: parseScene(obj.scene),
     arrangements,
     activeArrangement: active,
+    ...(obj.sourceRevision === undefined
+      ? {}
+      : { sourceRevision: text(obj.sourceRevision) }),
   };
 }
 export function importProject(source: string): EditorProject {

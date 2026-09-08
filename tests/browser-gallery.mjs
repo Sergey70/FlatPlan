@@ -26,7 +26,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
   try {
     await page.goto(url.href);
     await page.locator('.gallery-card').last().waitFor();
-    assert.equal(await page.locator('.gallery-card').count(), 12);
+    assert.equal(await page.locator('.gallery-card').count(), 15);
     assert.equal(await page.locator('.ed-app').count(), 0);
     const snapshot = await page.evaluate(() =>
       JSON.stringify({ ...localStorage }),
@@ -42,7 +42,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     const sources = await page
       .locator('img')
       .evaluateAll((images) => [...new Set(images.map((image) => image.src))]);
-    assert.equal(sources.length, 15);
+    assert.equal(sources.length, 20);
     for (const src of sources) {
       const result = await page.evaluate(async (src) => {
         const image = new Image();
@@ -57,24 +57,22 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       path: path.join(outputDirectory, 'gallery-desktop.png'),
       fullPage: true,
     });
+    await page.getByRole('button', { name: 'План 1', exact: true }).click();
+    assert.equal(await page.locator('.gallery-card').count(), 3);
     await page
-      .getByRole('button', { name: 'Стеклянная перегородка', exact: true })
-      .click();
-    assert.equal(await page.locator('.gallery-card').count(), 4);
-    await page
-      .getByRole('button', { name: 'Тёплый минимализм', exact: true })
+      .getByRole('button', { name: 'Тёплая отделка', exact: true })
       .click();
     assert.equal(await page.locator('.gallery-card').count(), 1);
     assert.equal(
       await page.locator('.gallery-card').getAttribute('data-concept'),
-      'glass-warm',
+      'plan-1-warm',
     );
     const detail = page.getByRole('button', { name: /^Подробнее/ });
     await detail.click();
     await page.getByRole('dialog').waitFor();
     assert.ok(
       await page
-        .getByRole('heading', { name: 'Тёплый минимализм', exact: true })
+        .getByRole('heading', { name: 'Тёплая отделка', exact: true })
         .isVisible(),
     );
     assert.equal(
@@ -86,7 +84,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
         .getByRole('dialog')
         .locator('.gallery-plan img')
         .getAttribute('src'),
-      /glass\.svg$/,
+      /plan-1\.svg$/,
     );
     await page.screenshot({
       path: path.join(outputDirectory, 'gallery-detail-desktop.png'),
@@ -97,11 +95,9 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
       await detail.evaluate((element) => element === document.activeElement),
     );
     await page.getByRole('button', { name: /^Сравнить\s*:/ }).click();
+    await page.getByRole('button', { name: 'План 2', exact: true }).click();
     await page
-      .getByRole('button', { name: 'Открытая планировка', exact: true })
-      .click();
-    await page
-      .getByRole('button', { name: 'Мягкий лофт', exact: true })
+      .getByRole('button', { name: 'Контрастная отделка', exact: true })
       .click();
     await page.getByRole('button', { name: /^Сравнить\s*:/ }).click();
     assert.equal(await page.locator('.gallery-selected-item').count(), 2);
@@ -111,7 +107,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     await page.getByRole('button', { name: 'Все стили', exact: true }).click();
     assert.equal(
       await page.locator('.gallery-compare-toggle:disabled').count(),
-      10,
+      13,
     );
     await page
       .getByRole('button', { name: 'Сравнить два варианта', exact: true })
@@ -126,7 +122,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     );
     assert.deepEqual(
       await page.getByRole('dialog').locator('h3').allTextContents(),
-      ['Тёплый минимализм', 'Мягкий лофт'],
+      ['Тёплая отделка', 'Контрастная отделка'],
     );
     await page.screenshot({
       path: path.join(outputDirectory, 'gallery-compare-desktop.png'),
@@ -205,7 +201,7 @@ export async function checkGallery(browser, baseUrl, outputDirectory) {
     );
     assert.deepEqual(errors, []);
     console.log(
-      'PASS gallery: 12 images, 3 plans, layout/style filters, detail and comparison dialogs, keyboard focus, 360/390/768 widths, project bytes unchanged and reload',
+      'PASS gallery: 15 model renders, 5 plans, filters, detail/comparison, keyboard focus, 360/390/768 widths, project bytes unchanged and reload',
     );
   } finally {
     await context.close();

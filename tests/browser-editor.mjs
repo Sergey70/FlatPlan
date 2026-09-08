@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';
 import { checkGallery } from './browser-gallery.mjs';
+import { checkSourcePlan, sameGeometry } from './browser-source-plan.mjs';
+import { createInitialProject as createLegacyProject } from '../lib/editor-seed.ts';
+import {
+  createPlanProject,
+  DEFAULT_PLAN_ID,
+  PLAN_REVISION,
+} from '../lib/plan-project.ts';
 import { chromium } from 'playwright';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { spawn } from 'node:child_process';
@@ -131,11 +138,34 @@ try {
     args: ['--enable-unsafe-swiftshader'],
   });
   await checkGallery(browser, url, out);
+  await checkSourcePlan(browser, url, out, {
+    installTools,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    editField,
+    call,
+    noOverflow,
+  });
   const desktop = await browser.newContext({
     viewport: { width: 1365, height: 900 },
     deviceScaleFactor: 1,
   });
   await installTools(desktop);
+  // Keep exercising existing saved-project editing controls, after a user deliberately reopens the legacy scene.
+  const sourceSeed = createPlanProject(),
+    legacySeed = createLegacyProject();
+  const legacyFixture = {
+    ...legacySeed,
+    sourceRevision: PLAN_REVISION,
+    arrangements: [...legacySeed.arrangements, ...sourceSeed.arrangements],
+  };
+  await desktop.addInitScript((value) => {
+    if (!localStorage.getItem('flatplan.editor.v1'))
+      localStorage.setItem('flatplan.editor.v1', value);
+  }, JSON.stringify(legacyFixture));
   const page = await desktop.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(url);
@@ -534,7 +564,7 @@ try {
     JSON.parse(
       await cp.evaluate(() => localStorage.getItem('flatplan.editor.v1')),
     ).name,
-    initial.name,
+    sourceSeed.name,
   );
   await corrupt.close();
   console.log(
@@ -555,7 +585,7 @@ try {
   await editField(resetPage, 'Название проекта', 'Личный проект для сброса');
   await call(resetPage, 'edit_editor_object', {
     action: 'remove',
-    id: partitionIds[0],
+    id: baseline.scene.objects.find((n) => n.geometry.kind === 'wall').id,
   });
   await call(resetPage, 'configure_editor_view', {
     mode: '2d',
@@ -800,6 +830,12 @@ try {
     0.25, 0, 2.88,
   ];
   previous.name = 'Прежняя кухня сверху';
+  for (const old of [legacy, previous]) {
+    delete old.sourceRevision;
+    old.arrangements = old.arrangements.filter(
+      (a) => !a.id.startsWith(PLAN_REVISION),
+    );
+  }
   for (const previousProject of [legacy, previous]) {
     for (const viaLink of [false, true]) {
       const upgrade = await browser.newContext();
@@ -812,26 +848,17 @@ try {
       up.on('pageerror', (e) => errors.push(e.message));
       await up.goto(viaLink ? `${url}?layout=kitchen-by-bathroom` : url);
       await loaded(up);
-      if (!viaLink) {
-        assert.deepEqual(await project(up), previousProject);
-        await up
-          .getByRole('button', {
-            name: 'Открыть кухню у санузла',
-            exact: true,
-          })
-          .click();
-      }
       await saved(up);
       const upgraded = await project(up);
-      assert.equal(upgraded.activeArrangement, 'kitchen-by-bathroom-v2');
+      assert.equal(upgraded.activeArrangement, DEFAULT_PLAN_ID);
       assert.equal(upgraded.name, previousProject.name);
       assert.deepEqual(
         upgraded.arrangements.find(
-          (a) => a.name === 'До переноса кухни к санузлу',
+          (a) => a.name === 'До обновления по файлу .plan',
         ).scene,
         previousProject.scene,
       );
-      assert.ok(upgraded.scene.objects.some((n) => n.id === 'floor-room2'));
+      sameGeometry(upgraded.scene.objects, sourceSeed.scene.objects);
       assert.ok(!new URL(up.url()).searchParams.has('layout'));
       await up.reload();
       await loaded(up);
@@ -841,7 +868,7 @@ try {
     }
   }
   console.log(
-    'PASS saved-project upgrade: explicit button/deep link, full backup and stable reload',
+    'PASS saved-project upgrade: ordinary load and deep link, full backup and stable reload',
   );
 
   // A separate storage partition simulates another device.

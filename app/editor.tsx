@@ -39,9 +39,16 @@ import {
   X,
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import { apartment, palettes, polygonPath, formatArea } from '@/lib/apartment';
+import { palettes, polygonPath } from '@/lib/apartment';
 import {
-  createInitialProject,
+  createPlanProject as createInitialProject,
+  applyPlanSource,
+  hasPlanSource,
+  planLayouts,
+  PLAN_REVISION,
+  sourceLayout,
+} from '@/lib/plan-project';
+import {
   applyPartitionedPreset,
   PARTITION_PRESET_ID,
   PARTITION_WALL_IDS,
@@ -680,21 +687,38 @@ export default function Editor() {
     try {
       const saved = readStoredProject(window.localStorage);
       restored = saved;
-      const requested = ['separate-kitchen', 'kitchen-by-bathroom'].includes(
-        new URLSearchParams(window.location.search).get('layout') ?? '',
+      const requested = new URLSearchParams(window.location.search).get(
+        'layout',
       );
+      const upgraded = !!saved && !hasPlanSource(saved);
+      let project = saved
+        ? upgraded
+          ? applyPlanSource(saved)
+          : saved
+        : createInitialProject();
+      const layout = planLayouts.find(
+        (l) =>
+          l.id === requested ||
+          (l.id === 'plan-2' &&
+            ['separate-kitchen', 'kitchen-by-bathroom'].includes(
+              requested ?? '',
+            )),
+      );
+      if (layout) {
+        const id = `${PLAN_REVISION}-${layout.id}`;
+        if (!project.arrangements.some((a) => a.id === id))
+          project = applyPlanSource(project);
+        project = loadArrangement(project, id);
+      }
       return {
-        project: saved
-          ? requested &&
-            !saved.arrangements.some((a) => a.id === PARTITION_PRESET_ID)
-            ? applyPartitionedPreset(saved)
-            : saved
-          : createInitialProject(),
+        project,
+        upgraded,
         error: null as string | null,
       };
     } catch (error) {
       return {
         project: restored ?? createInitialProject(),
+        upgraded: false,
         error: `${restored ? 'Не удалось открыть новый план' : 'Не удалось восстановить проект'}: ${(error as Error).message}`,
       };
     }
@@ -702,9 +726,11 @@ export default function Editor() {
   useEffect(() => {
     const url = new URL(window.location.href);
     if (
-      ['separate-kitchen', 'kitchen-by-bathroom'].includes(
-        url.searchParams.get('layout') ?? '',
-      )
+      [
+        'separate-kitchen',
+        'kitchen-by-bathroom',
+        ...planLayouts.map((l) => l.id),
+      ].includes(url.searchParams.get('layout') ?? '')
     ) {
       url.searchParams.delete('layout');
       window.history.replaceState(null, '', url);
@@ -733,7 +759,11 @@ export default function Editor() {
     pausedRef.current = storagePaused;
   }, [storagePaused]);
   const [error, setError] = useState<string | null>(boot.error),
-    [notice, setNotice] = useState<string | null>(null),
+    [notice, setNotice] = useState<string | null>(
+      boot.upgraded
+        ? 'Открыт план из файла .plan. Предыдущая сцена сохранена в варианте «До обновления по файлу .plan».'
+        : null,
+    ),
     [panel, setPanel] = useState<
       'objects' | 'properties' | 'variants' | 'files'
     >('objects');
@@ -1012,6 +1042,10 @@ export default function Editor() {
     attempt(() => {
       const next = clone(project),
         object = catalogObject(id);
+      if (id === 'wall')
+        object.geometry.size[1] =
+          project.scene.objects.find((n) => n.geometry.kind === 'wall')
+            ?.geometry.size[1] ?? 2.7;
       next.scene.objects.push(object);
       next.scene.view.selected = object.id;
       next.scene.view.furniture = true;
@@ -1170,86 +1204,36 @@ export default function Editor() {
                     Добавить
                   </button>
                 </div>
-                <section
-                  className="ed-layout-card"
-                  aria-label="Предложенные перегородки"
-                >
-                  <strong>Кухня у стены санузла</strong>
+                <section className="ed-layout-card" aria-label="План из файла">
+                  <strong>
+                    {sourceLayout(project)?.name ?? 'Планировка из файла .plan'}
+                  </strong>
                   <p>
-                    Предложенная схема: кухня на прежнем месте ТВ, у нижнего
-                    окна. Комната 2 — у верхнего левого окна.
+                    Два плана квартиры и три варианта санузла. Размеры,
+                    положение стен и проёмов перенесены из файла.
                   </p>
-                  {project.scene.objects.some(
-                    (n) => n.id === 'floor-kitchen',
+                  <button
+                    className="ed-full"
+                    onClick={() => setPanel('variants')}
+                  >
+                    Выбрать планировку
+                  </button>
+                  {!project.scene.objects.some((n) =>
+                    n.id.startsWith('plan-'),
                   ) && (
-                    <>
-                      <button
-                        className="ed-full"
-                        onClick={() =>
-                          attempt(() =>
-                            commit(
-                              togglePartitionWalls(
-                                project,
-                                !project.scene.objects.some(
-                                  (n) =>
-                                    (
-                                      PARTITION_WALL_IDS as readonly string[]
-                                    ).includes(n.id) && n.visible,
-                                ),
-                              ),
-                            ),
-                          )
-                        }
-                      >
-                        {project.scene.objects.some(
-                          (n) =>
-                            (PARTITION_WALL_IDS as readonly string[]).includes(
-                              n.id,
-                            ) && n.visible,
-                        )
-                          ? 'Убрать новые перегородки'
-                          : 'Вернуть новые перегородки'}
-                      </button>
-                      <p>
-                        Каждую стену можно отдельно выбрать, передвинуть или
-                        удалить. Окна на плане выделены голубым.
-                      </p>
-                    </>
-                  )}
-                  {(!project.arrangements.some(
-                    (a) => a.id === PARTITION_PRESET_ID,
-                  ) ||
-                    !project.scene.objects.some(
-                      (n) => n.id === 'floor-kitchen',
-                    )) && (
                     <button
                       className="ed-primary ed-full"
                       onClick={() =>
                         attempt(() => {
-                          commit(applyPartitionedPreset(project));
+                          commit(applyPlanSource(project));
                           setNotice(
-                            'Открыт новый план. Предыдущая сцена сохранена в варианте «До переноса кухни к санузлу».',
+                            'Открыт исходный .plan. Предыдущая сцена сохранена отдельным вариантом.',
                           );
                         })
                       }
                     >
-                      Открыть кухню у санузла
+                      Открыть исходный .plan
                     </button>
-                  )}
-                  {[
-                    [PARTITION_WALL_IDS[0], 'Размер стены у кухни'],
-                    [PARTITION_WALL_IDS[1], 'Стена между кухней и комнатой'],
-                  ].map(
-                    ([id, label]) =>
-                      project.scene.objects.some((n) => n.id === id) && (
-                        <button
-                          className="ed-full"
-                          key={id}
-                          onClick={() => select(id)}
-                        >
-                          {label}
-                        </button>
-                      ),
                   )}
                   <button
                     className="ed-full"
@@ -1263,6 +1247,92 @@ export default function Editor() {
                     Добавить стену на план
                   </button>
                 </section>
+                {!project.scene.objects.some((n) =>
+                  n.id.startsWith('plan-'),
+                ) && (
+                  <section
+                    className="ed-layout-card"
+                    aria-label="Предложенные перегородки"
+                  >
+                    <strong>Кухня у стены санузла</strong>
+                    <p>
+                      Предложенная схема: кухня на прежнем месте ТВ, у нижнего
+                      окна. Комната 2 — у верхнего левого окна.
+                    </p>
+                    {project.scene.objects.some(
+                      (n) => n.id === 'floor-kitchen',
+                    ) && (
+                      <>
+                        <button
+                          className="ed-full"
+                          onClick={() =>
+                            attempt(() =>
+                              commit(
+                                togglePartitionWalls(
+                                  project,
+                                  !project.scene.objects.some(
+                                    (n) =>
+                                      (
+                                        PARTITION_WALL_IDS as readonly string[]
+                                      ).includes(n.id) && n.visible,
+                                  ),
+                                ),
+                              ),
+                            )
+                          }
+                        >
+                          {project.scene.objects.some(
+                            (n) =>
+                              (
+                                PARTITION_WALL_IDS as readonly string[]
+                              ).includes(n.id) && n.visible,
+                          )
+                            ? 'Убрать новые перегородки'
+                            : 'Вернуть новые перегородки'}
+                        </button>
+                        <p>
+                          Каждую стену можно отдельно выбрать, передвинуть или
+                          удалить. Окна на плане выделены голубым.
+                        </p>
+                      </>
+                    )}
+                    {(!project.arrangements.some(
+                      (a) => a.id === PARTITION_PRESET_ID,
+                    ) ||
+                      !project.scene.objects.some(
+                        (n) => n.id === 'floor-kitchen',
+                      )) && (
+                      <button
+                        className="ed-primary ed-full"
+                        onClick={() =>
+                          attempt(() => {
+                            commit(applyPartitionedPreset(project));
+                            setNotice(
+                              'Открыт новый план. Предыдущая сцена сохранена в варианте «До переноса кухни к санузлу».',
+                            );
+                          })
+                        }
+                      >
+                        Открыть кухню у санузла
+                      </button>
+                    )}
+                    {[
+                      [PARTITION_WALL_IDS[0], 'Размер стены у кухни'],
+                      [PARTITION_WALL_IDS[1], 'Стена между кухней и комнатой'],
+                    ].map(
+                      ([id, label]) =>
+                        project.scene.objects.some((n) => n.id === id) && (
+                          <button
+                            className="ed-full"
+                            key={id}
+                            onClick={() => select(id)}
+                          >
+                            {label}
+                          </button>
+                        ),
+                    )}
+                  </section>
+                )}
                 <input
                   className="ed-search"
                   placeholder="Найти объект или деталь"
@@ -1709,7 +1779,7 @@ export default function Editor() {
                   <Palette size={22} aria-hidden="true" />
                   <span>
                     <strong>Галерея интерьеров ↗</strong>
-                    <small>12 концепций · планировки и стили</small>
+                    <small>15 визуализаций · 5 планировок</small>
                   </span>
                 </a>
                 <p className="ed-hint">
@@ -1984,9 +2054,9 @@ export default function Editor() {
                   Сохранить сейчас в браузере
                 </button>
                 <details>
-                  <summary>Новый проект по техпаспорту</summary>
+                  <summary>Новый проект по файлу .plan</summary>
                   <p className="ed-hint">
-                    Откроет план с отдельной кухней, второй комнатой и ванной.
+                    Откроет правый план с ванной и все варианты из файла.
                     Сначала скачайте свой проект; сброс можно отменить.
                   </p>
                   <button
@@ -2036,16 +2106,15 @@ export default function Editor() {
                   </section>
                 )}
                 <div className="ed-reference">
-                  <h3>Основа — техпаспорт</h3>
+                  <h3>Основа — файл .plan</h3>
                   <p>
-                    {formatArea(apartment.insideArea)} м² внутри ·{' '}
-                    {formatArea(apartment.accountedArea)} м² в расчёте с
-                    лоджией.
+                    Высота стен в исходном файле — 2,70 м. В каждом плане
+                    квартиры четыре оконных и французских проёма.
                   </p>
                   <p>
-                    Высота 2,8 м и детали проёмов предварительные. Стены и полы
-                    независимы: после переноса стены скорректируйте точки пола
-                    при необходимости.
+                    Геометрия соответствует файлу; форма деталей мебели и
+                    отделка условные. Стены и полы независимы: после переноса
+                    стены скорректируйте точки пола при необходимости.
                   </p>
                 </div>
               </>
@@ -2176,7 +2245,7 @@ export default function Editor() {
         </section>
       </main>
       <footer className="ed-footer">
-        <span>Предварительная геометрия · размеры можно уточнить</span>
+        <span>Геометрия из файла .plan · размеры редактируются</span>
         <span>{flattenNodes(project.scene.objects).length} элементов</span>
       </footer>
     </div>

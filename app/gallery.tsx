@@ -76,20 +76,11 @@ function Plan({ concept }: { concept: GalleryConcept }) {
         width="350"
         height="420"
         loading="lazy"
-        alt={`Схема из 3D-модели: ${concept.layout.name}. Показаны исходные окна и предложенные перегородки.`}
+        alt={`Схема из файла .plan: ${concept.layout.name}. Стены, проёмы и расстановка предметов.`}
       />
       <figcaption>
         <span className="gallery-dot gallery-dot-window" /> Окна{' '}
-        {concept.layout.id !== 'open' && (
-          <>
-            <span className="gallery-dot gallery-dot-wall" /> Новые стены
-          </>
-        )}{' '}
-        {concept.layout.id === 'glass' && (
-          <>
-            <span className="gallery-dot gallery-dot-glass" /> Стекло
-          </>
-        )}
+        <span className="gallery-dot gallery-dot-wall" /> Стены
       </figcaption>
     </figure>
   );
@@ -112,7 +103,7 @@ function Detail({ concept }: { concept: GalleryConcept }) {
             <span className="gallery-eyebrow">Концепция {concept.number}</span>
             <DialogTitle>{concept.style.name}</DialogTitle>
             <DialogDescription>
-              {concept.layout.name} · Иллюстрация с помощью ИИ
+              {concept.layout.name} · Рендер модели из .plan
             </DialogDescription>
           </div>
           <DialogClose
@@ -131,8 +122,8 @@ function Detail({ concept }: { concept: GalleryConcept }) {
           <div>
             <ConceptImage concept={concept} eager />
             <p className="gallery-image-note">
-              Образ материалов и настроения. Пропорции, мебель и детали на
-              иллюстрации могут отличаться от модели.
+              Изображение получено из модели редактора. Контуры, проёмы и
+              габариты перенесены из .plan; детали мебели и отделка условные.
             </p>
             {concept.imageNote && (
               <p className="gallery-image-note">{concept.imageNote}</p>
@@ -176,7 +167,7 @@ export default function Gallery() {
   const compared = selected.map((id) =>
     galleryConcepts.find((c) => c.id === id)!,
   );
-  const featured = galleryConcepts.find((c) => c.id === 'closed-warm')!;
+  const featured = galleryConcepts.find((c) => c.id === 'plan-2-warm')!;
   useEffect(() => {
     document.title = 'Галерея интерьеров — FlatPlan';
   }, []);
@@ -213,18 +204,18 @@ export default function Gallery() {
             <p className="gallery-eyebrow">Планировка и отделка</p>
             <h1 id="gallery-title">Варианты интерьера</h1>
             <p className="gallery-intro">
-              Концепции планировки и отделки на основе предварительного плана
-              квартиры. Выберите планировку и стиль для просмотра и сравнения.
+              Визуализации планировок из файла .plan в трёх палитрах отделки.
+              Выберите вариант для просмотра и сравнения.
             </p>
             <div className="gallery-numbers">
               <span>
-                <strong>3</strong> планировки
+                <strong>{galleryLayouts.length}</strong> схем
               </span>
               <span>
-                <strong>4</strong> стиля
+                <strong>{galleryStyles.length}</strong> палитры
               </span>
               <span>
-                <strong>12</strong> концепций
+                <strong>{galleryConcepts.length}</strong> визуализаций
               </span>
             </div>
             <a className="gallery-hero-link" href="#concepts">
@@ -234,8 +225,10 @@ export default function Gallery() {
           <figure className="gallery-hero-image">
             <ConceptImage concept={featured} eager />
             <figcaption>
-              <span>01.2 / Тёплый минимализм</span>
-              <span>Отдельная кухня</span>
+              <span>
+                {featured.number} / {featured.style.name}
+              </span>
+              <span>План 2 из файла .plan</span>
             </figcaption>
           </figure>
         </section>
@@ -243,20 +236,20 @@ export default function Gallery() {
           <div>
             <span className="gallery-eyebrow">Что объединяет варианты</span>
             <h2>
-              Кухня у санузла.
+              Планировки из файла.
               <br />
-              Свет от существующих окон.
+              Варианты отделки.
             </h2>
           </div>
           <div>
             <p>
-              Спальня, лоджия, санузел и колонна сохраняют свои места. Меняем
-              три дополнительные перегородки и характер отделки.
+              Два плана квартиры и три отдельных варианта санузла. В каждой
+              схеме сохранены координаты стен, проёмов и предметов из файла.
             </p>
             <p className="gallery-muted">
-              Это идеи по предварительному плану. Изображения созданы с помощью
-              ИИ и могут менять пропорции. Схемы рядом построены по текущей
-              модели; точные размеры уточним после обмеров.
+              Рендеры и схемы построены по одной модели. В файле нет готовых
+              3D-моделей предметов: их внешний вид восстановлен условно, с
+              сохранением габаритов. Палитры отделки — варианты оформления.
             </p>
           </div>
         </section>
@@ -271,7 +264,7 @@ export default function Gallery() {
               <h2 id="collection-title">Коллекция интерьеров</h2>
             </div>
             <output className="gallery-count" aria-live="polite">
-              Показано {shown.length} из 12
+              Показано {shown.length} из {galleryConcepts.length}
             </output>
           </div>
           <div className="gallery-filters">
@@ -391,7 +384,7 @@ export default function Gallery() {
           <div className="gallery-section-heading">
             <div>
               <p className="gallery-eyebrow">Окна и стены</p>
-              <h2 id="layouts-title">Три схемы пространства</h2>
+              <h2 id="layouts-title">Схемы из файла .plan</h2>
             </div>
             <span className="gallery-muted">Из базовой 3D-модели</span>
           </div>

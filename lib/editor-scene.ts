@@ -7,6 +7,7 @@ import {
   createNodeGeometry,
   nodeColor,
   wallBlocks,
+  wallBlockGeometry,
   sceneBounds,
 } from './editor-geometry';
 import type { SceneNode, EditorView, CameraState, Vec3 } from './editor-model';
@@ -181,7 +182,9 @@ export function createEditorScene(
       object.scale.set(...node.scale);
       object.userData = { id: node.id, rootId };
       object.visible =
-        node.visible && (view.furniture || node.category === 'structure');
+        node.visible &&
+        (view.furniture || node.category === 'structure') &&
+        !(view.cutaway && node.cutaway && node.category === 'furniture');
       parent.add(object);
       lookup.set(node.id, object);
       const m = material(node);
@@ -198,7 +201,7 @@ export function createEditorScene(
       }
       if (node.geometry.kind === 'wall')
         for (const block of wallBlocks(node, view.cutaway))
-          mesh(new THREE.BoxGeometry(...block.size), block.position);
+          mesh(wallBlockGeometry(block), block.position);
       else {
         const geometry = createNodeGeometry(node);
         if (geometry) mesh(geometry);
@@ -532,6 +535,25 @@ export function createEditorScene(
           target: [center.x, 0, center.z],
         });
       } else {
+        const labels = {
+          living: /Кухня|Гостиная/i,
+          bedroom: /Спальня|Комната 1|Жилая комната/i,
+          bathroom: /Санузел/i,
+        };
+        const room = nodes.find(
+          (n) => n.geometry.kind === 'floor' && labels[kind].test(n.name),
+        );
+        if (room) {
+          const box = sceneBounds([room], false),
+            center = box.getCenter(new THREE.Vector3()),
+            size = box.getSize(new THREE.Vector3());
+          setCamera({
+            position: [center.x + size.x * 0.34, 1.6, center.z + size.z * 0.34],
+            target: [center.x - size.x * 0.25, 0.95, center.z - size.z * 0.25],
+          });
+          emitCamera();
+          return;
+        }
         const presets = {
           living: {
             position: [6.65, 1.65, 6.4] as Vec3,
