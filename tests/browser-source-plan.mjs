@@ -181,6 +181,28 @@ export async function checkSourcePlan(browser, url, out, h) {
       );
     if (i === 0) await oldPage.reload();
   }
+  const beforeReopen = await h.project(oldPage);
+  await h.panel(oldPage, 'Объекты');
+  await oldPage
+    .getByRole('button', { name: 'Открыть исходный .plan', exact: true })
+    .click();
+  await h.saved(oldPage);
+  const reopened = await h.project(oldPage);
+  sameGeometry(reopened.scene.objects, seed.scene.objects);
+  sameGeometry(
+    reopened.arrangements.find((a) => a.name === 'До обновления по файлу .plan')
+      .scene.objects,
+    beforeReopen.scene.objects,
+  );
+  for (const arrangement of beforeReopen.arrangements)
+    assert.ok(
+      reopened.arrangements.some(
+        (a) =>
+          a.name === arrangement.name &&
+          JSON.stringify(a.scene.objects) ===
+            JSON.stringify(arrangement.scene.objects),
+      ),
+    );
   await oldContext.close();
 
   // Existing PLAN-008 projects update in place, including the retired left-plan deep link.

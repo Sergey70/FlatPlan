@@ -1227,23 +1227,19 @@ export default function Editor() {
                   >
                     Выбрать планировку
                   </button>
-                  {!project.scene.objects.some((n) =>
-                    n.id.startsWith('plan-'),
-                  ) && (
-                    <button
-                      className="ed-primary ed-full"
-                      onClick={() =>
-                        attempt(() => {
-                          commit(applyPlanSource(project));
-                          setNotice(
-                            'Открыт исходный .plan. Предыдущая сцена сохранена отдельным вариантом.',
-                          );
-                        })
-                      }
-                    >
-                      Открыть исходный .plan
-                    </button>
-                  )}
+                  <button
+                    className="ed-primary ed-full"
+                    onClick={() =>
+                      attempt(() => {
+                        commit(applyPlanSource(project));
+                        setNotice(
+                          'Открыт исходный .plan. Предыдущая сцена сохранена отдельным вариантом.',
+                        );
+                      })
+                    }
+                  >
+                    Открыть исходный .plan
+                  </button>
                   <button
                     className="ed-full"
                     onClick={() => {

@@ -4,7 +4,7 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-010 complete and published** — reconciled the model with the newer 15:35 Plan v3 export. Four source scenes retain the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Updated geometry, openings and nightstand, removed obsolete loose objects, corrected labels, beds and round 2D silhouettes, added door leaves/swing arcs, preserved saved user edits, and regenerated the gallery. Local, CI and public acceptance all passed. No active implementation work remains.
+**PLAN-010 published; final UI correction pending** — reconciled the model with the newer 15:35 Plan v3 export. Four source scenes retain the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Updated geometry, openings and nightstand, removed obsolete loose objects, corrected labels, beds and round 2D silhouettes, added door leaves/swing arcs, preserved saved user edits, and regenerated the gallery. Local, CI and public acceptance all passed. Final review found that the canonical-source reopening button was hidden for updated source scenes despite the migration notice referring to it. The existing backup-preserving action is now always available; 48 tests and the complete browser suite passed again, including real PLAN-009 upgrade → reopen → full snapshot/variant retention. Only publication of this UI correction remains.
 
 Acceptance completed: independent 2160-value comparison with the supplied file; 48 unit/regression tests, lint, TypeScript and production build; complete final browser acceptance locally and in CI; visual and diff review; public source/gallery checks; byte comparison of every published production file. No blockers.
 
