@@ -52,7 +52,11 @@ async function ready(dialog) {
   await dialog.locator('[data-render-ready="true"]').waitFor();
 }
 async function complete(dialog) {
-  await dialog.getByText(/^Готово:/).waitFor({ timeout: 180000 });
+  // GitHub's software renderer completed the real four-view batch in just over
+  // three minutes. Allow bounded CI headroom without changing render quality.
+  await dialog.getByText(/^Готово:/).waitFor({
+    timeout: process.env.CI ? 600000 : 180000,
+  });
 }
 export async function checkPresentation(browser, url, out, h) {
   const context = await browser.newContext({
