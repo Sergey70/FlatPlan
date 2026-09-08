@@ -715,7 +715,7 @@ export default function Editor() {
       return {
         project,
         upgraded,
-        selectionUpdated: ['plan-008', 'plan-009'].includes(
+        selectionUpdated: ['plan-008', 'plan-009', 'plan-010'].includes(
           saved?.sourceRevision ?? '',
         ),
         error: null as string | null,
@@ -769,7 +769,7 @@ export default function Editor() {
     [notice, setNotice] = useState<string | null>(
       boot.upgraded
         ? boot.selectionUpdated
-          ? 'План обновлён по новому файлу. Пользовательские изменения сохранены; исходную схему можно открыть кнопкой «Открыть исходный .plan».'
+          ? 'План обновлён по исходному файлу. Пользовательские изменения сохранены; исходную схему можно открыть кнопкой «Открыть исходный .plan».'
           : 'Открыт план из файла .plan. Предыдущая сцена сохранена в варианте «До обновления по файлу .plan».'
         : null,
     ),

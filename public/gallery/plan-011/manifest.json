@@ -1,5 +1,5 @@
 {
-  "revision": "plan-010",
+  "revision": "plan-011",
   "sceneDecimalPlaces": 7,
   "renderer": "FlatPlan Three.js; cutaway walls; no labels or grid",
   "entries": [
@@ -7,8 +7,8 @@
       "id": "plan-2-natural",
       "layout": "plan-2",
       "palette": "natural",
-      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
-      "imageSha256": "4a66e50b3244d84f3fc57ecd93faa7b89b65bb15ee7351ee24e97e4c2dbdf785",
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "1c1c3d0ca76a10600e32ccd9dcf48e0c4dd9c69508590da010304eb50dc282de",
       "width": 1470,
       "height": 1205
     },
@@ -16,8 +16,8 @@
       "id": "plan-2-warm",
       "layout": "plan-2",
       "palette": "warm",
-      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
-      "imageSha256": "fb72fd96db80eb5182c1ddba747177196e7770028cc954d6536bbd0f45548feb",
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "8f6aba18bfce1fb5c529435b00ef13545f1c37cd8e5d2d5e07a754445c06bbbe",
       "width": 1470,
       "height": 1205
     },
@@ -25,8 +25,8 @@
       "id": "plan-2-contrast",
       "layout": "plan-2",
       "palette": "contrast",
-      "sceneSha256": "2743d0a0dd188167240fa022215ebc4882d3fcb9aaea586d863980a3642c57d6",
-      "imageSha256": "11acba2a5c15beba39f7df901a513a4457dc4fe73987e74854af5234b7a1062e",
+      "sceneSha256": "839da7cdbecb05013006a3b382a6ec8ffdc6ebeb59ea5e4fe8246c9b6113f3b1",
+      "imageSha256": "38b6ed849c4038c32af7d763248fb6592ca235cb84ee1a9b856e0226385ea5bf",
       "width": 1470,
       "height": 1205
     },

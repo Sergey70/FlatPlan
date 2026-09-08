@@ -4,11 +4,19 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-010 complete and published** — reconciled the model with the newer 15:35 Plan v3 export. Four source scenes retain the right apartment, kitchen 21.43 m² and bedroom 13.55 m². Updated geometry, openings and nightstand, removed obsolete loose objects, corrected labels, beds and round 2D silhouettes, added door leaves/swing arcs, preserved saved user edits, and regenerated the gallery. Local, CI and public acceptance all passed. The canonical-source reopening action is also available in updated projects; it restores the exact source while preserving the complete previous scene and all variants. Its browser regression passed locally, in CI and on the public site. No active implementation work remains.
+**PLAN-011 implemented; publication pending** — correct the kitchen triple sofa's backwards semantic mesh. Its source centre, footprint and angle are correct; the source wall attachment places its rear edge against the partition, while the placeholder backrest is on the opposite side. Flip only the triple-sofa backrest and seat offsets. Keep recorded transforms and all other furniture unchanged; migrate untouched saved part offsets with the existing field-delta mechanism and regenerate gallery assets.
 
-Acceptance completed: independent 2160-value comparison with the supplied file; 48 unit/regression tests, lint, TypeScript and production build; complete final browser acceptance locally and in CI; visual and diff review; public source/gallery checks; byte comparison of every published production file. No blockers.
+Acceptance: regression against the source rear attachment and front-facing seats; prove other objects and the sofa root transform unchanged; saved PLAN-010 and older migration preserves user edits; `npm run verify`, browser source/migration checks, visual review, CI and public publication checks. No blockers.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+
+## PLAN-011 implementation and acceptance
+
+- Confirmed the source kitchen sofa centre [165.54, 651.2708] cm, footprint 232.8298 × 90.668 cm, height 85 cm and angle −180° are already correct. The recorded rear-wall projection is Y=60.567 cm before normalization. The semantic triple-sofa mesh incorrectly placed its back on −Z; it now uses +Z before the recorded rotation, so the back meets the partition and seats face the kitchen.
+- Exactly four source part offsets change: backrest and three seats. The sofa root, arms/base, every other object and the original anonymous geometry are unchanged. A whole-project comparison proves only those four offsets in the current/saved scenes plus sourceRevision differ. An actual PLAN-010 canonical project upgrades exactly to the corrected model.
+- Reused the field-level delta migration for PLAN-010 → PLAN-011 and chained it after PLAN-008/009 updates. Root movement, rotation, scaling, part colours and manually edited offsets survive. Stable node/arrangement IDs and 30-variant handling remain unchanged; no new dependencies.
+- Added a compact anonymous old-sofa fixture and regressions for source rear attachment, inward-facing seats, exact root/other-object preservation, edited current/saved scenes, old revisions and JSON reload. Browser acceptance also upgrades a PLAN-010 sofa project, compares every scene to the corrected seed and reloads it.
+- Regenerated the gallery under `public/gallery/plan-011/` and visually inspected the apartment render. `npm run verify` passes 50 tests, lint, TypeScript and build. Complete `npm run test:browser` passed, including new PLAN-010 sofa migration/reload and all retained editor, JSON, reset and desktop/mobile scenarios. Source/migration diff and `git diff --check` reviewed; only CI/public publication remains. Local evidence is ignored under `.local/qa/plan-011/`.
 
 ## PLAN-010 implementation and acceptance
 

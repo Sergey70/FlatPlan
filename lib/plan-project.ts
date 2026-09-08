@@ -162,15 +162,23 @@ export function hasPlanSource(project: EditorProject): boolean {
   return project.sourceRevision === PLAN_REVISION;
 }
 export function applyPlanSource(project: EditorProject): EditorProject {
-  if (['plan-008', 'plan-009'].includes(project.sourceRevision ?? '')) {
+  if (
+    ['plan-008', 'plan-009', 'plan-010'].includes(project.sourceRevision ?? '')
+  ) {
     const selected =
       project.sourceRevision === 'plan-008'
         ? updatePlanSelection(project)
         : project;
+    const initial = createPlanProject().scene;
+    const previous =
+      project.sourceRevision === 'plan-010'
+        ? selected
+        : refreshPlanGeometry(selected, DEFAULT_PLAN_ID, initial);
     const next = refreshPlanGeometry(
-      selected,
+      previous,
       DEFAULT_PLAN_ID,
-      createPlanProject().scene,
+      initial,
+      'plan-011',
     );
     next.sourceRevision = PLAN_REVISION;
     return validateProject(next);

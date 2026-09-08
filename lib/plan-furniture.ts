@@ -183,8 +183,11 @@ export function planFurniture(item: PlanItem, ceiling: number): SceneNode {
         'white',
       );
   } else if (type.startsWith('sofa')) {
+    // The triple-sofa source symbol has its rear on +Z before the recorded rotation.
+    // At -180°, that edge meets the kitchen partition; seats face into the kitchen.
+    const facing = type === 'sofa_triple' ? -1 : 1;
     add('Основание', [1, 0.35, 1], [0, 0.18, 0], 'fabric');
-    add('Спинка', [1, 1, 0.17], [0, 0.5, -0.415], 'fabric');
+    add('Спинка', [1, 1, 0.17], [0, 0.5, -0.415 * facing], 'fabric');
     for (const x of [-0.46, 0.46])
       add('Подлокотник', [0.08, 0.72, 1], [x, 0.37, 0], 'fabric');
     const seats = type === 'sofa' ? 1 : 3;
@@ -192,7 +195,7 @@ export function planFurniture(item: PlanItem, ceiling: number): SceneNode {
       add(
         'Подушка сиденья',
         [0.82 / seats, 0.23, 0.68],
-        [-0.41 + ((i + 0.5) * 0.82) / seats, 0.47, 0.08],
+        [-0.41 + ((i + 0.5) * 0.82) / seats, 0.47, 0.08 * facing],
         'fabric',
       );
     if (type === 'sofa_corner')

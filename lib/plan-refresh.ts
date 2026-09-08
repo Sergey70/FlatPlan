@@ -1,4 +1,5 @@
 import rawDelta from './plan-update-010.json' with { type: 'json' };
+import sofaDelta from './plan-update-011.json' with { type: 'json' };
 import {
   clone,
   findNode,
@@ -14,12 +15,16 @@ interface FieldChange {
   before?: unknown;
   after?: unknown;
 }
-const delta = rawDelta as unknown as {
+interface SourceDelta {
   updates: Record<string, FieldChange[]>;
   added: { parentId: string; node: SceneNode }[];
   removed: { parentId: string; node: SceneNode }[];
   retired: { id: string; scene: Arrangement }[];
-};
+}
+const deltas = {
+  'plan-010': rawDelta,
+  'plan-011': sofaDelta,
+} as unknown as Record<'plan-010' | 'plan-011', SourceDelta>;
 /** A numeric tolerance accounts solely for Node/Chromium round-off. */
 function same(a: unknown, b: unknown): boolean {
   if (typeof a === 'number' && typeof b === 'number')
@@ -41,7 +46,9 @@ export function refreshPlanGeometry(
   project: EditorProject,
   defaultId: string,
   defaultScene: Arrangement,
+  revision: 'plan-010' | 'plan-011' = 'plan-010',
 ): EditorProject {
+  const delta = deltas[revision];
   const next = clone(project);
   function update(scene: Arrangement) {
     scene.objects = scene.objects.map((original) => {

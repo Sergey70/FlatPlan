@@ -1,0 +1,287 @@
+{
+  "id": "plan-item-024",
+  "name": "Трёхместный диван",
+  "category": "furniture",
+  "position": [
+    1.6554,
+    0,
+    6.512708
+  ],
+  "rotation": [
+    0,
+    180,
+    0
+  ],
+  "scale": [
+    1,
+    1,
+    1
+  ],
+  "geometry": {
+    "kind": "group",
+    "size": [
+      2.328298,
+      0.85,
+      0.90668
+    ]
+  },
+  "color": "#d4d0c7",
+  "material": "paint",
+  "visible": true,
+  "locked": false,
+  "cutaway": false,
+  "children": [
+    {
+      "id": "plan-item-024-part-1",
+      "name": "Основание",
+      "category": "furniture",
+      "position": [
+        0,
+        0.153,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          2.328298,
+          0.2975,
+          0.90668
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-2",
+      "name": "Спинка",
+      "category": "furniture",
+      "position": [
+        0,
+        0.425,
+        -0.3762722
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          2.328298,
+          0.85,
+          0.1541356
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-3",
+      "name": "Подлокотник",
+      "category": "furniture",
+      "position": [
+        -1.07101708,
+        0.3145,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          0.18626384,
+          0.612,
+          0.90668
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-4",
+      "name": "Подлокотник",
+      "category": "furniture",
+      "position": [
+        1.07101708,
+        0.3145,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          0.18626384,
+          0.612,
+          0.90668
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-5",
+      "name": "Подушка сиденья",
+      "category": "furniture",
+      "position": [
+        -0.6364014533333333,
+        0.39949999999999997,
+        0.0725344
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          0.6364014533333333,
+          0.1955,
+          0.6165424
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-6",
+      "name": "Подушка сиденья",
+      "category": "furniture",
+      "position": [
+        0,
+        0.39949999999999997,
+        0.0725344
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          0.6364014533333333,
+          0.1955,
+          0.6165424
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    },
+    {
+      "id": "plan-item-024-part-7",
+      "name": "Подушка сиденья",
+      "category": "furniture",
+      "position": [
+        0.6364014533333332,
+        0.39949999999999997,
+        0.0725344
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "geometry": {
+        "kind": "box",
+        "size": [
+          0.6364014533333333,
+          0.1955,
+          0.6165424
+        ],
+        "radius": 0.01275
+      },
+      "color": "#d5d5c9",
+      "material": "fabric",
+      "visible": true,
+      "locked": false,
+      "cutaway": false,
+      "children": [],
+      "role": "fabric"
+    }
+  ]
+}

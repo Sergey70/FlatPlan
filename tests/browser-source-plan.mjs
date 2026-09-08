@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import previousPlan from './fixtures/plan-009.json' with { type: 'json' };
+import previousSofa from './fixtures/kitchen-sofa-010.json' with { type: 'json' };
 import {
   createPlanProject,
   DEFAULT_PLAN_ID,
@@ -204,6 +205,42 @@ export async function checkSourcePlan(browser, url, out, h) {
       ),
     );
   await oldContext.close();
+
+  const sofaContext = await browser.newContext({
+    viewport: { width: 1365, height: 960 },
+  });
+  await h.installTools(sofaContext);
+  const oldSofaProject = structuredClone(seed);
+  oldSofaProject.sourceRevision = 'plan-010';
+  for (const scene of [
+    oldSofaProject.scene,
+    ...oldSofaProject.arrangements.map((a) => a.scene),
+  ])
+    scene.objects = scene.objects.map((n) =>
+      n.id === previousSofa.id ? structuredClone(previousSofa) : n,
+    );
+  await sofaContext.addInitScript((value) => {
+    if (!localStorage.getItem('sofa-upgrade-seeded')) {
+      localStorage.setItem('flatplan.editor.v1', value);
+      localStorage.setItem('sofa-upgrade-seeded', 'yes');
+    }
+  }, JSON.stringify(oldSofaProject));
+  const sofaPage = await sofaContext.newPage();
+  await sofaPage.goto(url);
+  for (let i = 0; i < 2; i++) {
+    await h.loaded(sofaPage);
+    await h.saved(sofaPage);
+    const updated = await h.project(sofaPage);
+    assert.equal(updated.sourceRevision, PLAN_REVISION);
+    sameGeometry(updated.scene.objects, seed.scene.objects);
+    for (const a of updated.arrangements)
+      sameGeometry(
+        a.scene.objects,
+        seed.arrangements.find((b) => b.id === a.id).scene.objects,
+      );
+    if (i === 0) await sofaPage.reload();
+  }
+  await sofaContext.close();
 
   // Existing PLAN-008 projects update in place, including the retired left-plan deep link.
   for (const activeLeft of [false, true]) {

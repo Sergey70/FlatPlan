@@ -61,7 +61,7 @@ export const planSource = raw as {
   layouts: PlanLayout[];
 };
 export const planLayouts = planSource.layouts;
-export const PLAN_REVISION = 'plan-010';
+export const PLAN_REVISION = 'plan-011';
 // Arrangement identity stays stable across source revisions and user edits.
 export const planArrangementId = (layout: string) => `plan-008-${layout}`;
 export const DEFAULT_PLAN_ID = planArrangementId(planSource.defaultLayout);
