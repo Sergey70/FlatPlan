@@ -62,6 +62,7 @@ export async function checkPresentation(browser, url, out, h) {
   const page = await context.newPage(),
     errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  let releaseTexture = () => {};
   try {
     await page.goto(url);
     await h.loaded(page);
@@ -76,6 +77,26 @@ export async function checkPresentation(browser, url, out, h) {
     await page
       .getByRole('button', { name: 'Изображения', exact: true })
       .click();
+    // Hold a real prerequisite so cancellation has a stable opportunity on both
+    // hardware WebGL and slower CI software rendering; do not race a finished PNG.
+    const textureGate = new Promise((resolve) => {
+      releaseTexture = resolve;
+    });
+    let textureRequested;
+    const requestSeen = new Promise((resolve) => {
+      textureRequested = resolve;
+    });
+    let textureContinued;
+    const routeComplete = new Promise((resolve) => {
+      textureContinued = resolve;
+    });
+    const holdTexture = async (route) => {
+      textureRequested();
+      await textureGate;
+      await route.continue();
+      textureContinued();
+    };
+    await page.route('**/textures/oak.jpg', holdTexture);
     await page
       .getByRole('button', { name: 'Открыть изображения', exact: true })
       .click();
@@ -84,6 +105,7 @@ export async function checkPresentation(browser, url, out, h) {
       exact: true,
     });
     await ready(dialog);
+    await requestSeen;
     await dialog
       .getByLabel('Размер изображения', { exact: true })
       .selectOption('1280');
@@ -99,6 +121,10 @@ export async function checkPresentation(browser, url, out, h) {
         { exact: true },
       )
       .waitFor();
+    assert.equal(await dialog.locator('.ed-render-results figure').count(), 0);
+    releaseTexture();
+    await routeComplete;
+    await page.unroute('**/textures/oak.jpg', holdTexture);
     const rooms = measuredRooms(fixture.scene.objects),
       names = ['Кухня', 'Комната 1', 'Спальня', 'Санузел'];
     let firstHash;
@@ -226,6 +252,7 @@ export async function checkPresentation(browser, url, out, h) {
     );
     throw error;
   } finally {
+    releaseTexture();
     await context.close();
   }
   const mobile = await browser.newContext({

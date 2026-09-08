@@ -8,9 +8,11 @@ Updated: 2026-09-09.
 
 - All seven implementations have passed local acceptance. `npm run verify` passed all 112 tests, lint, TypeScript and the production build. The final complete `npm run test:browser` terminated with exit 0: every R17 feature, retained design/tools/source/gallery, migrations, history/import/reset, desktop and touch scenarios passed.
 - Final visual review passed: improved four kitchen viewpoints, room/workspace, bedroom and bathroom images, edited blue floor, real 2560×1707 export, all 54 PDF pages and desktop/mobile tools. Image tests assert useful content/brightness as well as PNG dimensions. Final diff and whitespace checks passed; source geometry, private files, dependencies and workflow are unchanged.
-- Active gate: publish the verified application, observe successful Pages verification/deployment, and independently verify public UI and production asset bytes.
+- Active gate: republish the deterministic R17-1 cancellation test, then observe successful Pages deployment and run independent public UI/assets acceptance. Initial application commit `877e3e541b415a293cae2ab8ee86ca326ca944b7` / run `34290466302` passed unit/static/build and R17-2/3/4 browser checks, then stopped at a transient cancellation-button race in Linux software rendering; Pages was not deployed. Production code/build are unchanged by the fix.
+- Cancellation regression: hold the real oak-texture request, cancel through the visible button, assert no PNG, release and finish the request before removing the route, then run every real four-room/2560/edited-finish/error/mobile export. The complete focused presentation run terminated with exit 0 after the test fix. Evidence: `.local/qa/renovation-017-cancel-regression.log`. No assertions were removed or weakened.
+
 - Assumptions: authoritative PLAN-011 geometry and identifiers unchanged; optional version-1 JSON/history metadata only. Costs use manual prices. Minsk/south-facing balcony remains editable. Current-scene images use actual geometry with schematic furniture detail, approximate lighting/reflections and an inferred 2.70 m ceiling. Existing generated gallery is retained. PDF is A4 raster at 220 dpi; SVG is vector. No new dependencies or external services.
-- Remaining: commit/push, successful Pages deployment and independent public UI/assets acceptance. No blockers.
+- Remaining: successful Pages deployment and independent public UI/assets acceptance. Public-check helper is ignored at `.local/qa/renovation-017-public-check.mjs`. No blockers.
 - Previous completed iteration: DESIGN-016, Pages run 34272402880; evidence retained below.
 
 ## RENOVATION-017 working evidence
