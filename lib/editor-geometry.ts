@@ -287,7 +287,7 @@ export function doorSwingArcs(node: SceneNode): Point[][] {
     }),
   );
 }
-function hull(points: Point[]): Point[] {
+export function hull(points: Point[]): Point[] {
   const sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   const cross = (a: Point, b: Point, c: Point) =>
     (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);

@@ -17,7 +17,11 @@ import {
   type MaterialKind,
 } from './editor-model.ts';
 import { resizeObject, objectDimensions } from './editor-geometry.ts';
-import { catalogObject, catalog, type CatalogId } from './editor-seed.ts';
+import {
+  createFurniture as catalogObject,
+  furnitureCatalog as catalog,
+  type FurnitureId as CatalogId,
+} from './furniture-catalog.ts';
 interface Runtime {
   read(): EditorProject;
   commit(project: EditorProject): void;

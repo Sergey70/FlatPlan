@@ -48,6 +48,7 @@ export interface SceneNode {
   locked: boolean;
   cutaway: boolean;
   children: SceneNode[];
+  clearance?: { front: number; back: number };
 }
 export interface CameraState {
   position: Vec3;
@@ -69,6 +70,12 @@ export interface EditorView {
 export interface Arrangement {
   objects: SceneNode[];
   view: EditorView;
+  measurements?: PlanMeasurement[];
+}
+export interface PlanMeasurement {
+  id: string;
+  from: Point;
+  to: Point;
 }
 export interface SavedArrangement {
   id: string;
@@ -384,6 +391,13 @@ function parseObjects(value: unknown): SceneNode[] {
       )
         fail('цилиндр не может иметь два нулевых радиуса.');
       if (obj.role !== undefined) node.role = obj.role as StyleRole;
+      if (obj.clearance !== undefined) {
+        const c = record(obj.clearance);
+        node.clearance = {
+          front: number(c.front, 0, 5),
+          back: number(c.back, 0, 5),
+        };
+      }
       if (kind === 'wall') {
         const openings = node.children
           .filter((n) => n.geometry.kind === 'opening' && n.visible)
@@ -421,6 +435,28 @@ function parseScene(input: unknown): Arrangement {
   if (selected && !findNode(objects, selected))
     fail('выбранный объект отсутствует.');
   let camera: CameraState | null = null;
+  let measurements: PlanMeasurement[] | undefined;
+  if (obj.measurements !== undefined) {
+    if (!Array.isArray(obj.measurements) || obj.measurements.length > 100)
+      fail('максимум 100 размерных линий в расстановке.');
+    const ids = new Set<string>();
+    measurements = obj.measurements.map((input) => {
+      const m = record(input),
+        id = text(m.id, 150);
+      if (ids.has(id)) fail('повторяющийся идентификатор размера.');
+      ids.add(id);
+      function point(value: unknown): Point {
+        if (!Array.isArray(value) || value.length !== 2)
+          fail('неверная точка размера.');
+        return value.map((v) => number(v, -200, 200)) as Point;
+      }
+      const from = point(m.from),
+        to = point(m.to);
+      if (Math.hypot(to[0] - from[0], to[1] - from[1]) < 0.01)
+        fail('длина размера должна быть не меньше 1 см.');
+      return { id, from, to };
+    });
+  }
   if (v.camera !== null) {
     const c = record(v.camera);
     camera = {
@@ -434,6 +470,7 @@ function parseScene(input: unknown): Arrangement {
   }
   return {
     objects,
+    ...(measurements === undefined ? {} : { measurements }),
     view: {
       mode: v.mode,
       planZoom: number(v.planZoom, 0.5, 3),

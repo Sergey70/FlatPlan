@@ -37,9 +37,29 @@ import {
   Moon,
   Save,
   X,
+  Ruler,
+  ScanLine,
 } from 'lucide-react';
+import { FurnitureCatalog } from './furniture-catalog';
+import { PlanOverlays } from './plan-overlays';
+import {
+  createFurniture,
+  placeFurniture,
+  type FurnitureId,
+} from '@/lib/furniture-catalog';
+import {
+  analysisFootprints,
+  analyzePlan,
+  selectedDistances,
+  dimensionOutline,
+  frontDirection,
+  centimetres,
+  type Footprint,
+  type PlanIssue,
+  type DistanceLine,
+} from '@/lib/plan-analysis';
 import { Switch } from '@/components/ui/switch';
-import { palettes, polygonPath } from '@/lib/apartment';
+import { palettes, polygonPath, type Point } from '@/lib/apartment';
 import {
   createPlanProject as createInitialProject,
   applyPlanSource,
@@ -53,7 +73,6 @@ import {
   PARTITION_PRESET_ID,
   PARTITION_WALL_IDS,
   togglePartitionWalls,
-  catalog,
   catalogObject,
   makeOpening,
   type CatalogId,
@@ -79,6 +98,8 @@ import {
   redoHistory,
   STORAGE_KEY,
   MAX_FILE_BYTES,
+  newId,
+  validateProject,
   type EditorProject,
   type SceneNode,
   type Vec3,
@@ -93,6 +114,7 @@ import {
   planDrawing,
   nodeWorldMatrix,
   roomLabelPosition,
+  sceneBounds,
 } from '@/lib/editor-geometry';
 import { Matrix4, Vector3 } from 'three';
 import { validateContours } from '@/lib/polygon-validation';
@@ -408,6 +430,13 @@ function Plan({
   onSelect,
   onMove,
   onView,
+  measuring,
+  measureStart,
+  onMeasure,
+  analysis,
+  issues,
+  showChecks,
+  dimensions,
 }: {
   project: EditorProject;
   selected: string | null;
@@ -416,6 +445,13 @@ function Plan({
   onSelect: (id: string | null) => void;
   onMove: (id: string, position: Vec3) => void;
   onView: (patch: Partial<EditorView>) => void;
+  measuring: boolean;
+  measureStart: Point | null;
+  onMeasure: (point: Point) => void;
+  analysis: Footprint[];
+  issues: PlanIssue[];
+  showChecks: boolean;
+  dimensions: DistanceLine[];
 }) {
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, [number, number]>());
@@ -505,6 +541,7 @@ function Plan({
     const id = part ? (detail ? part.id : part.rootId) : null;
     const node = findNode(project.scene.objects, id);
     const moving =
+      !measuring &&
       tool === 'translate' &&
       node &&
       !node.locked &&
@@ -576,6 +613,19 @@ function Plan({
     setOffset(null);
     if (!g || !apply || g.type === 'pinch') return;
     if (!g.moved) {
+      if (measuring) {
+        const matrix = svg.current!.getScreenCTM();
+        if (matrix) {
+          const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(
+            matrix.inverse(),
+          );
+          onMeasure([
+            Math.round(p.x * 1000) / 1000,
+            Math.round(p.y * 1000) / 1000,
+          ]);
+        }
+        return;
+      }
       onSelect(g.id);
       return;
     }
@@ -598,7 +648,7 @@ function Plan({
     }
   }
   return (
-    <div className="ed-plan">
+    <div className={`ed-plan${measuring ? ' measuring' : ''}`}>
       <svg
         ref={svg}
         viewBox={`${extent.left + (extent.width * (1 - 1 / zoom)) / 2 + view.planOffset[0]} ${extent.top + (extent.depth * (1 - 1 / zoom)) / 2 + view.planOffset[1]} ${extent.width / zoom} ${extent.depth / zoom}`}
@@ -658,6 +708,17 @@ function Plan({
                 </text>
               );
             })}
+        {!offset && (
+          <PlanOverlays
+            dimensions={dimensions}
+            measurements={project.scene.measurements ?? []}
+            draft={measureStart}
+            shapes={analysis}
+            issues={issues}
+            showChecks={showChecks}
+            zoom={zoom}
+          />
+        )}
       </svg>
       <div className="ed-plan-zoom">
         <IconButton
@@ -774,7 +835,7 @@ export default function Editor() {
         : null,
     ),
     [panel, setPanel] = useState<
-      'objects' | 'properties' | 'variants' | 'files'
+      'objects' | 'properties' | 'variants' | 'files' | 'checks'
     >('objects');
   const [tool, setTool] = useState<EditTool>('orbit'),
     [detail, setDetail] = useState(false),
@@ -791,9 +852,54 @@ export default function Editor() {
     importRequest = useRef(0),
     [importName, setImportName] = useState<string | null>(null);
   const [resetPending, setResetPending] = useState(false);
+  const [measuring, setMeasuring] = useState(false),
+    [measureStart, setMeasureStart] = useState<Point | null>(null);
+  const [showChecks, setShowChecks] = useState(false),
+    [showDimensions, setShowDimensions] = useState(false),
+    [showGaps, setShowGaps] = useState(false),
+    [gapCm, setGapCm] = useState(80);
   const selected = project.scene.view.selected,
     node = findNode(project.scene.objects, selected),
     view = project.scene.view;
+  const analysis = useMemo(
+    () =>
+      showChecks || showDimensions
+        ? analysisFootprints(project.scene.objects)
+        : [],
+    [project.scene.objects, showChecks, showDimensions],
+  );
+  const issues = useMemo(
+    () =>
+      showChecks ? analyzePlan(analysis, showGaps ? gapCm / 100 : null) : [],
+    [analysis, showChecks, showGaps, gapCm],
+  );
+  const distances = useMemo(
+    () =>
+      showDimensions
+        ? selectedDistances(project.scene.objects, analysis, selected)
+        : [],
+    [project.scene.objects, analysis, selected, showDimensions],
+  );
+  const dimensionLines = useMemo(
+    () => [
+      ...(showDimensions
+        ? [...dimensionOutline(project.scene.objects, selected), ...distances]
+        : []),
+      ...(showChecks ? frontDirection(project.scene.objects, selected) : []),
+    ],
+    [project.scene.objects, selected, showDimensions, showChecks, distances],
+  );
+  const [measuredArrangement, setMeasuredArrangement] = useState(
+    project.activeArrangement,
+  );
+  if (measuredArrangement !== project.activeArrangement) {
+    setMeasuredArrangement(project.activeArrangement);
+    setMeasureStart(null);
+  }
+  if (view.mode === '3d' && measuring) {
+    setMeasuring(false);
+    setMeasureStart(null);
+  }
   function attempt(action: () => void) {
     try {
       action();
@@ -827,6 +933,12 @@ export default function Editor() {
     setImportName(null);
     if (fileInput.current) fileInput.current.value = '';
     setResetPending(false);
+    setMeasuring(false);
+    setMeasureStart(null);
+    setShowChecks(false);
+    setShowDimensions(false);
+    setShowGaps(false);
+    setGapCm(80);
   }, []);
   function resetUserData() {
     try {
@@ -1000,6 +1112,8 @@ export default function Editor() {
       if (e.key === 'Escape') {
         setTool('orbit');
         setAdd(false);
+        setMeasuring(false);
+        setMeasureStart(null);
       }
       if (e.key === 'Delete' && projectRef.current.scene.view.selected) {
         const id = projectRef.current.scene.view.selected!;
@@ -1062,6 +1176,67 @@ export default function Editor() {
       setAdd(false);
       setPanel('properties');
     });
+  }
+  function insertFurniture(
+    id: FurnitureId,
+    size: Vec3,
+    roomId: string,
+    replace: boolean,
+  ) {
+    attempt(() => {
+      const next = clone(project),
+        item = createFurniture(id, size);
+      if (replace) {
+        const index = next.scene.objects.findIndex(
+          (n) => n.id === selected && n.category === 'furniture' && !n.locked,
+        );
+        if (index < 0 || id === 'wall')
+          throw new Error('Выберите незакреплённый предмет целиком.');
+        const old = next.scene.objects[index],
+          box = sceneBounds([old]);
+        item.id = old.id;
+        item.rotation = [...old.rotation];
+        item.visible = old.visible;
+        placeFurniture(
+          item,
+          [(box.min.x + box.max.x) / 2, (box.min.z + box.max.z) / 2],
+          box.min.y,
+        );
+        next.scene.objects[index] = item;
+      } else {
+        const room = findNode(next.scene.objects, roomId);
+        placeFurniture(item, room ? roomLabelPosition(room) : [3, 4]);
+        next.scene.objects.push(item);
+      }
+      next.scene.view.selected = item.id;
+      next.scene.view.furniture = true;
+      commit(validateProject(next));
+      setAdd(false);
+      setPanel('properties');
+    });
+  }
+  function measure(point: Point) {
+    if (!measureStart) {
+      setMeasureStart(point);
+      return;
+    }
+    attempt(() => {
+      const next = clone(project);
+      next.scene.measurements ??= [];
+      next.scene.measurements.push({
+        id: newId('dimension'),
+        from: measureStart,
+        to: point,
+      });
+      commit(validateProject(next));
+      setMeasureStart(null);
+    });
+  }
+  function openChecks() {
+    setPanel('checks');
+    setShowChecks(true);
+    setShowDimensions(true);
+    updateView({ mode: '2d', furniture: true });
   }
   function opening(type: 'door' | 'window') {
     patchNode((n) => {
@@ -1190,13 +1365,14 @@ export default function Editor() {
                 ['properties', 'Свойства', SlidersHorizontal],
                 ['variants', 'Варианты', Palette],
                 ['files', 'Файл', FolderOpen],
+                ['checks', 'Проверка', ScanLine],
               ] as const
             ).map(([id, name, Icon]) => (
               <button
                 key={id}
                 aria-pressed={panel === id}
                 className={panel === id ? 'active' : ''}
-                onClick={() => setPanel(id)}
+                onClick={() => (id === 'checks' ? openChecks() : setPanel(id))}
               >
                 <Icon />
                 <span>{name}</span>
@@ -1346,14 +1522,19 @@ export default function Editor() {
                   onChange={(e) => setFilter(e.target.value)}
                 />
                 {add && (
-                  <div className="ed-catalog">
-                    {catalog.map((item) => (
-                      <button key={item.id} onClick={() => addObject(item.id)}>
-                        <Plus />
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
+                  <FurnitureCatalog
+                    rooms={project.scene.objects.filter(
+                      (n) => n.geometry.kind === 'floor' && n.visible,
+                    )}
+                    canReplace={
+                      !!node &&
+                      node.category === 'furniture' &&
+                      !node.locked &&
+                      project.scene.objects.includes(node)
+                    }
+                    onInsert={insertFurniture}
+                    onClose={() => setAdd(false)}
+                  />
                 )}
                 <ObjectTree
                   nodes={project.scene.objects}
@@ -1941,6 +2122,188 @@ export default function Editor() {
                 </div>
               </>
             )}
+            {panel === 'checks' && (
+              <>
+                <h2>Размеры и проверка</h2>
+                <Toggle
+                  label="Расстояния до выбранного объекта"
+                  checked={showDimensions}
+                  onChange={setShowDimensions}
+                />
+                <p className="ed-hint">
+                  Выберите мебель на плане: показаны её проекция и ближайшие
+                  расстояния до стен и других предметов на той же высоте.
+                </p>
+                {!!distances.length && (
+                  <ul className="ed-distance-list">
+                    {distances.map((d) => (
+                      <li key={d.label}>{d.label}</li>
+                    ))}
+                  </ul>
+                )}
+                <button
+                  className={`ed-full ${measuring ? 'ed-primary' : ''}`}
+                  aria-pressed={measuring}
+                  onClick={() => {
+                    setMeasuring(!measuring);
+                    setMeasureStart(null);
+                    setTool('orbit');
+                    updateView({ mode: '2d' });
+                  }}
+                >
+                  <Ruler />
+                  {measuring ? 'Завершить измерение' : 'Измерить между точками'}
+                </button>
+                <output className="ed-hint">
+                  {measuring
+                    ? measureStart
+                      ? 'Отметьте вторую точку. Escape — отменить.'
+                      : 'Отметьте первую точку на плане. Можно перемещать и масштабировать план между точками.'
+                    : 'Размеры сохраняются в варианте и JSON. Точки закреплены на плане; при переносе мебели ручной размер остаётся на месте.'}
+                </output>
+                {(project.scene.measurements ?? []).map((m, i) => (
+                  <div className="ed-measurement-row" key={m.id}>
+                    <span>
+                      Размер {i + 1}:{' '}
+                      {centimetres(
+                        Math.hypot(m.to[0] - m.from[0], m.to[1] - m.from[1]),
+                      )}
+                    </span>
+                    <button
+                      aria-label={`Удалить размер ${i + 1}`}
+                      onClick={() => {
+                        const next = clone(project);
+                        next.scene.measurements =
+                          next.scene.measurements?.filter((x) => x.id !== m.id);
+                        commit(validateProject(next));
+                      }}
+                    >
+                      <Trash2 />
+                    </button>
+                  </div>
+                ))}
+                <h3>Пересечения и проходы</h3>
+                <Toggle
+                  label="Подсветить препятствия"
+                  checked={showChecks}
+                  onChange={setShowChecks}
+                />
+                <Toggle
+                  label="Показывать узкие зазоры"
+                  checked={showGaps}
+                  onChange={setShowGaps}
+                />
+                {showGaps && (
+                  <Field
+                    label="Порог зазора, см"
+                    value={gapCm}
+                    min={10}
+                    max={200}
+                    step={5}
+                    onCommit={setGapCm}
+                  />
+                )}
+                <p className="ed-hint">
+                  Красный — пересечение или занятый дверной проём. Охра — зона
+                  использования или тесный зазор. Зазоры до 5 см считаются
+                  примыканием. Порог выбирается для сравнения, это не
+                  строительный норматив.
+                </p>
+                {node && node.category === 'furniture' && (
+                  <section
+                    className="ed-use-space"
+                    aria-label="Зона использования предмета"
+                  >
+                    <strong>{node.name}</strong>
+                    <p className="ed-hint">
+                      Свободное место перед предметом и за ним. Передняя сторона
+                      показана на плане; она поворачивается вместе с предметом.
+                    </p>
+                    <Field
+                      label="Свободно спереди, см"
+                      value={(node.clearance?.front ?? 0) * 100}
+                      min={0}
+                      max={500}
+                      step={5}
+                      disabled={node.locked}
+                      onCommit={(n) =>
+                        patchNode((item) => {
+                          item.clearance = {
+                            front: n / 100,
+                            back: item.clearance?.back ?? 0,
+                          };
+                        })
+                      }
+                    />
+                    <Field
+                      label="Свободно сзади, см"
+                      value={(node.clearance?.back ?? 0) * 100}
+                      min={0}
+                      max={500}
+                      step={5}
+                      disabled={node.locked}
+                      onCommit={(n) =>
+                        patchNode((item) => {
+                          item.clearance = {
+                            front: item.clearance?.front ?? 0,
+                            back: n / 100,
+                          };
+                        })
+                      }
+                    />
+                  </section>
+                )}
+                {showChecks && (
+                  <>
+                    <output className="ed-check-count" aria-live="polite">
+                      {issues.length
+                        ? `Найдено замечаний: ${issues.length}`
+                        : 'Пересечений и занятых зон не найдено'}
+                    </output>
+                    <div className="ed-check-list">
+                      {issues.slice(0, 100).map((issue) => (
+                        <button
+                          className={`ed-check-item ${issue.kind}`}
+                          key={issue.id}
+                          onClick={() => updateView({ selected: issue.ids[0] })}
+                        >
+                          <strong>
+                            {
+                              {
+                                collision: 'Пересечение',
+                                door: 'Дверь: занято место',
+                                clearance: 'Зона использования занята',
+                                gap: 'Узкий зазор',
+                              }[issue.kind]
+                            }
+                            {issue.distance !== undefined &&
+                              ` · ${centimetres(issue.distance)}`}
+                          </strong>
+                          <span>
+                            {issue.ids
+                              .map(
+                                (id) =>
+                                  findNode(project.scene.objects, id)?.name ??
+                                  id,
+                              )
+                              .join(' · ')}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    {issues.length > 100 && (
+                      <p className="ed-hint">Показаны первые 100 замечаний.</p>
+                    )}
+                  </>
+                )}
+                <p className="ed-hint">
+                  Проверка сопоставляет проекции видимых предметов и их высоту.
+                  Контакт до 5 мм игнорируется. Пространство внутри сложной
+                  детали оценивается приближённо; определите, какие зазоры
+                  действительно нужны для прохода.
+                </p>
+              </>
+            )}
             {panel === 'files' && (
               <>
                 <h2>Проект и перенос</h2>
@@ -2010,6 +2373,8 @@ export default function Editor() {
                       onClick={() => {
                         if (importRef.current) {
                           commit(importRef.current);
+                          setMeasuring(false);
+                          setMeasureStart(null);
                           setStoragePaused(false);
                           setImportName(null);
                           importRef.current = null;
@@ -2133,7 +2498,11 @@ export default function Editor() {
                 aria-pressed={view.mode === '3d'}
                 className={view.mode === '3d' ? 'active' : ''}
                 disabled={unavailable}
-                onClick={() => updateView({ mode: '3d' })}
+                onClick={() => {
+                  setMeasuring(false);
+                  setMeasureStart(null);
+                  updateView({ mode: '3d' });
+                }}
               >
                 <Box />
                 3D
@@ -2150,15 +2519,23 @@ export default function Editor() {
             <div className="ed-segment">
               <IconButton
                 label="Вращать вид"
-                active={tool === 'orbit'}
-                onClick={() => setTool('orbit')}
+                active={tool === 'orbit' && !measuring}
+                onClick={() => {
+                  setTool('orbit');
+                  setMeasuring(false);
+                  setMeasureStart(null);
+                }}
               >
                 <MousePointer2 />
               </IconButton>
               <IconButton
                 label="Перемещать объект"
                 active={tool === 'translate'}
-                onClick={() => setTool('translate')}
+                onClick={() => {
+                  setTool('translate');
+                  setMeasuring(false);
+                  setMeasureStart(null);
+                }}
               >
                 <Move />
               </IconButton>
@@ -2166,9 +2543,25 @@ export default function Editor() {
                 label="Повернуть объект"
                 active={tool === 'rotate'}
                 disabled={view.mode === '2d'}
-                onClick={() => setTool('rotate')}
+                onClick={() => {
+                  setTool('rotate');
+                  setMeasuring(false);
+                  setMeasureStart(null);
+                }}
               >
                 <RotateCw />
+              </IconButton>
+              <IconButton
+                label="Измерить расстояние"
+                active={measuring}
+                onClick={() => {
+                  openChecks();
+                  setTool('orbit');
+                  setMeasuring(!measuring);
+                  setMeasureStart(null);
+                }}
+              >
+                <Ruler />
               </IconButton>
             </div>
             <label className="ed-detail">
@@ -2198,9 +2591,20 @@ export default function Editor() {
               selected={selected}
               tool={tool}
               detail={detail}
-              onSelect={select}
+              onSelect={
+                panel === 'checks'
+                  ? (id) => updateView({ selected: id })
+                  : select
+              }
               onMove={change}
               onView={updateView}
+              measuring={measuring}
+              measureStart={measureStart}
+              onMeasure={measure}
+              analysis={analysis}
+              issues={issues}
+              showChecks={showChecks}
+              dimensions={dimensionLines}
             />
           )}
           {!ready && !unavailable && view.mode === '3d' && (
@@ -2210,15 +2614,17 @@ export default function Editor() {
             <div>
               <strong>{node?.name ?? project.name}</strong>
               <span>
-                {tool === 'orbit'
-                  ? view.mode === '2d'
-                    ? 'Тяните план · два пальца — масштаб'
-                    : 'Один палец — вращение · два — масштаб'
-                  : tool === 'translate'
+                {measuring
+                  ? 'Две точки — размер · Escape — завершить'
+                  : tool === 'orbit'
                     ? view.mode === '2d'
-                      ? 'Перетаскивайте выбранный объект'
-                      : 'Тяните за цветные оси выбранного объекта'
-                    : 'Тяните за зелёное кольцо · шаг 5°'}
+                      ? 'Тяните план · два пальца — масштаб'
+                      : 'Один палец — вращение · два — масштаб'
+                    : tool === 'translate'
+                      ? view.mode === '2d'
+                        ? 'Перетаскивайте выбранный объект'
+                        : 'Тяните за цветные оси выбранного объекта'
+                      : 'Тяните за зелёное кольцо · шаг 5°'}
               </span>
             </div>
             {view.mode === '3d' && (

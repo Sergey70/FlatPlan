@@ -4,9 +4,17 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**ROOM-014 complete and published.** The room has a separate bed/workstation proposal and three regenerated finished interiors. PLAN-011 source geometry and personal saves remain intact. No active implementation or blockers.
+**TOOLS-015 implemented; publication acceptance pending.** Completed the agreed next stage: saved two-point dimensions and live selected-object distances on the plan; furniture/wall/door and configurable clearance checks; furniture catalog presets/custom sizes and workstation objects. Reuse editor geometry, history, JSON and existing controls. Optional scene/node fields must preserve old source/gallery bytes and personal edits. Checks are advisory projections with height filtering; user-selected gap thresholds are not building-code certification. Local acceptance is complete; Pages and public acceptance are next. No blockers. ROOM-014 remains published until deployment.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
+
+## TOOLS-015 implementation and acceptance
+
+- Added the «Проверка» panel, a two-point ruler that respects plan pan/zoom and touch gestures, persistent dimension lines and live dimensions/nearest wall/furniture distances. Manual points stay anchored in world coordinates; up to 100 lines travel with each scene, saved arrangement and JSON. Delete/undo/redo work through existing history. Captions avoid one another. Escape, mode changes and arrangement changes clear unfinished measurements.
+- Shared 3D geometry supplies rotated projected solids with height filtering, hidden-ancestor handling, wall profiles/opening voids, polygon holes and circular silhouettes. Checks identify furniture collisions, occupied door spans/sweeps, configurable front/back use zones and optional narrow gaps; gap segments crossing a third obstacle are excluded. Use zones extend 1.9 m above the object's bottom; their user-set depth remains physical metres after resizing. Default gap threshold is 80 cm, abutments up to 5 cm are excluded, contact tolerance is 5 mm. Results are advisory, not navigation/building-code certification, and never reposition source furniture.
+- Catalog extends existing factories to 14 types with desk/chair/monitor/computer, typical sizes and custom centimetre inputs, room-centred placement, plus replacement preserving footprint centre, rotation and bottom. New chairs have a configurable 60 cm rear use zone, wardrobes a 60 cm front zone. Existing objects/source scenes remain unchanged. Optional validated scene/node fields preserve old JSON and all source/gallery provenance checks; no dependency or source migration is introduced.
+- Acceptance passed: `npm run verify` (63 tests, lint, TypeScript and production build), complete `npm run test:browser`, a final production rebuild and focused desktop/mobile UI run after the issue-list CSS correction. New browser cases cover collisions/clearance/gaps, exact ruler coordinates through pan/zoom, cancellation, mouse/touch/pinch, presets/custom sizes/replacement, variants/history/JSON/reload and the full supplied apartment. Retained source migration, gallery, editing, recovery/reset and mobile checks pass. Reviewed final desktop, apartment and 360/390/768 screenshots; final diff has no whitespace errors. Evidence: ignored `.local/qa/tools-015-final/` and `.local/qa/`.
+- README documents catalogue/measurements/checks, units, persistence and limitations alongside existing copy/paste setup/start/test/stop/troubleshooting. Publication and independent public-file verification remain pending.
 
 ## ROOM-014 implementation and acceptance
 
@@ -84,7 +92,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 
 ## Limits
 
-The file is authoritative for this revision and supersedes the earlier photographed passport. It does not prove real-world construction measurements. Furniture detail geometry, materials and missing heights are illustrative. Door leaves use a static 45° angle with 90° arcs in 2D; frame profiles are illustrative. Full-height door/window objects hide with the cutaway walls. Rooms, walls and furniture remain independent; moving walls does not regenerate floors or check collisions. No engineering networks, cloud sync or live regeneration of gallery images from visitor edits. Mobile QA uses Chromium touch emulation, not physical devices.
+The file is authoritative for this revision and supersedes the earlier photographed passport. It does not prove real-world construction measurements. Furniture detail geometry, materials and missing heights are illustrative. Door leaves use a static 45° angle with 90° arcs in 2D; frame profiles are illustrative. Full-height door/window objects hide with the cutaway walls. Rooms, walls and furniture remain independent; moving walls does not regenerate floors. TOOLS-015 offers advisory projected collision/door/clearance/gap checks with height filtering and 5 mm contact tolerance; it does not certify building-code compliance or full navigation routes. No engineering networks, cloud sync or live regeneration of gallery images from visitor edits. Mobile QA uses Chromium touch emulation, not physical devices.
 
 ## Publication
 
