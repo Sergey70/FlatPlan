@@ -4,7 +4,7 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**PLAN-008** — replace the preliminary passport model with the user's supplied Plan v3 file, update the gallery and publish. Implementation is complete; final verification/publication is in progress. User authorized project changes and publication.
+**PLAN-008 complete and published** — replaced the preliminary passport model with the user's supplied Plan v3 file and updated the gallery. Local verification, GitHub Actions deployment and the complete public-site browser acceptance passed. No active implementation work remains.
 
 Default: right-hand apartment (Plan 2, bathtub). Six editable arrangements: both apartments, three detached bathroom studies and eight loose objects. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -22,7 +22,7 @@ Default: right-hand apartment (Plan 2, bathtub). Six editable arrangements: both
 ## Verification
 
 - Independent comparison against the original local file checked **3011 numeric values**, with maximum extraction rounding error **4.99998e-9 cm**; every wall, polygon and item accounted for exactly once.
-- `npm run verify` passed **40 tests**, lint, TypeScript and production build. Six new source tests cover every wall corner/centreline/opening/sill, all item dimensions/transforms, all room areas, profiled wall resizing/JSON and safe migration. The final gate is repeated after manifest/documentation updates before publication.
+- Final `npm run verify` passed **40 tests**, lint, TypeScript and production build after manifest/documentation updates. Six new source tests cover every wall corner/centreline/opening/sill, all item dimensions/transforms, all room areas, profiled wall resizing/JSON and safe migration. GitHub Actions independently passed the same gate on Linux.
 - The complete `npm run test:browser` passed: six source scenes and windows, wall edits/addition, persistent refresh, deliberate variant deletion and mobile widths, plus all retained desktop/3D/JSON/storage/reset/upgrade/touch regressions. No page errors. Cross-engine comparisons tolerate 1e-8 numeric round-off while all other values remain exact.
 - New gallery render pipeline completed all 15 images at 1470 × 1205 with browser-to-source numeric comparison. Manifest numbers round to seven decimal places solely for portable hashing; model coordinates remain unchanged.
 - Desktop 3D, exact 2D and mobile editor screenshots inspected; full-size apartment/bath render samples and all 15 renders reviewed in a contact sheet. Desktop/mobile gallery review and final source diff completed, including storage migration and geometry changes. `git diff --check` passed.
@@ -39,7 +39,9 @@ Editor: https://sergey70.github.io/FlatPlan/
 Default deep link: https://sergey70.github.io/FlatPlan/?layout=plan-2
 Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
 
-PLAN-008 publication pending. Workflow `.github/workflows/pages.yml` gates deployment with unit/static/build and complete browser checks.
+PLAN-008 published application: `12082659873f04a70495d109aa65a96e7b0c863f`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34227401936.
+
+The complete `FLATPLAN_QA_URL=https://sergey70.github.io/FlatPlan/ npm run test:browser` passed against the public site in isolated contexts: gallery, six source arrangements, exact source geometry, existing editor manipulation, JSON, old-project backup/reload, reset/recovery and desktop/mobile touch scenarios. All **31 public production files** returned HTTP 200 and matched verified `dist/` byte-for-byte, including 15 PNGs and five SVGs. Evidence: ignored `.local/qa/plan-008-public-assets.json` and browser screenshots. Source is the deployed application plus this completion record; working tree is clean after the record commit. Workflow `.github/workflows/pages.yml` continues to gate deployment with unit/static/build and complete browser checks.
 
 Last published application before PLAN-008: DATA-007 `7adbca220b225b9da8140669acb1d55d7dfe1c9b`, successful run https://github.com/Sergey70/FlatPlan/actions/runs/34220689856. It added scoped permanent browser-data reset, history/import clearing and other-tab protection; public acceptance and asset hashes passed. Repository started clean at completion-record commit `36a8068`.
 
