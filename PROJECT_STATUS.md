@@ -4,11 +4,9 @@ Updated: 2026-09-08.
 
 ## Current iteration
 
-**GALLERY-012 implemented and locally verified; publication pending** — 42 model renders across 12 concepts. Five views per apartment finish (two kitchen directions, bedroom, upper room and overview), three per bathroom finish (two interior directions and overview). Detail/comparison dialogs offer thumbnails, previous/next, keyboard navigation and full-size links. PLAN-011 source geometry, revision and saved-project handling are unchanged. No blockers.
+**GALLERY-012 complete and published** — 42 model renders across 12 concepts. Five views per apartment finish (two kitchen directions, bedroom, upper room and overview), three per bathroom finish (two interior directions and overview). Detail/comparison dialogs offer thumbnails, previous/next, keyboard navigation and full-size links. PLAN-011 source geometry, revision and saved-project handling are unchanged. No active implementation work or blockers remain.
 
-Acceptance completed locally: all 42 scenes compared against canonical geometry; scene/image/camera provenance and camera room/furniture checks; all 42 renders visually reviewed; `npm run verify` (51 tests, lint, TypeScript and build); complete `npm run test:browser`; additional final gallery run including image load failure/retry, all 42 full-size images, desktop/mobile navigation, independent comparison and unchanged storage bytes/reload. Diff and screenshots reviewed. Remaining: commit/publish, GitHub Actions and public asset/gallery checks. Last published iteration: PLAN-011 below.
-
-Acceptance completed: source rear-wall attachment regression; exact preservation of other geometry and root transforms; old/current saved-project migration and reload; 50 tests, lint, TypeScript and build; full browser suite locally and in GitHub Actions; visual and diff review; public source/gallery acceptance; all 27 deployed files byte-identical to the final build. No blockers.
+Acceptance completed: all 42 scenes compared against canonical geometry; scene/image/camera provenance and camera room/furniture checks; all 42 renders visually reviewed; `npm run verify` (51 tests, lint, TypeScript and build); complete `npm run test:browser`; final gallery run including image load failure/retry, all full-size images, desktop/mobile navigation, independent comparison and unchanged storage bytes/reload. GitHub Actions independently passed verification, full browser checks and deployment. Public source/gallery acceptance passed; all 70 published files returned HTTP 200 and matched the final build byte-for-byte. Diff and screenshots reviewed.
 
 Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.55 m² is «Спальня». Four starter arrangements remain: one apartment and three detached bathroom studies. Source file and project identifiers remain local; only anonymous numeric geometry is published.
 
@@ -19,6 +17,7 @@ Default: the right-hand apartment with bathtub; 21.43 m² is «Кухня», 13.
 - Added accessible fieldsets, descriptive thumbnails, selected state, labelled previous/next buttons, arrow/Home/End keys, captions/counts and links to the selected full image. Comparison viewers have independent state. Failed large images can be left and retried; all gallery activity preserves browser project bytes. Covers show actual interior views and the number of available angles.
 - New gallery revision is independent of PLAN-011. Existing PLAN-011 images/manifest and SVG addresses remain available. README and GALLERY_ASSETS include viewing, regeneration, setup/start/test/stop and troubleshooting instructions. No dependencies added; original file and personal saves remain private.
 - Local verification: 51 unit tests, lint, TypeScript, build, full editor browser suite and a final focused gallery run pass. Visual review includes all three contact sheets (42 renders), full-size room/bathroom samples, desktop detail/comparison and 360/390/768 mobile layouts. Evidence under ignored `.local/qa/gallery-012/` and `.local/qa/`.
+- Publication verification: GitHub Actions build, full browser suite and deployment passed. Public source/gallery scenarios include every full-size view, keyboard/wrap controls, independent comparison, image failure/retry, desktop/mobile sizes and storage isolation. All 70 production files are byte-identical to the final build; previous PLAN-011 resources remain reachable. Evidence under ignored `.local/qa/gallery-012-public/` and `.local/qa/gallery-012/public-assets.json`.
 
 ## PLAN-011 implementation and acceptance
 
@@ -77,6 +76,8 @@ Repository: https://github.com/Sergey70/FlatPlan
 Editor: https://sergey70.github.io/FlatPlan/
 Default deep link: https://sergey70.github.io/FlatPlan/?layout=plan-2
 Gallery: https://sergey70.github.io/FlatPlan/?view=gallery
+
+GALLERY-012 published application: `37a6ab39172606ed39e66f06059a15a629484a08`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34246860984. Public source/gallery acceptance and all 70 production file comparisons passed. The completion record changes documentation only.
 
 PLAN-011 published application: `13273e90ad309131d9984cd9185dce286f79089b`. Successful build/browser/deployment run: https://github.com/Sergey70/FlatPlan/actions/runs/34239615579. Public source/gallery checks include a PLAN-010 sofa fixture upgraded in current/saved scenes and verified again after reload, along with retained source/editor/gallery scenarios. All 27 public files return HTTP 200 and match `dist/` byte-for-byte. Evidence remains ignored under `.local/qa/plan-011/` and `.local/qa/plan-011-public/`. The completion record changes documentation only.
 
