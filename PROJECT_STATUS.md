@@ -2,11 +2,11 @@
 
 Updated: 2026-09-09.
 
-## UI-019 — collapsed daylight and walk sections
+## UI-019 — collapsed daylight and walk sections (complete and published)
 
 - Both environment sections in Variants now start collapsed. Native summary toggling opens them; scene settings and saved projects are unchanged. Existing browser navigation explicitly expands each section before using its controls.
 - Local acceptance passed: `npm run verify` (117 tests, lint, TypeScript, build), desktop/touch checks for collapsed defaults, toggling, reload and unchanged settings, plus existing full DESIGN-016 browser scenarios. Mobile screenshot reviewed; final diff passes whitespace checks. Evidence: `.local/qa/ui-019-verify.log`, `.local/qa/ui-019-browser.log`, `.local/qa/ui-019-local/`.
-- Publication and independent public check pending.
+- Published application: `886f5980fdcb40c8b15b0defa4cd4bd2699a745e`. [GitHub Actions run 34300952249](https://github.com/Sergey70/FlatPlan/actions/runs/34300952249) passed verification, the complete browser suite and Pages deployment. Independent public desktop/touch checks passed: both sections are initially collapsed, expand/collapse by click/tap, remain collapsed after reload and leave project settings unchanged. Public mobile screenshot reviewed. Evidence: `.local/qa/ui-019-public-browser.log`, `.local/qa/ui-019-public/`. No remaining work for UI-019.
 
 ## ROOM-018 — main-plan workspace correction (complete and published)
 
@@ -20,7 +20,7 @@ Updated: 2026-09-09.
 
 ## Previous completed iteration
 
-**RENOVATION-017 complete and published.** ROOM-018 above is the latest completed correction; no implementation iteration is active.
+**RENOVATION-017 complete and published.** UI-019 above is the latest completed change; no implementation iteration is active.
 
 - All seven approved tools are available in **Ремонт**: current-model images, mechanisms, electrical/lighting, workplace sunlight, drawings/PDF, material estimates and paired arrangement comparison. Usage and limitations are documented in README; all acceptance gates are complete in RENOVATION_017_PLAN.md.
 - Published application: `22f8391559045ecee67a34a862992aa5885fd116`. [Pages run 34294654729](https://github.com/Sergey70/FlatPlan/actions/runs/34294654729) passed verification, the complete browser suite and deployment. The application implementation is unchanged since `877e3e5`; subsequent commits make CI render tests deterministic and allow measured software-rendering time.
