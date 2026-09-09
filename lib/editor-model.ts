@@ -124,6 +124,7 @@ export interface EditorProject {
   sourceRevision?: string;
 }
 export const STORAGE_KEY = 'flatplan.editor.v1';
+export const VIEW_STORAGE_KEY = 'flatplan.view.v1';
 export const ROOM_WORKSPACE_STORAGE_KEY = 'flatplan.room-workspace.v1';
 export const MAX_FILE_BYTES = 8_000_000;
 export const clone = <T>(value: T): T => structuredClone(value);
@@ -631,10 +632,12 @@ function parseObjects(value: unknown): SceneNode[] {
   }
   return walk(value);
 }
-function parseScene(input: unknown): Arrangement {
-  const obj = record(input),
-    objects = parseObjects(obj.objects),
-    v = record(obj.view);
+/** Validate a small view snapshot without cloning or revalidating scene geometry. */
+export function validateEditorView(
+  input: unknown,
+  objects: SceneNode[],
+): EditorView {
+  const v = record(input);
   if (v.mode !== '2d' && v.mode !== '3d') fail('неверный режим просмотра.');
   if (!['natural', 'warm', 'contrast'].includes(v.palette as string))
     fail('неверная палитра.');
@@ -642,6 +645,45 @@ function parseScene(input: unknown): Arrangement {
   if (selected && !findNode(objects, selected))
     fail('выбранный объект отсутствует.');
   let camera: CameraState | null = null;
+  if (v.camera !== null) {
+    const c = record(v.camera);
+    camera = {
+      position: vec(c.position, -500, 500),
+      target: vec(c.target, -200, 200),
+    };
+    if (
+      Math.hypot(...camera.position.map((n, i) => n - camera!.target[i])) < 0.1
+    )
+      fail('камера совпадает с точкой наблюдения.');
+  }
+  return {
+    mode: v.mode,
+    planZoom: number(v.planZoom, 0.5, 3),
+    planOffset:
+      v.planOffset === undefined
+        ? [0, 0]
+        : (() => {
+            if (!Array.isArray(v.planOffset) || v.planOffset.length !== 2)
+              fail('неверное смещение плана.');
+            return v.planOffset.map((n) => number(n, -200, 200)) as [
+              number,
+              number,
+            ];
+          })(),
+    palette: v.palette as PaletteId,
+    night: bool(v.night),
+    cutaway: bool(v.cutaway),
+    furniture: bool(v.furniture),
+    labels: bool(v.labels),
+    grid: bool(v.grid),
+    camera,
+    selected,
+    ...parseDesignView(v),
+  };
+}
+function parseScene(input: unknown): Arrangement {
+  const obj = record(input),
+    objects = parseObjects(obj.objects);
   let measurements: PlanMeasurement[] | undefined;
   if (obj.measurements !== undefined) {
     if (!Array.isArray(obj.measurements) || obj.measurements.length > 100)
@@ -663,17 +705,6 @@ function parseScene(input: unknown): Arrangement {
         fail('длина размера должна быть не меньше 1 см.');
       return { id, from, to };
     });
-  }
-  if (v.camera !== null) {
-    const c = record(v.camera);
-    camera = {
-      position: vec(c.position, -500, 500),
-      target: vec(c.target, -200, 200),
-    };
-    if (
-      Math.hypot(...camera.position.map((n, i) => n - camera!.target[i])) < 0.1
-    )
-      fail('камера совпадает с точкой наблюдения.');
   }
   return {
     objects,
@@ -811,30 +842,7 @@ function parseScene(input: unknown): Arrangement {
             });
           })(),
         }),
-    view: {
-      mode: v.mode,
-      planZoom: number(v.planZoom, 0.5, 3),
-      planOffset:
-        v.planOffset === undefined
-          ? [0, 0]
-          : (() => {
-              if (!Array.isArray(v.planOffset) || v.planOffset.length !== 2)
-                fail('неверное смещение плана.');
-              return v.planOffset.map((n) => number(n, -200, 200)) as [
-                number,
-                number,
-              ];
-            })(),
-      palette: v.palette as PaletteId,
-      night: bool(v.night),
-      cutaway: bool(v.cutaway),
-      furniture: bool(v.furniture),
-      labels: bool(v.labels),
-      grid: bool(v.grid),
-      camera,
-      selected,
-      ...parseDesignView(v),
-    },
+    view: validateEditorView(obj.view, objects),
   };
 }
 /** Parse into a new whitelisted document before any state or storage mutation. */
@@ -900,6 +908,7 @@ export function persistProject(storage: StoragePort, project: EditorProject) {
 export function clearStoredProject(storage: Pick<Storage, 'removeItem'>) {
   storage.removeItem(STORAGE_KEY);
   storage.removeItem(ROOM_WORKSPACE_STORAGE_KEY);
+  storage.removeItem(VIEW_STORAGE_KEY);
 }
 export interface History {
   past: EditorProject[];

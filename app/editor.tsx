@@ -1,3 +1,10 @@
+import {
+  EditorAutosave,
+  StorageConflictError,
+  readEditorProject,
+  type SaveStatus,
+} from '@/lib/editor-storage';
+import { createProjectSerializer } from '@/lib/project-serializer';
 import { PresentationPanel } from './presentation-panel';
 import { DrawingsPanel } from './drawings-panel';
 import { ComparisonPanel } from './comparison-panel';
@@ -97,7 +104,6 @@ import {
 import {
   createDefaultProject as createInitialProject,
   upgradeRoomWorkspace,
-  persistEditorProject,
 } from '@/lib/editor-project';
 import {
   applyPartitionedPreset,
@@ -121,7 +127,6 @@ import {
   loadArrangement,
   importProject,
   exportProject,
-  readStoredProject,
   ROOM_WORKSPACE_STORAGE_KEY,
   clearStoredProject,
   pushHistory,
@@ -488,6 +493,7 @@ function Plan({
   walkPick,
   onWalkPoint,
   onPlacePoint,
+  onInteraction,
 }: {
   project: EditorProject;
   selected: string | null;
@@ -510,9 +516,11 @@ function Plan({
   walkPick: boolean;
   onWalkPoint: (point: Point) => void;
   onPlacePoint: ((point: Point) => void) | null;
+  onInteraction: (active: boolean) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, [number, number]>());
+  useEffect(() => () => onInteraction(false), [onInteraction]);
   type Gesture = {
     type: 'move' | 'pan' | 'pinch' | 'marquee';
     start: [number, number];
@@ -595,6 +603,7 @@ function Plan({
   function start(e: React.PointerEvent<SVGSVGElement>) {
     if (e.button !== 0) return;
     pointers.current.set(e.pointerId, position(e));
+    onInteraction(true);
     e.currentTarget.setPointerCapture(e.pointerId);
     if (pointers.current.size === 2) {
       setRectangle(null);
@@ -722,6 +731,7 @@ function Plan({
   function stop(e: React.PointerEvent, apply: boolean) {
     if (!pointers.current.has(e.pointerId)) return;
     pointers.current.delete(e.pointerId);
+    onInteraction(pointers.current.size > 0);
     const g = gesture.current;
     gesture.current = null;
     setOffset(null);
@@ -972,8 +982,10 @@ function Plan({
 export default function Editor() {
   const [boot] = useState(() => {
     let restored: EditorProject | null = null;
+    let source: string | null = null;
     try {
-      const saved = readStoredProject(window.localStorage);
+      source = window.localStorage.getItem(STORAGE_KEY);
+      const saved = readEditorProject(window.localStorage, source);
       restored = saved;
       const requested = new URLSearchParams(window.location.search).get(
         'layout',
@@ -1002,6 +1014,8 @@ export default function Editor() {
       }
       return {
         project,
+        stored: restored,
+        source,
         upgraded,
         selectionUpdated: ['plan-008', 'plan-009', 'plan-010'].includes(
           saved?.sourceRevision ?? '',
@@ -1011,6 +1025,8 @@ export default function Editor() {
     } catch (error) {
       return {
         project: restored ?? createInitialProject(),
+        stored: restored,
+        source,
         upgraded: false,
         selectionUpdated: false,
         error: `${restored ? 'Не удалось открыть новый план' : 'Не удалось восстановить проект'}: ${(error as Error).message}`,
@@ -1042,13 +1058,10 @@ export default function Editor() {
     projectRef.current = project;
   }, [project]);
   const [storagePaused, setStoragePaused] = useState(!!boot.error);
-  const [savedProject, setSavedProject] = useState<EditorProject | null>(null),
-    [saveFailed, setSaveFailed] = useState(!!boot.error);
-  const saveStatus = saveFailed
-    ? 'error'
-    : savedProject === project
-      ? 'saved'
-      : 'saving';
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>(
+    boot.error ? 'error' : 'saving',
+  );
+  const autosave = useRef<EditorAutosave | null>(null);
   const pausedRef = useRef(storagePaused);
   useLayoutEffect(() => {
     pausedRef.current = storagePaused;
@@ -1103,6 +1116,32 @@ export default function Editor() {
     importRef = useRef<EditorProject | null>(null),
     importRequest = useRef(0),
     [importName, setImportName] = useState<string | null>(null);
+  const readProject = useCallback(() => {
+    const current = projectRef.current;
+    const camera = controller.current?.readCamera();
+    if (!camera || current.scene.view.mode !== '3d') return current;
+    const previous = current.scene.view.camera;
+    // OrbitControls round-trips through spherical coordinates on restore. Keep the
+    // exact saved values when the only difference is floating-point noise.
+    if (
+      previous &&
+      camera.position.every(
+        (v, i) => Math.abs(v - previous.position[i]) < 1e-9,
+      ) &&
+      camera.target.every((v, i) => Math.abs(v - previous.target[i]) < 1e-9)
+    )
+      return current;
+    return {
+      ...current,
+      scene: { ...current.scene, view: { ...current.scene.view, camera } },
+    };
+  }, []);
+  const onInteraction = useCallback((active: boolean) => {
+    autosave.current?.interaction('scene', active);
+  }, []);
+  const onPlanInteraction = useCallback((active: boolean) => {
+    autosave.current?.interaction('plan', active);
+  }, []);
   const [resetPending, setResetPending] = useState(false);
   const [measuring, setMeasuring] = useState(false),
     [measureStart, setMeasureStart] = useState<Point | null>(null);
@@ -1178,19 +1217,40 @@ export default function Editor() {
       setError((error as Error).message);
     }
   }
-  const commit = useCallback((next: EditorProject) => {
-    projectRef.current = next;
-    setHistory((old) => pushHistory(old, next));
-    setNotice(null);
-  }, []);
-  const replaceProject = useCallback((next: EditorProject) => {
+  const commit = useCallback(
+    (incoming: EditorProject, preserveCamera = true) => {
+      const previous = projectRef.current;
+      const current = readProject();
+      let next = incoming;
+      // Ordinary edits retain the live viewpoint; imports and arrangement loads supply their own.
+      if (
+        preserveCamera &&
+        incoming.activeArrangement === previous.activeArrangement &&
+        incoming.scene.view.camera &&
+        JSON.stringify(incoming.scene.view.camera) ===
+          JSON.stringify(previous.scene.view.camera)
+      )
+        next = {
+          ...incoming,
+          scene: {
+            ...incoming.scene,
+            view: { ...incoming.scene.view, camera: current.scene.view.camera },
+          },
+        };
+      projectRef.current = next;
+      setHistory((old) => pushHistory({ ...old, present: current }, next));
+      setNotice(null);
+    },
+    [readProject],
+  );
+  const replaceProject = useCallback((next: EditorProject, stored = false) => {
     // Update refs before any pending autosave or unload can use the old scene.
     projectRef.current = next;
     pausedRef.current = false;
     setHistory({ past: [], present: next, future: [] });
     setStoragePaused(false);
-    setSavedProject(null);
-    setSaveFailed(false);
+    autosave.current?.reset(next, stored);
+    setSaveStatus(stored ? 'saved' : 'saving');
     setError(null);
     setTool('orbit');
     setDetail(false);
@@ -1227,25 +1287,26 @@ export default function Editor() {
       );
     }
   }
-  const updateView = useCallback((patch: Partial<EditorView>) => {
-    setHistory((old) => {
-      const next = {
-        ...old.present,
-        scene: {
-          ...old.present.scene,
-          view: {
-            ...old.present.scene.view,
-            ...patch,
-            ...(patch.mode === '2d' && old.present.scene.view.walk?.enabled
-              ? { walk: { ...old.present.scene.view.walk, enabled: false } }
-              : {}),
-          },
-        },
+  const updateView = useCallback(
+    (patch: Partial<EditorView>) => {
+      const current = readProject();
+      const view = {
+        ...current.scene.view,
+        ...patch,
+        ...(patch.mode === '2d' && current.scene.view.walk?.enabled
+          ? { walk: { ...current.scene.view.walk, enabled: false } }
+          : {}),
       };
+      if (
+        JSON.stringify(view) === JSON.stringify(projectRef.current.scene.view)
+      )
+        return;
+      const next = { ...current, scene: { ...current.scene, view } };
       projectRef.current = next;
-      return { ...old, present: next };
-    });
-  }, []);
+      setHistory((old) => ({ ...old, present: next }));
+    },
+    [readProject],
+  );
   const select = useCallback(
     (id: string | null) => {
       const validId =
@@ -1300,46 +1361,85 @@ export default function Editor() {
       );
       return;
     }
+    autosave.current?.update(readProject());
+    autosave.current?.flush();
+  }, [readProject]);
+  const resumeStorage = useCallback(() => {
     try {
-      persistEditorProject(window.localStorage, projectRef.current);
-      setSavedProject(projectRef.current);
-      setSaveFailed(false);
+      autosave.current?.reset(readProject());
+      pausedRef.current = false;
+      setStoragePaused(false);
+      setError(null);
     } catch (error) {
-      setSaveFailed(true);
+      setSaveStatus('error');
       setError(
-        `Не удалось сохранить в браузере: ${(error as Error).message}. Скачайте JSON проекта.`,
+        `Не удалось открыть хранилище браузера: ${(error as Error).message}. Скачайте JSON проекта.`,
       );
     }
-  }, []);
+  }, [readProject]);
   useEffect(() => {
-    if (storagePaused) return;
-    const timer = setTimeout(saveNow, 400);
-    return () => clearTimeout(timer);
-  }, [project, storagePaused, saveNow]);
-  useEffect(() => {
+    const serializer = createProjectSerializer();
+    // Access lazily: some browsers throw even when reading the localStorage property.
+    // A blocked store must not prevent opening or exporting the in-memory project.
+    const storagePort = {
+      getItem: (key: string) => window.localStorage.getItem(key),
+      setItem: (key: string, value: string) =>
+        window.localStorage.setItem(key, value),
+    };
+    const saver = new EditorAutosave(storagePort, {
+      project: projectRef.current,
+      saved: boot.project === boot.stored ? boot.project : null,
+      source: boot.source,
+      serialize: (project) => serializer.serialize(project),
+      onStatus: setSaveStatus,
+      onError: (error) => {
+        if (error instanceof StorageConflictError) {
+          pausedRef.current = true;
+          setStoragePaused(true);
+          setError(
+            'Проект изменился в другой вкладке. Автосохранение приостановлено. Откройте раздел «Файл».',
+          );
+        } else
+          setError(
+            `Не удалось сохранить в браузере: ${(error as Error).message}. Скачайте JSON проекта.`,
+          );
+      },
+    });
+    autosave.current = saver;
+    if (pausedRef.current) saver.pause();
+    else saver.update(projectRef.current);
     const flush = () => saveNow();
+    const hidden = () => {
+      if (document.hidden) flush();
+    };
+    const storage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY || event.key === null)
+        saver.external(
+          event.key === null
+            ? window.localStorage.getItem(STORAGE_KEY)
+            : event.newValue,
+        );
+    };
+    const activity = () => saver.touch();
     window.addEventListener('pagehide', flush);
     window.addEventListener('beforeunload', flush);
-    const storage = (event: StorageEvent) => {
-      if (
-        event.key === STORAGE_KEY &&
-        event.newValue !== exportProject(projectRef.current)
-      ) {
-        pausedRef.current = true;
-        setStoragePaused(true);
-        setSaveFailed(true);
-        setError(
-          'Проект изменился в другой вкладке. Автосохранение приостановлено. Откройте раздел «Файл».',
-        );
-      }
-    };
     window.addEventListener('storage', storage);
+    document.addEventListener('visibilitychange', hidden);
+    document.addEventListener('input', activity, true);
     return () => {
+      saver.dispose();
+      serializer.dispose();
+      autosave.current = null;
       window.removeEventListener('pagehide', flush);
       window.removeEventListener('beforeunload', flush);
       window.removeEventListener('storage', storage);
+      document.removeEventListener('visibilitychange', hidden);
+      document.removeEventListener('input', activity, true);
     };
-  }, [saveNow]);
+  }, [boot, saveNow]);
+  useEffect(() => {
+    autosave.current?.update(project);
+  }, [project]);
   useEffect(() => {
     let active = true;
     let scene: EditorScene | undefined;
@@ -1347,16 +1447,21 @@ export default function Editor() {
       .then(({ createEditorScene }) => {
         if (!active || !host.current) return;
         try {
-          scene = createEditorScene(host.current, {
-            select,
-            change,
-            camera: (camera) => {
-              cameraEmitted.current = camera;
-              updateView({ camera });
+          scene = createEditorScene(
+            host.current,
+            {
+              select,
+              change,
+              interaction: onInteraction,
+              camera: (camera) => {
+                cameraEmitted.current = camera;
+                updateView({ camera });
+              },
+              error: (message) => setError(message),
+              ready: () => setReady(true),
             },
-            error: (message) => setError(message),
-            ready: () => setReady(true),
-          });
+            { deferCameraUpdates: true },
+          );
           controller.current = scene;
           scene.update(
             projectRef.current.scene.objects,
@@ -1383,7 +1488,7 @@ export default function Editor() {
       scene?.dispose();
       controller.current = null;
     };
-  }, [select, change, updateView]);
+  }, [select, change, updateView, onInteraction]);
   useEffect(() => {
     controller.current?.update(project.scene.objects, view);
   }, [project.scene.objects, view]);
@@ -1443,7 +1548,7 @@ export default function Editor() {
   useEffect(
     () =>
       registerEditorTools({
-        read: () => projectRef.current,
+        read: readProject,
         commit,
         view: updateView,
         undo: () => setHistory(undoHistory),
@@ -1451,7 +1556,7 @@ export default function Editor() {
         save: saveNow,
         status: () => statusRef.current,
       }),
-    [commit, updateView, saveNow],
+    [commit, updateView, saveNow, readProject],
   );
   function selectMany(ids: string[]) {
     const valid = ids.filter((id) =>
@@ -1524,7 +1629,7 @@ export default function Editor() {
     });
   }
   function patchNode(edit: (node: SceneNode) => void) {
-    if (node) attempt(() => commit(editNode(project, node.id, edit)));
+    if (node) attempt(() => commit(editNode(readProject(), node.id, edit)));
   }
   function vector(
     field: 'position' | 'rotation',
@@ -1862,7 +1967,7 @@ export default function Editor() {
                     className="ed-primary ed-full"
                     onClick={() =>
                       attempt(() => {
-                        commit(applyPlanSource(project));
+                        commit(applyPlanSource(project), false);
                         setNotice(
                           'Открыт исходный .plan. Предыдущая сцена сохранена отдельным вариантом.',
                         );
@@ -2544,6 +2649,7 @@ export default function Editor() {
                   ))}
                 </div>
                 <EnvironmentPanel
+                  readProject={readProject}
                   project={project}
                   unavailable={unavailable || !ready}
                   onView={updateView}
@@ -2621,7 +2727,7 @@ export default function Editor() {
                         <button
                           onClick={() =>
                             attempt(() =>
-                              commit(loadArrangement(project, item.id)),
+                              commit(loadArrangement(project, item.id), false),
                             )
                           }
                         >
@@ -2846,7 +2952,7 @@ export default function Editor() {
                   onClick={() =>
                     attempt(() => {
                       download(
-                        new Blob([exportProject(project)], {
+                        new Blob([exportProject(readProject())], {
                           type: 'application/json',
                         }),
                         'flatplan-project.json',
@@ -2897,10 +3003,10 @@ export default function Editor() {
                       className="ed-primary"
                       onClick={() => {
                         if (importRef.current) {
-                          commit(importRef.current);
+                          commit(importRef.current, false);
                           setMeasuring(false);
                           setMeasureStart(null);
-                          setStoragePaused(false);
+                          if (pausedRef.current) resumeStorage();
                           setImportName(null);
                           importRef.current = null;
                           setNotice('Проект импортирован.');
@@ -2926,8 +3032,11 @@ export default function Editor() {
                     <button
                       onClick={() =>
                         attempt(() => {
-                          const saved = readStoredProject(window.localStorage);
-                          replaceProject(saved ?? createInitialProject());
+                          const saved = readEditorProject(window.localStorage);
+                          replaceProject(
+                            saved ?? createInitialProject(),
+                            !!saved,
+                          );
                           setNotice('Открыт проект из хранилища браузера.');
                         })
                       }
@@ -2936,8 +3045,7 @@ export default function Editor() {
                     </button>
                     <button
                       onClick={() => {
-                        setStoragePaused(false);
-                        setError(null);
+                        resumeStorage();
                       }}
                     >
                       Продолжить с текущим проектом
@@ -2957,8 +3065,8 @@ export default function Editor() {
                   <button
                     className="ed-danger"
                     onClick={() => {
-                      commit(createInitialProject());
-                      setStoragePaused(false);
+                      commit(createInitialProject(), false);
+                      if (pausedRef.current) resumeStorage();
                       setNotice(
                         'Создан исходный проект. Предыдущее состояние доступно через «Отменить».',
                       );
@@ -3123,6 +3231,7 @@ export default function Editor() {
                   : select
               }
               onMove={change}
+              onInteraction={onPlanInteraction}
               onView={updateView}
               measuring={measuring}
               measureStart={measureStart}

@@ -24,7 +24,7 @@ import {
 } from './furniture-catalog.ts';
 interface Runtime {
   read(): EditorProject;
-  commit(project: EditorProject): void;
+  commit(project: EditorProject, preserveCamera?: boolean): void;
   view(patch: Partial<EditorView>): void;
   undo(): void;
   redo(): void;
@@ -303,7 +303,7 @@ export function registerEditorTools(runtime: Runtime) {
             args.action === 'replace',
           );
         else throw new Error('Unknown action');
-        runtime.commit(next);
+        runtime.commit(next, args.action !== 'open');
         return {
           active: next.activeArrangement,
           arrangements: next.arrangements.map((a) => ({
@@ -324,7 +324,7 @@ export function registerEditorTools(runtime: Runtime) {
         if (typeof args.json !== 'string')
           throw new Error('JSON string required');
         const next = importProject(args.json);
-        runtime.commit(next);
+        runtime.commit(next, false);
         return {
           name: next.name,
           objects: flattenNodes(next.scene.objects).length,

@@ -31,6 +31,7 @@ export interface EditorScene {
   update(nodes: SceneNode[], view: EditorView): void;
   select(id: string | null, tool: EditTool, detail: boolean): void;
   camera(state: CameraState | null): void;
+  readCamera(): CameraState | null;
   focus(id?: string): void;
   viewpoint(kind: 'overview' | 'top' | 'living' | 'bedroom' | 'bathroom'): void;
   zoom(factor: number): void;
@@ -46,6 +47,7 @@ export interface EditorScene {
   dispose(): void;
 }
 interface Callbacks {
+  interaction?(active: boolean): void;
   select(id: string | null): void;
   change(id: string, position: Vec3, rotation: Vec3): void;
   camera(state: CameraState): void;
@@ -59,6 +61,7 @@ export function createEditorScene(
     fov?: number;
     ceilingHeight?: number;
     presentation?: boolean;
+    deferCameraUpdates?: boolean;
   } = {},
 ): EditorScene {
   const scene = new THREE.Scene();
@@ -645,7 +648,7 @@ export function createEditorScene(
     }
   }
   function emitCamera() {
-    if (!restoring && initialized)
+    if (!disposed && !restoring && initialized)
       callbacks.camera({
         position: camera.position.toArray(),
         target: orbit.target.toArray(),
@@ -659,8 +662,13 @@ export function createEditorScene(
     restoring = true;
     camera.position.set(...state.position);
     orbit.target.set(...state.target);
-    if (walking()) camera.lookAt(orbit.target);
-    else orbit.update();
+    if (!walking()) {
+      orbit.update();
+      // Saved walking viewpoints may exceed the orbit gesture's tilt limits.
+      // Restore their exact pose; gesture limits apply only when the user moves.
+      camera.position.set(...state.position);
+    }
+    camera.lookAt(orbit.target);
     restoring = false;
     initialized = true;
     dirty = true;
@@ -702,12 +710,39 @@ export function createEditorScene(
   }
   const observer = new ResizeObserver(resize);
   observer.observe(host);
+  let orbitGesture = false,
+    transformGesture = false,
+    reportedBusy = false;
+  function refreshInteraction() {
+    const busy =
+      !disposed &&
+      (orbitGesture ||
+        transformGesture ||
+        !!lookPointer ||
+        (walking() &&
+          (walkKeys.size > 0 || !!(pad.forward || pad.side || pad.turn))));
+    if (busy !== reportedBusy) {
+      reportedBusy = busy;
+      callbacks.interaction?.(busy);
+    }
+  }
   function onOrbit() {
     dirty = true;
-    emitCamera();
+    if (!renderOptions.deferCameraUpdates) emitCamera();
   }
+  orbit.addEventListener('start', () => {
+    orbitGesture = true;
+    refreshInteraction();
+  });
+  orbit.addEventListener('end', () => {
+    orbitGesture = false;
+    if (renderOptions.deferCameraUpdates) emitCamera();
+    refreshInteraction();
+  });
   orbit.addEventListener('change', onOrbit);
   transform.addEventListener('dragging-changed', (event) => {
+    transformGesture = !!event.value;
+    refreshInteraction();
     orbit.enabled = !walking() && !event.value;
     dirty = true;
   });
@@ -752,6 +787,7 @@ export function createEditorScene(
           y: event.clientY,
         };
         canvas.setPointerCapture(event.pointerId);
+        refreshInteraction();
       }
       return;
     }
@@ -777,7 +813,7 @@ export function createEditorScene(
       );
       lookPointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
       setCamera(next);
-      emitCamera();
+      if (!renderOptions.deferCameraUpdates) emitCamera();
       return;
     }
     if (transform.dragging) wasDragging = true;
@@ -785,7 +821,11 @@ export function createEditorScene(
   const ray = new THREE.Raycaster();
   function up(event: PointerEvent) {
     if (walking()) {
-      if (lookPointer?.id === event.pointerId) lookPointer = null;
+      if (lookPointer?.id === event.pointerId) {
+        lookPointer = null;
+        emitCamera();
+        refreshInteraction();
+      }
       return;
     }
     const tapped = taps.up(event.pointerId, event.clientX, event.clientY);
@@ -821,14 +861,19 @@ export function createEditorScene(
     else callbacks.select(null);
   }
   function cancel(event: PointerEvent) {
-    if (lookPointer?.id === event.pointerId) lookPointer = null;
+    if (lookPointer?.id === event.pointerId) {
+      lookPointer = null;
+      emitCamera();
+    }
+    refreshInteraction();
     taps.cancel(event.pointerId);
     pointers.delete(event.pointerId);
     cancelDrag();
     if (!pointers.size) transform.enabled = true;
   }
   function lost(event: PointerEvent) {
-    if (pointers.has(event.pointerId)) cancel(event);
+    if (pointers.has(event.pointerId) || lookPointer?.id === event.pointerId)
+      cancel(event);
   }
   function contextLost(event: Event) {
     event.preventDefault();
@@ -851,6 +896,7 @@ export function createEditorScene(
   function walkKey(event: KeyboardEvent) {
     if (event.type === 'keyup' && walkKeys.delete(event.code)) {
       emitCamera();
+      refreshInteraction();
       return;
     }
     if (
@@ -878,12 +924,24 @@ export function createEditorScene(
         walkKeys.delete(event.code);
         emitCamera();
       }
+      refreshInteraction();
     }
   }
-  function clearWalk() {
+  function clearWalk(emit = true) {
+    const active =
+      walkKeys.size || pad.forward || pad.side || pad.turn || lookPointer;
     walkKeys.clear();
     pad = { forward: 0, side: 0, turn: 0 };
     lookPointer = null;
+    if (active && emit) emitCamera();
+    refreshInteraction();
+  }
+  function finishNavigation() {
+    if (orbitGesture) {
+      orbitGesture = false;
+      emitCamera();
+    }
+    clearWalk();
   }
   function focusField(event: FocusEvent) {
     if (
@@ -895,8 +953,8 @@ export function createEditorScene(
   }
   window.addEventListener('keydown', walkKey);
   window.addEventListener('keyup', walkKey);
-  window.addEventListener('blur', clearWalk);
-  document.addEventListener('visibilitychange', clearWalk);
+  window.addEventListener('blur', finishNavigation);
+  document.addEventListener('visibilitychange', finishNavigation);
   document.addEventListener('focusin', focusField);
   function animate(now = performance.now()) {
     if (disposed) return;
@@ -932,7 +990,7 @@ export function createEditorScene(
           dt * (view.walk?.speed ?? defaultWalk.speed),
         );
         setCamera(next);
-        if (now - lastCameraEmit > 100) {
+        if (!renderOptions.deferCameraUpdates && now - lastCameraEmit > 100) {
           emitCamera();
           lastCameraEmit = now;
         }
@@ -977,7 +1035,7 @@ export function createEditorScene(
       const wasWalking = walking();
       nodes = nextNodes;
       view = nextView;
-      if (wasWalking && !walking()) clearWalk();
+      if (wasWalking && !walking()) clearWalk(false);
       orbit.enabled = !walking();
       if (rebuild) build();
       else {
@@ -993,7 +1051,15 @@ export function createEditorScene(
     walkInput(forward, side, turn = 0) {
       pad = { forward, side, turn };
       if (!forward && !side && !turn) emitCamera();
+      refreshInteraction();
     },
+    readCamera: () =>
+      initialized
+        ? {
+            position: camera.position.toArray(),
+            target: orbit.target.toArray(),
+          }
+        : null,
     camera: setCamera,
     focus,
     viewpoint(kind) {
@@ -1223,6 +1289,7 @@ export function createEditorScene(
     },
     dispose() {
       disposed = true;
+      refreshInteraction();
       cancelDrag();
       cancelAnimationFrame(frame);
       observer.disconnect();
@@ -1235,8 +1302,8 @@ export function createEditorScene(
       finishMaps.clear();
       window.removeEventListener('keydown', walkKey);
       window.removeEventListener('keyup', walkKey);
-      window.removeEventListener('blur', clearWalk);
-      document.removeEventListener('visibilitychange', clearWalk);
+      window.removeEventListener('blur', finishNavigation);
+      document.removeEventListener('visibilitychange', finishNavigation);
       document.removeEventListener('focusin', focusField);
       ground.geometry.dispose();
       (ground.material as THREE.Material).dispose();

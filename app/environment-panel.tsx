@@ -12,6 +12,7 @@ import { DesignCheck, DesignNumber } from './design-controls';
 
 export function EnvironmentPanel({
   project,
+  readProject,
   unavailable,
   onView,
   onCommit,
@@ -20,6 +21,7 @@ export function EnvironmentPanel({
   onError,
 }: {
   project: EditorProject;
+  readProject: () => EditorProject;
   unavailable: boolean;
   onView: (patch: Partial<EditorView>) => void;
   onCommit: (project: EditorProject) => void;
@@ -39,12 +41,17 @@ export function EnvironmentPanel({
     onView({ sunlight: { ...sun, ...patch } });
   function saveViewpoint() {
     try {
-      if (!view.camera)
+      const current = readProject();
+      if (!current.scene.view.camera)
         throw new Error('Дождитесь загрузки 3D и выберите ракурс.');
-      const next = clone(project);
+      const next = clone(current);
       next.scene.viewpoints = [
         ...(next.scene.viewpoints ?? []),
-        { id: newId('view'), name: name.trim(), camera: clone(view.camera) },
+        {
+          id: newId('view'),
+          name: name.trim(),
+          camera: clone(current.scene.view.camera),
+        },
       ];
       onCommit(validateProject(next));
     } catch (error) {
