@@ -1,4 +1,10 @@
-import { useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 export function DesignNumber({
   label,
   value,
@@ -63,6 +69,65 @@ export function DesignCheck({
         onChange={(e) => onChange(e.target.checked)}
       />
       <span>{label}</span>
+    </label>
+  );
+}
+
+/** Keep native picker input local; only its confirmed change edits the project. */
+export function DesignColor({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState(value);
+  const [previous, setPrevious] = useState(value);
+  const committed = useRef(value);
+  const latestChange = useRef(onChange);
+  if (previous !== value) {
+    setPrevious(value);
+    setDraft(value);
+  }
+  useLayoutEffect(() => {
+    committed.current = value;
+    latestChange.current = onChange;
+  }, [value, onChange]);
+  const apply = useCallback(() => {
+    const color = input.current?.value;
+    if (color && color !== committed.current) {
+      committed.current = color;
+      latestChange.current(color);
+    }
+  }, []);
+  useEffect(() => {
+    const element = input.current!;
+    // React onChange also fires for every native input event during dragging.
+    element.addEventListener('change', apply);
+    return () => element.removeEventListener('change', apply);
+  }, [apply]);
+  return (
+    <label className="ed-field">
+      <span>{label}</span>
+      <input
+        ref={input}
+        type="color"
+        aria-label={label}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={apply}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.currentTarget.value = committed.current;
+            setDraft(committed.current);
+            e.currentTarget.blur();
+          }
+          if (e.key === 'Enter') e.currentTarget.blur();
+        }}
+      />
     </label>
   );
 }

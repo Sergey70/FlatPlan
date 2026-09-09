@@ -1,4 +1,5 @@
 import { createDefaultProject as createPlanProject } from '../lib/editor-project.ts';
+import { checkColors } from './browser-colors.mjs';
 import { checkRoomWorkspace } from './browser-room-workspace.mjs';
 import { checkPresentation } from './browser-presentation.mjs';
 import { checkDrawings } from './browser-drawings.mjs';
@@ -74,6 +75,16 @@ try {
   browser = await chromium.launch({
     headless: true,
     args: ['--enable-unsafe-swiftshader'],
+  });
+  await checkColors(browser, url, out, {
+    installTools,
+    call,
+    project,
+    status,
+    loaded,
+    saved,
+    panel,
+    noOverflow,
   });
   await checkRenovation(browser, url, out, {
     installTools,

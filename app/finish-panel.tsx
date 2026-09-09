@@ -6,7 +6,7 @@ import {
   type WallFace,
 } from '@/lib/design-types';
 import type { SceneNode } from '@/lib/editor-model';
-import { DesignNumber } from './design-controls';
+import { DesignColor, DesignNumber } from './design-controls';
 export function FinishPanel({
   node,
   onChange,
@@ -62,15 +62,12 @@ export function FinishPanel({
           <option value="stone">Камень</option>
         </select>
       </label>
-      <label className="ed-field">
-        <span>Цвет отделки</span>
-        <input
-          type="color"
-          aria-label="Цвет отделки"
-          value={f.color}
-          onChange={(e) => change({ color: e.target.value })}
-        />
-      </label>
+      <DesignColor
+        key={`color-${face}`}
+        label="Цвет отделки"
+        value={f.color}
+        onChange={(color) => change({ color })}
+      />
       <DesignNumber
         label="Направление укладки, °"
         value={f.angle}
@@ -107,15 +104,12 @@ export function FinishPanel({
             min={0}
             max={30}
           />
-          <label className="ed-field">
-            <span>Цвет шва</span>
-            <input
-              type="color"
-              aria-label="Цвет шва"
-              value={f.jointColor}
-              onChange={(e) => change({ jointColor: e.target.value })}
-            />
-          </label>
+          <DesignColor
+            key={`joint-${face}`}
+            label="Цвет шва"
+            value={f.jointColor}
+            onChange={(jointColor) => change({ jointColor })}
+          />
         </>
       )}
       <DesignNumber

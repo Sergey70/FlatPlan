@@ -2,6 +2,13 @@
 
 Updated: 2026-09-09.
 
+## COLOR-020 — responsive finish color selection (verified locally; publication pending)
+
+- Cause: finish/grout native input events commit and validate the entire project and rebuild textured 3D geometry on every picker movement, also flooding the 30-step undo history. The object's basic color field already keeps a local draft.
+- Scope: keep finish/grout swatches responsive with a local draft; commit the final native color choice once, with blur/keyboard fallback, cancellation and independent wall-face state. Geometry, source data and saved-project format remain unchanged.
+- Acceptance: browser regression for native input bursts without project/texture updates, final color, one-step undo/redo, cancellation, keyboard, wall-face isolation, autosave/reload and desktop/touch; existing DESIGN-016 checks; `npm run verify`; final diff review. Publication follows the existing GitHub Pages workflow.
+- Regression failed on the previous production build at the input-burst preservation assertion. After the fix, desktop/touch checks pass for unchanged project/texture counts while dragging, final color, single undo, redo, cancellation, keyboard, autosave and reload. Existing DESIGN-016 browser checks pass, including independent wall sides. `npm run verify` passes all 117 tests, lint, TypeScript and production build. Desktop/mobile screenshots and final diff reviewed. Evidence: `.local/qa/color-020-before.log`, `.local/qa/color-020-verify.log`, `.local/qa/color-020-browser.log`, `.local/qa/color-020-desktop.png`, `.local/qa/color-020-mobile.png`.
+
 ## UI-019 — collapsed daylight and walk sections (complete and published)
 
 - Both environment sections in Variants now start collapsed. Native summary toggling opens them; scene settings and saved projects are unchanged. Existing browser navigation explicitly expands each section before using its controls.
