@@ -2,9 +2,16 @@
 
 Updated: 2026-09-09.
 
-## Current iteration
+## ROOM-018 — main-plan workspace correction (active)
 
-**RENOVATION-017 complete and published.** No implementation iteration is active.
+- Objective: use the accepted ROOM-014 bed/workspace in the main editor, not only gallery views. Root cause: editor boot/reset still called the raw `.plan` factory.
+- Implementation: separate editor default from the unchanged source/gallery factories. One-time browser-save upgrade may replace untouched furniture in the default room; edited room furniture and custom arrangements must be preserved. Explicit JSON imports and reopening the original `.plan` remain exact.
+- Acceptance: workspace/source/gallery unit regressions; `npm run verify`; focused browser tests for fresh/default, saved upgrade, edited room, deep link, source reopening, reload and reset; existing browser suite in publication CI. No dependency or original source changes.
+- Local acceptance passed: 117 unit tests, lint, TypeScript and production build; focused Chromium tests for default/deep link, old saves, edited/deleted furniture, custom arrangements, original source reopening, JSON import, reload and new-project reset. Existing source migration and full gallery checks also pass. Reviewed 2D/3D screenshots showing desk, two monitors, chair and bed. Evidence: `.local/qa/room-018-verify.log`, `.local/qa/room-018-browser.log`, `.local/qa/room-018-local/`. Final diff/whitespace review passed. Publication CI and independent public verification pending.
+
+## Last completed iteration
+
+**RENOVATION-017 complete and published.** ROOM-018 above is the active correction.
 
 - All seven approved tools are available in **Ремонт**: current-model images, mechanisms, electrical/lighting, workplace sunlight, drawings/PDF, material estimates and paired arrangement comparison. Usage and limitations are documented in README; all acceptance gates are complete in RENOVATION_017_PLAN.md.
 - Published application: `22f8391559045ecee67a34a862992aa5885fd116`. [Pages run 34294654729](https://github.com/Sergey70/FlatPlan/actions/runs/34294654729) passed verification, the complete browser suite and deployment. The application implementation is unchanged since `877e3e5`; subsequent commits make CI render tests deterministic and allow measured software-rendering time.

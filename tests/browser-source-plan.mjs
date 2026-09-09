@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createDefaultProject } from '../lib/editor-project.ts';
 import path from 'node:path';
 import previousPlan from './fixtures/plan-009.json' with { type: 'json' };
 import previousSofa from './fixtures/kitchen-sofa-010.json' with { type: 'json' };
@@ -37,7 +38,7 @@ export async function checkSourcePlan(browser, url, out, h) {
   const page = await context.newPage(),
     errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  const seed = createPlanProject();
+  const seed = createDefaultProject();
   await page.goto(url);
   await h.loaded(page);
   await h.saved(page);
@@ -189,7 +190,7 @@ export async function checkSourcePlan(browser, url, out, h) {
     .click();
   await h.saved(oldPage);
   const reopened = await h.project(oldPage);
-  sameGeometry(reopened.scene.objects, seed.scene.objects);
+  sameGeometry(reopened.scene.objects, createPlanProject().scene.objects);
   sameGeometry(
     reopened.arrangements.find((a) => a.name === 'До обновления по файлу .plan')
       .scene.objects,

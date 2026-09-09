@@ -1,3 +1,5 @@
+import { createDefaultProject as createPlanProject } from '../lib/editor-project.ts';
+import { checkRoomWorkspace } from './browser-room-workspace.mjs';
 import { checkPresentation } from './browser-presentation.mjs';
 import { checkDrawings } from './browser-drawings.mjs';
 import { checkComparison } from './browser-comparison.mjs';
@@ -23,11 +25,7 @@ import { checkPlanTools } from './browser-plan-tools.mjs';
 import { checkDesign } from './browser-design.mjs';
 import { checkSourcePlan, sameGeometry } from './browser-source-plan.mjs';
 import { createInitialProject as createLegacyProject } from '../lib/editor-seed.ts';
-import {
-  createPlanProject,
-  DEFAULT_PLAN_ID,
-  PLAN_REVISION,
-} from '../lib/plan-project.ts';
+import { DEFAULT_PLAN_ID, PLAN_REVISION } from '../lib/plan-project.ts';
 import { chromium } from 'playwright';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { spawn } from 'node:child_process';
@@ -181,6 +179,7 @@ try {
     noOverflow,
   });
   await checkGallery(browser, url, out);
+  await checkRoomWorkspace(browser, url, out);
   await checkSourcePlan(browser, url, out, {
     installTools,
     project,

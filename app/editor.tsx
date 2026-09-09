@@ -88,13 +88,17 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { palettes, polygonPath, type Point } from '@/lib/apartment';
 import {
-  createPlanProject as createInitialProject,
   applyPlanSource,
   hasPlanSource,
   planLayouts,
   planArrangementId,
   sourceLayout,
 } from '@/lib/plan-project';
+import {
+  createDefaultProject as createInitialProject,
+  upgradeRoomWorkspace,
+  persistEditorProject,
+} from '@/lib/editor-project';
 import {
   applyPartitionedPreset,
   PARTITION_PRESET_ID,
@@ -118,7 +122,7 @@ import {
   importProject,
   exportProject,
   readStoredProject,
-  persistProject,
+  ROOM_WORKSPACE_STORAGE_KEY,
   clearStoredProject,
   pushHistory,
   undoHistory,
@@ -980,6 +984,8 @@ export default function Editor() {
           ? applyPlanSource(saved)
           : saved
         : createInitialProject();
+      if (!window.localStorage.getItem(ROOM_WORKSPACE_STORAGE_KEY))
+        project = upgradeRoomWorkspace(project);
       const layout = planLayouts.find(
         (l) =>
           l.id === requested ||
@@ -991,7 +997,7 @@ export default function Editor() {
       if (layout) {
         const id = planArrangementId(layout.id);
         if (!project.arrangements.some((a) => a.id === id))
-          project = applyPlanSource(project);
+          project = upgradeRoomWorkspace(applyPlanSource(project));
         project = loadArrangement(project, id);
       }
       return {
@@ -1295,7 +1301,7 @@ export default function Editor() {
       return;
     }
     try {
-      persistProject(window.localStorage, projectRef.current);
+      persistEditorProject(window.localStorage, projectRef.current);
       setSavedProject(projectRef.current);
       setSaveFailed(false);
     } catch (error) {
@@ -1843,7 +1849,8 @@ export default function Editor() {
                   </strong>
                   <p>
                     Кухня — 21,43 м², спальня — 13,55 м². Размеры, положение
-                    стен и проёмов перенесены из файла.
+                    стен и проёмов перенесены из файла. В основном варианте
+                    комната 14,91 м² оборудована кроватью и рабочим местом.
                   </p>
                   <button
                     className="ed-full"

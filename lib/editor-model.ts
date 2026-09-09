@@ -124,6 +124,7 @@ export interface EditorProject {
   sourceRevision?: string;
 }
 export const STORAGE_KEY = 'flatplan.editor.v1';
+export const ROOM_WORKSPACE_STORAGE_KEY = 'flatplan.room-workspace.v1';
 export const MAX_FILE_BYTES = 8_000_000;
 export const clone = <T>(value: T): T => structuredClone(value);
 export const newId = (prefix = 'object') =>
@@ -898,6 +899,7 @@ export function persistProject(storage: StoragePort, project: EditorProject) {
 }
 export function clearStoredProject(storage: Pick<Storage, 'removeItem'>) {
   storage.removeItem(STORAGE_KEY);
+  storage.removeItem(ROOM_WORKSPACE_STORAGE_KEY);
 }
 export interface History {
   past: EditorProject[];
