@@ -6,6 +6,7 @@ import { createRoomProposalProject } from '../lib/room-proposal.ts';
 import { measuredRooms } from '../lib/room-surfaces.ts';
 import { findNode } from '../lib/editor-model.ts';
 import { defaultFinish } from '../lib/design-types.ts';
+const renderTimeout = process.env.CI ? 600000 : 180000;
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 async function memory(page) {
   return page.evaluate(() =>
@@ -55,7 +56,7 @@ async function complete(dialog) {
   // GitHub's software renderer completed the real four-view batch in just over
   // three minutes. Allow bounded CI headroom without changing render quality.
   await dialog.getByText(/^Готово:/).waitFor({
-    timeout: process.env.CI ? 600000 : 180000,
+    timeout: renderTimeout,
   });
 }
 export async function checkPresentation(browser, url, out, h) {
@@ -115,7 +116,7 @@ export async function checkPresentation(browser, url, out, h) {
       .selectOption('1280');
     await dialog
       .getByRole('button', { name: 'Создать изображение', exact: true })
-      .click();
+      .click({ timeout: renderTimeout });
     await dialog
       .getByRole('button', { name: 'Отменить создание', exact: true })
       .click();
@@ -129,6 +130,23 @@ export async function checkPresentation(browser, url, out, h) {
     releaseTexture();
     await routeComplete;
     await page.unroute('**/textures/oak.jpg', holdTexture);
+    await dialog
+      .getByLabel('Размер изображения', { exact: true })
+      .selectOption('2560');
+    await dialog
+      .getByRole('button', { name: 'Создать изображение', exact: true })
+      .click({ timeout: renderTimeout });
+    await complete(dialog);
+    await downloadResult(
+      page,
+      dialog.locator('.ed-render-results figure').last(),
+      path.join(out, 'renovation-017-render-2560.png'),
+      2560,
+    );
+    console.log('PASS R17-1 actual 2560×1707 PNG export');
+    await dialog
+      .getByLabel('Размер изображения', { exact: true })
+      .selectOption('1280');
     const rooms = measuredRooms(fixture.scene.objects),
       names = ['Кухня', 'Комната 1', 'Спальня', 'Санузел'];
     let firstHash;
@@ -149,7 +167,7 @@ export async function checkPresentation(browser, url, out, h) {
           name: 'Создать ракурсы помещения (4)',
           exact: true,
         })
-        .click();
+        .click({ timeout: renderTimeout });
       await complete(dialog);
       const figures = dialog.locator('.ed-render-results figure'),
         count = await figures.count();
@@ -172,19 +190,6 @@ export async function checkPresentation(browser, url, out, h) {
         `PASS R17-1 ${name}: four distinct actual 1280×853 PNG exports`,
       );
     }
-    await dialog
-      .getByLabel('Размер изображения', { exact: true })
-      .selectOption('2560');
-    await dialog
-      .getByRole('button', { name: 'Создать изображение', exact: true })
-      .click();
-    await complete(dialog);
-    await downloadResult(
-      page,
-      dialog.locator('.ed-render-results figure').last(),
-      path.join(out, 'renovation-017-render-2560.png'),
-      2560,
-    );
     await dialog
       .getByRole('button', { name: 'Закрыть изображения', exact: true })
       .click();
@@ -213,7 +218,7 @@ export async function checkPresentation(browser, url, out, h) {
       .selectOption({ index: 1 });
     await dialog
       .getByRole('button', { name: 'Создать изображение', exact: true })
-      .click();
+      .click({ timeout: renderTimeout });
     await complete(dialog);
     const editedHash = await downloadResult(
       page,
@@ -232,7 +237,7 @@ export async function checkPresentation(browser, url, out, h) {
     await dialog.getByRole('alert').waitFor();
     await dialog
       .getByRole('button', { name: 'Создать изображение', exact: true })
-      .click();
+      .click({ timeout: renderTimeout });
     await dialog
       .getByRole('alert')
       .filter({ hasText: 'Не удалось загрузить текстуру' })
@@ -244,9 +249,15 @@ export async function checkPresentation(browser, url, out, h) {
       'PASS R17-1 desktop: cancel, 12-image limit, current edited finish, actual PNG size, storage preservation and texture failure handling',
     );
   } catch (error) {
-    await page.screenshot({
-      path: path.join(out, 'renovation-017-render-failure.png'),
-    });
+    console.error('Presentation failure:', String(error.stack ?? error));
+    await page
+      .screenshot({
+        path: path.join(out, 'renovation-017-render-failure.png'),
+        timeout: 15000,
+      })
+      .catch((diagnostic) =>
+        console.error('Failure screenshot unavailable:', diagnostic.message),
+      );
     console.log(
       errors,
       await page
@@ -290,7 +301,7 @@ export async function checkPresentation(browser, url, out, h) {
     }
     await dialog
       .getByRole('button', { name: 'Создать изображение', exact: true })
-      .tap();
+      .tap({ timeout: renderTimeout });
     await complete(dialog);
     await downloadResult(
       phone,
