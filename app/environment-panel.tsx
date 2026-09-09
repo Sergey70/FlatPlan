@@ -53,7 +53,7 @@ export function EnvironmentPanel({
   }
   return (
     <>
-      <details className="ed-design-details" open>
+      <details className="ed-design-details">
         <summary>Прогулка и ракурсы</summary>
         <section className="ed-design-panel" aria-label="Прогулка и ракурсы">
           <p className="ed-hint">
@@ -154,7 +154,7 @@ export function EnvironmentPanel({
           ))}
         </section>
       </details>
-      <details className="ed-design-details" open>
+      <details className="ed-design-details">
         <summary>Дневной свет</summary>
         <section className="ed-design-panel" aria-label="Дневной свет">
           <DesignCheck

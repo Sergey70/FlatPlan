@@ -7,6 +7,12 @@ import { nodeWorldMatrix } from '../lib/editor-geometry.ts';
 import { sunDirection } from '../lib/sunlight.ts';
 const near = (a, b, e = 0.005) =>
   assert.ok(Math.abs(a - b) < e, `${a} != ${b}`);
+async function openEnvironment(page, title) {
+  const summary = page
+    .locator('details:not([open]) > summary')
+    .filter({ hasText: title });
+  if (await summary.count()) await summary.click();
+}
 async function point(page, x, z) {
   return page.locator('.ed-plan > svg').evaluate(
     (svg, [x, z]) => {
@@ -223,6 +229,7 @@ export async function checkDesign(browser, url, out, h) {
     await h.call(page, 'editor_history', { action: 'redo' });
     // Daylight settings use Minsk, editable north and civil time, with distinct rendered results.
     await h.panel(page, 'Варианты');
+    await openEnvironment(page, 'Дневной свет');
     await page
       .getByRole('checkbox', { name: 'Солнце по дате и времени', exact: true })
       .check();
@@ -256,6 +263,7 @@ export async function checkDesign(browser, url, out, h) {
         .isVisible(),
     );
     // Walk, mouse look, keyboard, named viewpoints, saved arrangements and reload.
+    await openEnvironment(page, 'Прогулка и ракурсы');
     await page
       .getByRole('button', { name: 'Начать прогулку', exact: true })
       .click();
@@ -322,6 +330,7 @@ export async function checkDesign(browser, url, out, h) {
     await h.loaded(page);
     assert.deepEqual((await h.project(page)).scene, stored.scene);
     await h.panel(page, 'Варианты');
+    await openEnvironment(page, 'Прогулка и ракурсы');
     await page
       .getByRole('button', { name: 'Начать прогулку здесь', exact: true })
       .click();
@@ -344,6 +353,7 @@ export async function checkDesign(browser, url, out, h) {
     source.scene.view.labels = false;
     await importScene(source);
     await h.panel(page, 'Варианты');
+    await openEnvironment(page, 'Прогулка и ракурсы');
     await page
       .getByRole('button', { name: 'Начать прогулку', exact: true })
       .click();
@@ -398,6 +408,7 @@ export async function checkDesign(browser, url, out, h) {
       .tap();
     assert.ok((await h.project(phone)).scene.objects.some((n) => n.assembly));
     await h.panel(phone, 'Варианты');
+    await openEnvironment(phone, 'Прогулка и ракурсы');
     await phone
       .getByRole('button', { name: 'Начать прогулку', exact: true })
       .tap();
@@ -445,6 +456,7 @@ export async function checkDesign(browser, url, out, h) {
       .last()
       .tap();
     await h.panel(phone, 'Варианты');
+    await openEnvironment(phone, 'Дневной свет');
     await phone
       .getByRole('checkbox', { name: 'Солнце по дате и времени', exact: true })
       .check();

@@ -2,6 +2,12 @@
 
 Updated: 2026-09-09.
 
+## UI-019 — collapsed daylight and walk sections
+
+- Both environment sections in Variants now start collapsed. Native summary toggling opens them; scene settings and saved projects are unchanged. Existing browser navigation explicitly expands each section before using its controls.
+- Local acceptance passed: `npm run verify` (117 tests, lint, TypeScript, build), desktop/touch checks for collapsed defaults, toggling, reload and unchanged settings, plus existing full DESIGN-016 browser scenarios. Mobile screenshot reviewed; final diff passes whitespace checks. Evidence: `.local/qa/ui-019-verify.log`, `.local/qa/ui-019-browser.log`, `.local/qa/ui-019-local/`.
+- Publication and independent public check pending.
+
 ## ROOM-018 — main-plan workspace correction (complete and published)
 
 - Objective: use the accepted ROOM-014 bed/workspace in the main editor, not only gallery views. Root cause: editor boot/reset still called the raw `.plan` factory.
