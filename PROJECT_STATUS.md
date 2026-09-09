@@ -2,12 +2,14 @@
 
 Updated: 2026-09-09.
 
-## COLOR-020 — responsive finish color selection (verified locally; publication pending)
+## COLOR-020 — responsive finish color selection (complete and published)
 
 - Cause: finish/grout native input events commit and validate the entire project and rebuild textured 3D geometry on every picker movement, also flooding the 30-step undo history. The object's basic color field already keeps a local draft.
 - Scope: keep finish/grout swatches responsive with a local draft; commit the final native color choice once, with blur/keyboard fallback, cancellation and independent wall-face state. Geometry, source data and saved-project format remain unchanged.
 - Acceptance: browser regression for native input bursts without project/texture updates, final color, one-step undo/redo, cancellation, keyboard, wall-face isolation, autosave/reload and desktop/touch; existing DESIGN-016 checks; `npm run verify`; final diff review. Publication follows the existing GitHub Pages workflow.
 - Regression failed on the previous production build at the input-burst preservation assertion. After the fix, desktop/touch checks pass for unchanged project/texture counts while dragging, final color, single undo, redo, cancellation, keyboard, autosave and reload. Existing DESIGN-016 browser checks pass, including independent wall sides. `npm run verify` passes all 117 tests, lint, TypeScript and production build. Desktop/mobile screenshots and final diff reviewed. Evidence: `.local/qa/color-020-before.log`, `.local/qa/color-020-verify.log`, `.local/qa/color-020-browser.log`, `.local/qa/color-020-desktop.png`, `.local/qa/color-020-mobile.png`.
+
+- Publication: application commit `6554abc0ff8db36dae8721a7d63cb4a7ea37a11f`; [GitHub Actions run 34325973192](https://github.com/Sergey70/FlatPlan/actions/runs/34325973192) passed all verification, the complete browser suite and Pages deployment. Independent public desktop/touch color scenarios pass, including input bursts without project/texture updates, one-step undo/redo, cancellation, keyboard, autosave and reload. Published HTML and all seven JS/CSS bundles match the verified build byte-for-byte. Evidence: `.local/qa/color-020-public.log`. No remaining work for COLOR-020.
 
 ## UI-019 — collapsed daylight and walk sections (complete and published)
 
@@ -27,7 +29,7 @@ Updated: 2026-09-09.
 
 ## Previous completed iteration
 
-**RENOVATION-017 complete and published.** UI-019 above is the latest completed change; no implementation iteration is active.
+**RENOVATION-017 complete and published.** COLOR-020 above is the latest completed change; no implementation iteration is active.
 
 - All seven approved tools are available in **Ремонт**: current-model images, mechanisms, electrical/lighting, workplace sunlight, drawings/PDF, material estimates and paired arrangement comparison. Usage and limitations are documented in README; all acceptance gates are complete in RENOVATION_017_PLAN.md.
 - Published application: `22f8391559045ecee67a34a862992aa5885fd116`. [Pages run 34294654729](https://github.com/Sergey70/FlatPlan/actions/runs/34294654729) passed verification, the complete browser suite and deployment. The application implementation is unchanged since `877e3e5`; subsequent commits make CI render tests deterministic and allow measured software-rendering time.
