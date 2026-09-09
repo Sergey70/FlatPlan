@@ -2,16 +2,19 @@
 
 Updated: 2026-09-09.
 
-## ROOM-018 — main-plan workspace correction (active)
+## ROOM-018 — main-plan workspace correction (complete and published)
 
 - Objective: use the accepted ROOM-014 bed/workspace in the main editor, not only gallery views. Root cause: editor boot/reset still called the raw `.plan` factory.
 - Implementation: separate editor default from the unchanged source/gallery factories. One-time browser-save upgrade may replace untouched furniture in the default room; edited room furniture and custom arrangements must be preserved. Explicit JSON imports and reopening the original `.plan` remain exact.
 - Acceptance: workspace/source/gallery unit regressions; `npm run verify`; focused browser tests for fresh/default, saved upgrade, edited room, deep link, source reopening, reload and reset; existing browser suite in publication CI. No dependency or original source changes.
-- Local acceptance passed: 117 unit tests, lint, TypeScript and production build; focused Chromium tests for default/deep link, old saves, edited/deleted furniture, custom arrangements, original source reopening, JSON import, reload and new-project reset. Existing source migration and full gallery checks also pass. Reviewed 2D/3D screenshots showing desk, two monitors, chair and bed. Evidence: `.local/qa/room-018-verify.log`, `.local/qa/room-018-browser.log`, `.local/qa/room-018-local/`. Final diff/whitespace review passed. Publication CI and independent public verification pending.
+- Local acceptance passed: 117 unit tests, lint, TypeScript and production build; focused Chromium tests for default/deep link, old saves, edited/deleted furniture, custom arrangements, original source reopening, JSON import, reload and new-project reset. Existing source migration and full gallery checks also pass. Reviewed 2D/3D screenshots showing desk, two monitors, chair and bed. Evidence: `.local/qa/room-018-verify.log`, `.local/qa/room-018-browser.log`, `.local/qa/room-018-local/`. Final diff/whitespace review passed. The complete local browser suite also passed (`.local/qa/room-018-full-browser.log`).
 
-## Last completed iteration
+- Publication: application commit `b0ef17cec0c893a168651c3023707c5de1538e3c`; [GitHub Actions run 34297925091](https://github.com/Sergey70/FlatPlan/actions/runs/34297925091) passed all 117 tests, complete browser acceptance and Pages deployment. The software-rendered browser suite completed successfully; the build job took 34 minutes.
+- Independent public acceptance passed: fresh/default/deep-link workspace, old-save update, edited/deleted furniture and custom-variant preservation, raw source reopening, JSON import, reload, new project, source migrations and the complete gallery. All **121 production files** return HTTP 200 and match the verified build byte-for-byte. Public 2D screenshot reviewed. Evidence: `.local/qa/room-018-public-browser.log`, `.local/qa/room-018-public/`, `.local/qa/room-018-public-assets.json`. No remaining work or blockers for ROOM-018.
 
-**RENOVATION-017 complete and published.** ROOM-018 above is the active correction.
+## Previous completed iteration
+
+**RENOVATION-017 complete and published.** ROOM-018 above is the latest completed correction; no implementation iteration is active.
 
 - All seven approved tools are available in **Ремонт**: current-model images, mechanisms, electrical/lighting, workplace sunlight, drawings/PDF, material estimates and paired arrangement comparison. Usage and limitations are documented in README; all acceptance gates are complete in RENOVATION_017_PLAN.md.
 - Published application: `22f8391559045ecee67a34a862992aa5885fd116`. [Pages run 34294654729](https://github.com/Sergey70/FlatPlan/actions/runs/34294654729) passed verification, the complete browser suite and deployment. The application implementation is unchanged since `877e3e5`; subsequent commits make CI render tests deterministic and allow measured software-rendering time.
